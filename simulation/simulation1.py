@@ -106,16 +106,28 @@ class car:
 
 
 class red:
-    red_drag = 0.001
-    red_angular_drag = 0.5
+    drag = 0.001
+    angular_drag = 0.5
     def __init__(self,x,y):
         self.body = pymunk.Body(mass=0.01, moment=0.1)
         self.shape = pymunk.Poly(self.body, [(-2.5,-2.5),(-2.5,2.5),(2.5,2.5),(2.5,-2.5)])
         self.shape.color = (255,0,0,255)
         self.body.position = (x,y)
     def physics(self):
-        self.body.apply_impulse_at_world_point(-self.red_drag *self.body.velocity,self.body.position)
-        self.body.torque -= self.body.angular_velocity * self.red_angular_drag
+        self.body.apply_impulse_at_world_point(-self.drag *self.body.velocity,self.body.position)
+        self.body.torque -= self.body.angular_velocity * self.angular_drag
+
+class obstacle:
+    drag = 0.5
+    angular_drag = 5000
+    def __init__(self,x,y):
+        self.body = pymunk.Body(mass=2, moment=1000)
+        self.shape = pymunk.Circle(self.body, 20)
+        self.shape.color = (192,192,192,255)
+        self.body.position = (x,y)
+    def physics(self):
+        self.body.apply_impulse_at_world_point(-self.drag *self.body.velocity,self.body.position)
+        self.body.torque -= self.body.angular_velocity * self.angular_drag
         
         
 car0 = car(100,100)
@@ -124,6 +136,11 @@ reds = []
 for i in range(10):
     reds.append(red(rand.randint(50,650), rand.randint(50,450)))
     room.add(reds[-1].body, reds[-1].shape)
+    
+obstacles = []
+for i in range(5):
+    obstacles.append(obstacle(rand.randint(80,620), rand.randint(80,420)))
+    room.add(obstacles[-1].body, obstacles[-1].shape)
 
 
 
@@ -170,8 +187,8 @@ while running:
     
     # physics
     car0.physics()
-    for r in reds:
-        r.physics()
+    for x in reds + obstacles:
+        x.physics()
     
     
     # draw
