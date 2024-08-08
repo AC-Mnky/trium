@@ -123,7 +123,7 @@ class obstacle:
     def __init__(self,x,y):
         self.body = pymunk.Body(mass=2, moment=1000)
         self.shape = pymunk.Circle(self.body, 20)
-        self.shape.color = (192,192,192,255)
+        self.shape.color = (64,64,255,255)
         self.body.position = (x,y)
     def physics(self):
         self.body.apply_impulse_at_world_point(-self.drag *self.body.velocity,self.body.position)
