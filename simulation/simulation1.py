@@ -36,6 +36,60 @@ for s in static:
 room.add(*static)
 
 
+# algorithm
+class algorithm:
+    def __init__(self, car):
+        self.car = car
+        self.oldangle = None
+        self.stuckpos = car.body.position
+        self.stucktime = 0
+    def calc(self, seen_reds, seen_obstacles):
+        self.stucktime += 1
+        if(self.stucktime > 420):
+            self.stucktime = 200
+        elif(self.stucktime > 360):
+            return (1,1)
+        elif(self.stucktime > 300):
+            return (1,-1)
+        if((self.car.body.position - self.stuckpos).length > self.car.length):
+            self.stuckpos = self.car.body.position
+            self.stucktime = 0 
+        if(not (80 < self.car.body.position.x < 620 and 80 < self.car.body.position.y < 420)):
+            self.oldangle = None
+        for o in seen_obstacles:
+            if((o-self.car.body.position).length < 45):
+                if(self.oldangle == None):
+                    self.oldangle = self.car.body.angle
+                return (-1,1)
+        if(self.oldangle != None):
+            a = self.oldangle - self.car.body.angle
+            a -= round(a/math.tau)*math.tau
+            if(a>0.1):
+                return (1, -0.25)
+            elif(a<-0.1):
+                return (-0.25, 1)
+            else:
+                self.oldangle = None
+                return (1, 1)
+        if(len(seen_reds) == 0):
+            self.oldangle = None
+            return (-1, 1)
+        pos = Vec2d(0,0)
+        shortest = 1000
+        for r in seen_reds:
+            if((r - self.car.body.position).length < shortest):
+                shortest = (r - self.car.body.position).length
+                pos = r
+        a = (pos - self.car.body.position).angle - self.car.body.angle
+        a -= round(a/math.tau)*math.tau
+        if(a>0.1):
+            return (1, -1)
+        elif(a<-0.1):
+            return (-1, 1)
+        else:
+            return (1, 1)
+
+
 # car
 class car:
     left_wheel_max_force = right_wheel_max_force = 10
@@ -72,6 +126,7 @@ class car:
         self.camera = pymunk.Poly(self.body, [self.camera_relapos(-self.camera_half_width_angle,-self.camera_half_height_angle),self.camera_relapos(-self.camera_half_width_angle,self.camera_half_height_angle),self.camera_relapos(self.camera_half_width_angle,self.camera_half_height_angle),self.camera_relapos(self.camera_half_width_angle,-self.camera_half_height_angle)])
         self.camera.color = (64,64,64,255)
         self.camera.sensor = True
+        self.algorithm = algorithm(self)
         room.add(self.body, self.shape1, self.shape2, self.shape3, self.camera)
         
     def input(self, wheel_inputs):
@@ -85,28 +140,39 @@ class car:
         self.body.torque -= self.body.angular_velocity * self.angular_drag
         self.left_wheel_force = self.right_wheel_force = 0
         
-    def algorithm(self, seen_reds, seen_obstacles):
-        for o in seen_obstacles:
-            if((o-self.body.position).length < 50):
-                return (-1,1)
-        if(len(seen_reds) == 0):
-            return (-1, 1)
-        pos = Vec2d(0,0)
-        shortest = 1000
-        for r in seen_reds:
-            if((r - self.body.position).length < shortest):
-                shortest = (r - self.body.position).length
-                pos = r
-        a = (pos - self.body.position).angle - self.body.angle
-        a -= round(a/math.tau)*math.tau
-        if(a>0.1):
-            return (1, 0)
-        elif(a<-0.1):
-            return (0, 1)
-        else:
-            return (1, 1)
-
-
+    # def algorithm(self, seen_reds, seen_obstacles):
+    #     for o in seen_obstacles:
+    #         if((o-self.body.position).length < 50):
+    #             if(self.oldangle == None):
+    #                 self.oldangle = self.body.angle
+    #             return (-1,1)
+    #     if(self.oldangle != None):
+    #         a = self.oldangle - self.body.angle
+    #         a -= round(a1/math.tau)*math.tau
+    #         if(a>0.1):
+    #             return (1, -1)
+    #         elif(a<-0.1):
+    #             return (-1, 1)
+    #         else:
+    #             oldangle = None
+    #             return (1, 1)
+    #     if(len(seen_reds) == 0):
+    #         self.oldangle = None
+    #         return (-1, 1)
+    #     pos = Vec2d(0,0)
+    #     shortest = 1000
+    #     for r in seen_reds:
+    #         if((r - self.body.position).length < shortest):
+    #             shortest = (r - self.body.position).length
+    #             pos = r
+    #     a = (pos - self.body.position).angle - self.body.angle
+    #     a -= round(a/math.tau)*math.tau
+    #     if(a>0.1):
+    #         return (1, -1)
+    #     elif(a<-0.1):
+    #         return (-1, 1)
+    #     else:
+    #         return (1, 1)
 
 class red:
     drag = 0.001
@@ -137,7 +203,7 @@ car0 = car(100,100)
 
 reds = []
 for i in range(10):
-    reds.append(red(rand.randint(50,650), rand.randint(50,450)))
+    reds.append(red(rand.randint(51,649), rand.randint(51,449)))
     room.add(reds[-1].body, reds[-1].shape)
     
 obstacles = []
@@ -171,7 +237,7 @@ while running:
         for o in obstacles:
             if(len(car0.camera.shapes_collide(o.shape).points) > 0):
                 seen_obstacles.append(o.body.position)
-        car0.input(car0.algorithm(seen_reds, seen_obstacles))
+        car0.input(car0.algorithm.calc(seen_reds, seen_obstacles))
     else:
         if keys[pygame.K_UP]:
             if keys[pygame.K_LEFT]:
