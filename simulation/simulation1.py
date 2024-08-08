@@ -85,21 +85,24 @@ class car:
         self.body.torque -= self.body.angular_velocity * self.angular_drag
         self.left_wheel_force = self.right_wheel_force = 0
         
-    def algorithm(self, seen_reds):
+    def algorithm(self, seen_reds, seen_obstacles):
+        for o in seen_obstacles:
+            if((o-self.body.position).length < 50):
+                return (-1,1)
         if(len(seen_reds) == 0):
             return (-1, 1)
         pos = Vec2d(0,0)
         shortest = 1000
-        for p in seen_reds:
-            if((p - self.body.position).length < shortest):
-                shortest = (p - self.body.position).length
-                pos = p
+        for r in seen_reds:
+            if((r - self.body.position).length < shortest):
+                shortest = (r - self.body.position).length
+                pos = r
         a = (pos - self.body.position).angle - self.body.angle
         a -= round(a/math.tau)*math.tau
         if(a>0.1):
-            return (1, -1)
+            return (1, 0)
         elif(a<-0.1):
-            return (-1, 1)
+            return (0, 1)
         else:
             return (1, 1)
 
@@ -164,7 +167,11 @@ while running:
         for r in reds:
             if(len(car0.camera.shapes_collide(r.shape).points) > 0):
                 seen_reds.append(r.body.position)
-        car0.input(car0.algorithm(seen_reds))
+        seen_obstacles = []
+        for o in obstacles:
+            if(len(car0.camera.shapes_collide(o.shape).points) > 0):
+                seen_obstacles.append(o.body.position)
+        car0.input(car0.algorithm(seen_reds, seen_obstacles))
     else:
         if keys[pygame.K_UP]:
             if keys[pygame.K_LEFT]:
