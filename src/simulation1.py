@@ -43,7 +43,7 @@ class Algorithm:
         self.stuck_pos = car.body.position
         self.stuck_time = 0
 
-    def calc(self, seen_reds, seen_obstacles):
+    def calc(self, _seen_reds, _seen_obstacles):
         self.stuck_time += 1
         if self.stuck_time > 420:
             self.stuck_time = 200
@@ -55,10 +55,11 @@ class Algorithm:
             self.stuck_pos = self.car.body.position
             self.stuck_time = 0
         if not (
-                room_left + 30 < self.car.body.position.x < room_right - 30 and room_top + 30 < self.car.body.position.y < room_bottom - 30):
+                room_left + 30 < self.car.body.position.x < room_right - 30 and room_top + 30 < self.car.body.position.y
+                < room_bottom - 30):
             self.old_angle = None
-        for o in seen_obstacles:
-            if (o - self.car.body.position).length < 45:
+        for o1 in _seen_obstacles:
+            if (o1 - self.car.body.position).length < 45:
                 if self.old_angle is None:
                     self.old_angle = self.car.body.angle
                 return -1, 1
@@ -72,15 +73,15 @@ class Algorithm:
             else:
                 self.old_angle = None
                 return 1, 1
-        if len(seen_reds) == 0:
+        if len(_seen_reds) == 0:
             self.old_angle = None
             return -1, 1
         pos = Vec2d(0, 0)
         shortest = 1000
-        for r in seen_reds:
-            if (r - self.car.body.position).length < shortest:
-                shortest = (r - self.car.body.position).length
-                pos = r
+        for r1 in _seen_reds:
+            if (r1 - self.car.body.position).length < shortest:
+                shortest = (r1 - self.car.body.position).length
+                pos = r1
         a = (pos - self.car.body.position).angle - self.car.body.angle
         a -= round(a / math.tau) * math.tau
         if a > 0.1:
@@ -253,9 +254,9 @@ def draw_polygon_alpha(surface, color, points):
 while running:
     for event in pygame.event.get():
         if (
-            event.type == pygame.QUIT
-            or event.type == pygame.KEYDOWN
-            and (event.key in [pygame.K_ESCAPE, pygame.K_q])
+                event.type == pygame.QUIT
+                or event.type == pygame.KEYDOWN
+                and (event.key in [pygame.K_ESCAPE, pygame.K_q])
         ):
             running = False
 
