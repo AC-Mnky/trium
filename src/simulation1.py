@@ -119,17 +119,33 @@ class Car:
 
     def __init__(self, color, x, y):
         self.body = pymunk.Body(mass=1, moment=500)
-        self.shape1 = pymunk.Poly(self.body, [(-self.length / 2, -self.width / 2), (-self.length / 2, self.width / 2),
-                                              (self.length / 2 - self.hole_length, self.width / 2),
-                                              (self.length / 2 - self.hole_length, -self.width / 2)])
-        self.shape2 = pymunk.Poly(self.body, [(self.length / 2 - self.hole_length, -self.width / 2),
-                                              (self.length / 2 - self.hole_length, -self.hole_width / 2),
-                                              (self.length / 2, -self.hole_width / 2),
-                                              (self.length / 2, -self.width / 2)])
-        self.shape3 = pymunk.Poly(self.body, [(self.length / 2 - self.hole_length, self.width / 2),
-                                              (self.length / 2 - self.hole_length, self.hole_width / 2),
-                                              (self.length / 2, self.hole_width / 2),
-                                              (self.length / 2, self.width / 2)])
+        self.shape1 = pymunk.Poly(
+            self.body,
+            [
+                (-self.length / 2, -self.width / 2),
+                (-self.length / 2, self.width / 2),
+                (self.length / 2 - self.hole_length, self.width / 2),
+                (self.length / 2 - self.hole_length, -self.width / 2),
+            ],
+        )
+        self.shape2 = pymunk.Poly(
+            self.body,
+            [
+                (self.length / 2 - self.hole_length, -self.width / 2),
+                (self.length / 2 - self.hole_length, -self.hole_width / 2),
+                (self.length / 2, -self.hole_width / 2),
+                (self.length / 2, -self.width / 2),
+            ],
+        )
+        self.shape3 = pymunk.Poly(
+            self.body,
+            [
+                (self.length / 2 - self.hole_length, self.width / 2),
+                (self.length / 2 - self.hole_length, self.hole_width / 2),
+                (self.length / 2, self.hole_width / 2),
+                (self.length / 2, self.width / 2),
+            ],
+        )
         self.shape1.color = self.shape2.color = self.shape3.color = color
         self.body.position = (x, y)
         self.camera = pymunk.Poly(self.body,
@@ -147,9 +163,15 @@ class Car:
         self.right_wheel_force = wheel_inputs[1] * self.right_wheel_max_force
 
     def physics(self):
-        self.body.apply_impulse_at_local_point(self.left_wheel_force * Vec2d(1, 0), self.left_wheel)
-        self.body.apply_impulse_at_local_point(self.right_wheel_force * Vec2d(1, 0), self.right_wheel)
-        self.body.apply_impulse_at_world_point(-self.drag * self.body.velocity, self.body.position)
+        self.body.apply_impulse_at_local_point(
+            self.left_wheel_force * Vec2d(1, 0), self.left_wheel
+        )
+        self.body.apply_impulse_at_local_point(
+            self.right_wheel_force * Vec2d(1, 0), self.right_wheel
+        )
+        self.body.apply_impulse_at_world_point(
+            -self.drag * self.body.velocity, self.body.position
+        )
         self.body.torque -= self.body.angular_velocity * self.angular_drag
         self.left_wheel_force = self.right_wheel_force = 0
 
@@ -160,12 +182,16 @@ class Red:
 
     def __init__(self, x, y):
         self.body = pymunk.Body(mass=0.01, moment=0.1)
-        self.shape = pymunk.Poly(self.body, [(-2.5, -2.5), (-2.5, 2.5), (2.5, 2.5), (2.5, -2.5)])
+        self.shape = pymunk.Poly(
+            self.body, [(-2.5, -2.5), (-2.5, 2.5), (2.5, 2.5), (2.5, -2.5)]
+        )
         self.shape.color = (255, 0, 0, 255)
         self.body.position = (x, y)
 
     def physics(self):
-        self.body.apply_impulse_at_world_point(-self.drag * self.body.velocity, self.body.position)
+        self.body.apply_impulse_at_world_point(
+            -self.drag * self.body.velocity, self.body.position
+        )
         self.body.torque -= self.body.angular_velocity * self.angular_drag
 
 
@@ -180,7 +206,9 @@ class Obstacle:
         self.body.position = (x, y)
 
     def physics(self):
-        self.body.apply_impulse_at_world_point(-self.drag * self.body.velocity, self.body.position)
+        self.body.apply_impulse_at_world_point(
+            -self.drag * self.body.velocity, self.body.position
+        )
         self.body.torque -= self.body.angular_velocity * self.angular_drag
 
 
@@ -225,9 +253,9 @@ def draw_polygon_alpha(surface, color, points):
 while running:
     for event in pygame.event.get():
         if (
-                event.type == pygame.QUIT
-                or event.type == pygame.KEYDOWN
-                and (event.key in [pygame.K_ESCAPE, pygame.K_q])
+            event.type == pygame.QUIT
+            or event.type == pygame.KEYDOWN
+            and (event.key in [pygame.K_ESCAPE, pygame.K_q])
         ):
             running = False
 
