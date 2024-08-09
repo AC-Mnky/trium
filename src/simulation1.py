@@ -16,7 +16,6 @@ running = True
 font = pygame.font.SysFont("Arial", 16)
 
 room = pymunk.Space()
-draw_options = pymunk.pygame_util.DrawOptions(screen)
 
 # 1px = 5mm
 
@@ -43,7 +42,7 @@ class Algorithm:
         self.stuck_pos = car.body.position
         self.stuck_time = 0
 
-    def calc(self, _seen_reds, _seen_obstacles):
+    def calc(self, camera_info):
         self.stuck_time += 1
         if self.stuck_time > 420:
             self.stuck_time = 200
@@ -58,7 +57,7 @@ class Algorithm:
                 room_left + 30 < self.car.body.position.x < room_right - 30 and room_top + 30 < self.car.body.position.y
                 < room_bottom - 30):
             self.old_angle = None
-        for o1 in _seen_obstacles:
+        for o1 in camera_info.seen_obstacles:
             if (o1 - self.car.body.position).length < 45:
                 if self.old_angle is None:
                     self.old_angle = self.car.body.angle
@@ -73,12 +72,12 @@ class Algorithm:
             else:
                 self.old_angle = None
                 return 1, 1
-        if len(_seen_reds) == 0:
+        if len(camera_info.seen_reds) == 0:
             self.old_angle = None
             return -1, 1
         pos = Vec2d(0, 0)
         shortest = 1000
-        for r1 in _seen_reds:
+        for r1 in camera_info.seen_reds:
             if (r1 - self.car.body.position).length < shortest:
                 shortest = (r1 - self.car.body.position).length
                 pos = r1
@@ -117,6 +116,17 @@ class Car:
         if v[2] <= 0:
             v[2] = 0.02
         return self.camera_height * v[0] / v[2], self.camera_height * v[1] / v[2]
+
+    def camera_info(self):
+        seen_reds = []
+        for r1 in reds:
+            if len(self.camera.shapes_collide(r1.shape).points) > 0:
+                seen_reds.append(r1.body.position)
+        seen_obstacles = []
+        for o1 in obstacles:
+            if len(self.camera.shapes_collide(o1.shape).points) > 0:
+                seen_obstacles.append(o1.body.position)
+        return CameraInfo(seen_reds, seen_obstacles)
 
     def __init__(self, color, x, y):
         self.body = pymunk.Body(mass=1, moment=500)
@@ -175,6 +185,12 @@ class Car:
         )
         self.body.torque -= self.body.angular_velocity * self.angular_drag
         self.left_wheel_force = self.right_wheel_force = 0
+
+
+class CameraInfo:
+    def __init__(self, seen_reds, seen_obstacles):
+        self.seen_reds = seen_reds
+        self.seen_obstacles = seen_obstacles
 
 
 class Red:
@@ -264,16 +280,7 @@ while running:
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_SPACE]:
-        seen_reds = []
-        for r in reds:
-
-            if len(car0.camera.shapes_collide(r.shape).points) > 0:
-                seen_reds.append(r.body.position)
-        seen_obstacles = []
-        for o in obstacles:
-            if len(car0.camera.shapes_collide(o.shape).points) > 0:
-                seen_obstacles.append(o.body.position)
-        car0.input(car0.algorithm.calc(seen_reds, seen_obstacles))
+        car0.input(car0.algorithm.calc(car0.camera_info()))
     else:
         if keys[pygame.K_UP]:
             if keys[pygame.K_LEFT]:
@@ -293,15 +300,7 @@ while running:
             car0.input((-1, 1))
         elif keys[pygame.K_RIGHT]:
             car0.input((1, -1))
-    seen_reds = []
-    for r in reds:
-        if len(car1.camera.shapes_collide(r.shape).points) > 0:
-            seen_reds.append(r.body.position)
-    seen_obstacles = []
-    for o in obstacles:
-        if len(car1.camera.shapes_collide(o.shape).points) > 0:
-            seen_obstacles.append(o.body.position)
-    car1.input(car1.algorithm.calc(seen_reds, seen_obstacles))
+    car1.input(car1.algorithm.calc(car1.camera_info()))
 
     # physics
     car0.physics()
