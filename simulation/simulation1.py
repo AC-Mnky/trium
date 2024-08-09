@@ -2,7 +2,6 @@ import math
 import random
 import time
 from typing import List
-
 import pygame
 import pymunk
 import pymunk.pygame_util
@@ -245,6 +244,7 @@ while running:
     if keys[pygame.K_SPACE]:
         seen_reds = []
         for r in reds:
+
             if (len(car0.camera.shapes_collide(r.shape).points) > 0):
                 seen_reds.append(r.body.position)
         seen_obstacles = []
@@ -271,7 +271,6 @@ while running:
             car0.input((-1, 1))
         elif keys[pygame.K_RIGHT]:
             car0.input((1, -1))
-
     # seen_reds = []
     # for r in reds:
     #     if len(car1.camera.shapes_collide(r.shape).points) > 0:
