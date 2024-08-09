@@ -20,11 +20,13 @@ draw_options = pymunk.pygame_util.DrawOptions(screen)
 
 # 1px = 5mm
 
+room_left, room_right = 50, 650
+room_top, room_bottom = 50, 450
 static: List[pymunk.Shape] = [
-    pymunk.Segment(room.static_body, (50, 450), (50, 50), 2),
-    pymunk.Segment(room.static_body, (50, 50), (650, 50), 2),
-    pymunk.Segment(room.static_body, (650, 50), (650, 450), 2),
-    pymunk.Segment(room.static_body, (50, 450), (650, 450), 2),
+    pymunk.Segment(room.static_body, (room_left, room_bottom), (room_left, room_top), 2),
+    pymunk.Segment(room.static_body, (room_left, room_top), (room_right, room_top), 2),
+    pymunk.Segment(room.static_body, (room_right, room_top), (room_right, room_bottom), 2),
+    pymunk.Segment(room.static_body, (room_left, room_bottom), (room_right, room_bottom), 2),
 ]
 
 for s in static:
@@ -34,62 +36,63 @@ room.add(*static)
 
 
 # algorithm
-class algorithm:
+class Algorithm:
     def __init__(self, car):
         self.car = car
-        self.oldangle = None
-        self.stuckpos = car.body.position
-        self.stucktime = 0
+        self.old_angle = None
+        self.stuck_pos = car.body.position
+        self.stuck_time = 0
 
     def calc(self, seen_reds, seen_obstacles):
-        self.stucktime += 1
-        if (self.stucktime > 420):
-            self.stucktime = 200
-        elif (self.stucktime > 360):
-            return (1, 1)
-        elif (self.stucktime > 300):
-            return (1, -1)
-        if ((self.car.body.position - self.stuckpos).length > self.car.length):
-            self.stuckpos = self.car.body.position
-            self.stucktime = 0
-        if (not (80 < self.car.body.position.x < 620 and 80 < self.car.body.position.y < 420)):
-            self.oldangle = None
+        self.stuck_time += 1
+        if self.stuck_time > 420:
+            self.stuck_time = 200
+        elif self.stuck_time > 360:
+            return 1, 1
+        elif self.stuck_time > 300:
+            return 1, -1
+        if (self.car.body.position - self.stuck_pos).length > self.car.length:
+            self.stuck_pos = self.car.body.position
+            self.stuck_time = 0
+        if not (
+                room_left + 30 < self.car.body.position.x < room_right - 30 and room_top + 30 < self.car.body.position.y < room_bottom - 30):
+            self.old_angle = None
         for o in seen_obstacles:
-            if ((o - self.car.body.position).length < 45):
-                if (self.oldangle == None):
-                    self.oldangle = self.car.body.angle
-                return (-1, 1)
-        if (self.oldangle != None):
-            a = self.oldangle - self.car.body.angle
+            if (o - self.car.body.position).length < 45:
+                if self.old_angle is None:
+                    self.old_angle = self.car.body.angle
+                return -1, 1
+        if self.old_angle is not None:
+            a = self.old_angle - self.car.body.angle
             a -= round(a / math.tau) * math.tau
-            if (a > 0.1):
-                return (1, -0.25)
-            elif (a < -0.1):
-                return (-0.25, 1)
+            if a > 0.1:
+                return 1, -0.25
+            elif a < -0.1:
+                return -0.25, 1
             else:
-                self.oldangle = None
-                return (1, 1)
-        if (len(seen_reds) == 0):
-            self.oldangle = None
-            return (-1, 1)
+                self.old_angle = None
+                return 1, 1
+        if len(seen_reds) == 0:
+            self.old_angle = None
+            return -1, 1
         pos = Vec2d(0, 0)
         shortest = 1000
         for r in seen_reds:
-            if ((r - self.car.body.position).length < shortest):
+            if (r - self.car.body.position).length < shortest:
                 shortest = (r - self.car.body.position).length
                 pos = r
         a = (pos - self.car.body.position).angle - self.car.body.angle
         a -= round(a / math.tau) * math.tau
-        if (a > 0.1):
-            return (1, -1)
-        elif (a < -0.1):
-            return (-1, 1)
+        if a > 0.1:
+            return 1, -1
+        elif a < -0.1:
+            return -1, 1
         else:
-            return (1, 1)
+            return 1, 1
 
 
 # car
-class car:
+class Car:
     left_wheel_max_force = right_wheel_max_force = 10
     drag = 0.1
     angular_drag = 5000
@@ -106,13 +109,13 @@ class car:
     camera_half_height_angle = math.radians(30)
     left_wheel_force = right_wheel_force = 0
 
-    def camera_relapos(self, angle1, angle2):
+    def camera_rela_pos(self, angle1, angle2):
         v = [math.cos(self.camera_angle) + math.sin(self.camera_angle) * math.tan(angle2),
              math.tan(angle1),
              math.sin(self.camera_angle) - math.cos(self.camera_angle) * math.tan(angle2)]
-        if (v[2] <= 0):
-            v[2] = 0.01
-        return (self.camera_height * v[0] / v[2], self.camera_height * v[1] / v[2])
+        if v[2] <= 0:
+            v[2] = 0.02
+        return self.camera_height * v[0] / v[2], self.camera_height * v[1] / v[2]
 
     def __init__(self, color, x, y):
         self.body = pymunk.Body(mass=1, moment=500)
@@ -130,13 +133,13 @@ class car:
         self.shape1.color = self.shape2.color = self.shape3.color = color
         self.body.position = (x, y)
         self.camera = pymunk.Poly(self.body,
-                                  [self.camera_relapos(-self.camera_half_width_angle, -self.camera_half_height_angle),
-                                   self.camera_relapos(-self.camera_half_width_angle, self.camera_half_height_angle),
-                                   self.camera_relapos(self.camera_half_width_angle, self.camera_half_height_angle),
-                                   self.camera_relapos(self.camera_half_width_angle, -self.camera_half_height_angle)])
-        self.camera.color = (64, 64, 64, 0)
+                                  [self.camera_rela_pos(-self.camera_half_width_angle, -self.camera_half_height_angle),
+                                   self.camera_rela_pos(-self.camera_half_width_angle, self.camera_half_height_angle),
+                                   self.camera_rela_pos(self.camera_half_width_angle, self.camera_half_height_angle),
+                                   self.camera_rela_pos(self.camera_half_width_angle, -self.camera_half_height_angle)])
+        self.camera.color = (255, 255, 255, 32)
         self.camera.sensor = True
-        self.algorithm = algorithm(self)
+        self.algorithm = Algorithm(self)
         room.add(self.body, self.shape1, self.shape2, self.shape3, self.camera)
 
     def input(self, wheel_inputs):
@@ -150,42 +153,8 @@ class car:
         self.body.torque -= self.body.angular_velocity * self.angular_drag
         self.left_wheel_force = self.right_wheel_force = 0
 
-    # def algorithm(self, seen_reds, seen_obstacles):
-    #     for o in seen_obstacles:
-    #         if((o-self.body.position).length < 50):
-    #             if(self.oldangle == None):
-    #                 self.oldangle = self.body.angle
-    #             return (-1,1)
-    #     if(self.oldangle != None):
-    #         a = self.oldangle - self.body.angle
-    #         a -= round(a1/math.tau)*math.tau
-    #         if(a>0.1):
-    #             return (1, -1)
-    #         elif(a<-0.1):
-    #             return (-1, 1)
-    #         else:
-    #             oldangle = None
-    #             return (1, 1)
-    #     if(len(seen_reds) == 0):
-    #         self.oldangle = None
-    #         return (-1, 1)
-    #     pos = Vec2d(0,0)
-    #     shortest = 1000
-    #     for r in seen_reds:
-    #         if((r - self.body.position).length < shortest):
-    #             shortest = (r - self.body.position).length
-    #             pos = r
-    #     a = (pos - self.body.position).angle - self.body.angle
-    #     a -= round(a/math.tau)*math.tau
-    #     if(a>0.1):
-    #         return (1, -1)
-    #     elif(a<-0.1):
-    #         return (-1, 1)
-    #     else:
-    #         return (1, 1)
 
-
-class red:
+class Red:
     drag = 0.001
     angular_drag = 0.5
 
@@ -200,7 +169,7 @@ class red:
         self.body.torque -= self.body.angular_velocity * self.angular_drag
 
 
-class obstacle:
+class Obstacle:
     drag = 0.5
     angular_drag = 5000
 
@@ -215,19 +184,43 @@ class obstacle:
         self.body.torque -= self.body.angular_velocity * self.angular_drag
 
 
-car0 = car((255, 128, 0, 255), 100, 100)
+car0 = Car((255, 128, 0, 255), 100, 100)
 
-# car1 = car((64, 64, 255, 255), 500, 300)
+car1 = Car((64, 64, 255, 255), 500, 300)
 
 reds = []
 for i in range(10):
-    reds.append(red(rand.randint(51, 649), rand.randint(51, 449)))
+    reds.append(Red(rand.randint(room_left + 2, room_right - 2), rand.randint(room_top + 2, room_bottom - 2)))
     room.add(reds[-1].body, reds[-1].shape)
 
 obstacles = []
 for i in range(5):
-    obstacles.append(obstacle(rand.randint(80, 620), rand.randint(80, 420)))
+    obstacles.append(
+        Obstacle(rand.randint(room_left + 30, room_right - 30), rand.randint(room_top + 30, room_bottom - 30)))
     room.add(obstacles[-1].body, obstacles[-1].shape)
+
+
+def draw_rect_alpha(surface, color, rect):
+    shape_surf = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+    pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
+    surface.blit(shape_surf, rect)
+
+
+def draw_circle_alpha(surface, color, center, radius):
+    target_rect = pygame.Rect(center, (0, 0)).inflate((radius * 2, radius * 2))
+    shape_surf = pygame.Surface(target_rect.size, pygame.SRCALPHA)
+    pygame.draw.circle(shape_surf, color, (radius, radius), radius)
+    surface.blit(shape_surf, target_rect)
+
+
+def draw_polygon_alpha(surface, color, points):
+    lx, ly = zip(*points)
+    min_x, min_y, max_x, max_y = min(lx), min(ly), max(lx), max(ly)
+    target_rect = pygame.Rect(min_x, min_y, max_x - min_x, max_y - min_y)
+    shape_surf = pygame.Surface(target_rect.size, pygame.SRCALPHA)
+    pygame.draw.polygon(shape_surf, color, [(x - min_x, y - min_y) for x, y in points])
+    surface.blit(shape_surf, target_rect)
+
 
 while running:
     for event in pygame.event.get():
@@ -245,11 +238,11 @@ while running:
         seen_reds = []
         for r in reds:
 
-            if (len(car0.camera.shapes_collide(r.shape).points) > 0):
+            if len(car0.camera.shapes_collide(r.shape).points) > 0:
                 seen_reds.append(r.body.position)
         seen_obstacles = []
         for o in obstacles:
-            if (len(car0.camera.shapes_collide(o.shape).points) > 0):
+            if len(car0.camera.shapes_collide(o.shape).points) > 0:
                 seen_obstacles.append(o.body.position)
         car0.input(car0.algorithm.calc(seen_reds, seen_obstacles))
     else:
@@ -271,19 +264,19 @@ while running:
             car0.input((-1, 1))
         elif keys[pygame.K_RIGHT]:
             car0.input((1, -1))
-    # seen_reds = []
-    # for r in reds:
-    #     if len(car1.camera.shapes_collide(r.shape).points) > 0:
-    #         seen_reds.append(r.body.position)
-    # seen_obstacles = []
-    # for o in obstacles:
-    #     if len(car1.camera.shapes_collide(o.shape).points) > 0:
-    #         seen_obstacles.append(o.body.position)
-    # car1.input(car1.algorithm.calc(seen_reds, seen_obstacles))
+    seen_reds = []
+    for r in reds:
+        if len(car1.camera.shapes_collide(r.shape).points) > 0:
+            seen_reds.append(r.body.position)
+    seen_obstacles = []
+    for o in obstacles:
+        if len(car1.camera.shapes_collide(o.shape).points) > 0:
+            seen_obstacles.append(o.body.position)
+    car1.input(car1.algorithm.calc(seen_reds, seen_obstacles))
 
     # physics
     car0.physics()
-    # car1.physics()
+    car1.physics()
     for r in reds:
         r.physics()
     for o in obstacles:
@@ -291,7 +284,31 @@ while running:
 
     # draw
     screen.fill(pygame.Color("black"))
-    room.debug_draw(draw_options)
+    # room.debug_draw(draw_options)
+
+    # cars camera
+    for c in car0, car1:
+        draw_polygon_alpha(screen, c.camera.color,
+                           [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
+                            c.camera.get_vertices()])
+    # cars
+    for c in car0, car1:
+        for s in c.shape1, c.shape2, c.shape3:
+            draw_polygon_alpha(screen, s.color, [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
+                                                 s.get_vertices()])
+    # reds
+    for r in reds:
+        draw_polygon_alpha(screen, (255, 0, 0, 255),
+                           [(v.rotated(r.body.angle) + r.body.position).int_tuple for v in r.shape.get_vertices()])
+    # obstacles
+    for o in obstacles:
+        draw_circle_alpha(screen, (64, 64, 255, 255), o.body.position, o.shape.radius)
+    # wall
+    draw_rect_alpha(screen, (255, 255, 255, 255), (room_left - 1, room_top - 1, 2, room_bottom - room_top + 2))
+    draw_rect_alpha(screen, (255, 255, 255, 255), (room_left - 1, room_top - 1, room_right - room_left + 2, 2))
+    draw_rect_alpha(screen, (255, 255, 255, 255), (room_right - 1, room_top - 1, 2, room_bottom - room_top + 2))
+    draw_rect_alpha(screen, (255, 255, 255, 255), (room_left - 1, room_bottom - 1, room_right - room_left + 2, 2))
+
     pygame.display.flip()
 
     # tick
