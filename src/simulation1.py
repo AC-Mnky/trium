@@ -45,7 +45,7 @@ class Algorithm:
     def calc(self, camera_info):
         self.stuck_time += 1
         if self.stuck_time > 420:
-            self.stuck_time = 200
+            self.stuck_time = rand.randint(150, 250)
         elif self.stuck_time > 360:
             return 1, 1
         elif self.stuck_time > 300:
@@ -58,7 +58,7 @@ class Algorithm:
                 < room_bottom - 30):
             self.old_angle = None
         for x in camera_info.seen_obstacles + camera_info.seen_cars:
-            if (x - self.car.body.position).length < 45:
+            if (x - self.car.body.position).length < 60:
                 if self.old_angle is None:
                     self.old_angle = self.car.body.angle
                 return -1, 1
@@ -219,7 +219,7 @@ class Red:
         self.body.torque -= self.body.angular_velocity * self.angular_drag
 
 
-class Obstacle:
+class Obstacle:  # No, we do not really need obstacles. Other cars are the real obstacles.
     drag = 0.5
     angular_drag = 5000
 
@@ -236,18 +236,23 @@ class Obstacle:
         self.body.torque -= self.body.angular_velocity * self.angular_drag
 
 
-cars = [Car((255, 128, 0, 255), 100, 100), Car((64, 64, 255, 255), 500, 300)]
+cars = [Car((255, 128, 0, 255), 100, 100),
+        Car((64, 64, 255, 255), 100, 300),
+        Car((64, 64, 255, 255), 500, 100),
+        Car((64, 64, 255, 255), 500, 300)]
 
 reds = []
-for i in range(10):
+for i in range(30):
     reds.append(Red(rand.randint(room_left + 2, room_right - 2), rand.randint(room_top + 2, room_bottom - 2)))
     room.add(reds[-1].body, reds[-1].shape)
 
 obstacles = []
-for i in range(5):
-    obstacles.append(
-        Obstacle(rand.randint(room_left + 30, room_right - 30), rand.randint(room_top + 30, room_bottom - 30)))
-    room.add(obstacles[-1].body, obstacles[-1].shape)
+
+
+# for i in range(5):
+#     obstacles.append(
+#         Obstacle(rand.randint(room_left + 30, room_right - 30), rand.randint(room_top + 30, room_bottom - 30)))
+#     room.add(obstacles[-1].body, obstacles[-1].shape)
 
 
 def draw_rect_alpha(surface, color, rect):
@@ -306,6 +311,8 @@ while running:
         elif keys[pygame.K_RIGHT]:
             cars[0].input((1, -1))
     cars[1].input(cars[1].algorithm.calc(cars[1].camera_info()))
+    cars[2].input(cars[2].algorithm.calc(cars[2].camera_info()))
+    cars[3].input(cars[3].algorithm.calc(cars[3].camera_info()))
 
     # physics
     for c in cars:
