@@ -57,8 +57,8 @@ class Algorithm:
                 room_left + 30 < self.car.body.position.x < room_right - 30 and room_top + 30 < self.car.body.position.y
                 < room_bottom - 30):
             self.old_angle = None
-        for o1 in camera_info.seen_obstacles:
-            if (o1 - self.car.body.position).length < 45:
+        for x in camera_info.seen_obstacles + camera_info.seen_cars:
+            if (x - self.car.body.position).length < 45:
                 if self.old_angle is None:
                     self.old_angle = self.car.body.angle
                 return -1, 1
@@ -118,6 +118,12 @@ class Car:
         return self.camera_height * v[0] / v[2], self.camera_height * v[1] / v[2]
 
     def camera_info(self):
+        seen_cars = []
+        for c1 in cars:
+            if len(self.camera.shapes_collide(c1.shape1).points) > 0 or \
+                    len(self.camera.shapes_collide(c1.shape2).points) > 0 or \
+                    len(self.camera.shapes_collide(c1.shape3).points) > 0:
+                seen_cars.append(c1.body.position)
         seen_reds = []
         for r1 in reds:
             if len(self.camera.shapes_collide(r1.shape).points) > 0:
@@ -126,7 +132,7 @@ class Car:
         for o1 in obstacles:
             if len(self.camera.shapes_collide(o1.shape).points) > 0:
                 seen_obstacles.append(o1.body.position)
-        return CameraInfo(seen_reds, seen_obstacles)
+        return CameraInfo(seen_cars, seen_reds, seen_obstacles)
 
     def __init__(self, color, x, y):
         self.body = pymunk.Body(mass=1, moment=500)
@@ -188,7 +194,8 @@ class Car:
 
 
 class CameraInfo:
-    def __init__(self, seen_reds, seen_obstacles):
+    def __init__(self, seen_cars, seen_reds, seen_obstacles):
+        self.seen_cars = seen_cars
         self.seen_reds = seen_reds
         self.seen_obstacles = seen_obstacles
 
@@ -229,9 +236,7 @@ class Obstacle:
         self.body.torque -= self.body.angular_velocity * self.angular_drag
 
 
-car0 = Car((255, 128, 0, 255), 100, 100)
-
-car1 = Car((64, 64, 255, 255), 500, 300)
+cars = [Car((255, 128, 0, 255), 100, 100), Car((64, 64, 255, 255), 500, 300)]
 
 reds = []
 for i in range(10):
@@ -280,31 +285,31 @@ while running:
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_SPACE]:
-        car0.input(car0.algorithm.calc(car0.camera_info()))
+        cars[0].input(cars[0].algorithm.calc(cars[0].camera_info()))
     else:
         if keys[pygame.K_UP]:
             if keys[pygame.K_LEFT]:
-                car0.input((0, 1))
+                cars[0].input((0, 1))
             elif keys[pygame.K_RIGHT]:
-                car0.input((1, 0))
+                cars[0].input((1, 0))
             else:
-                car0.input((1, 1))
+                cars[0].input((1, 1))
         elif keys[pygame.K_DOWN]:
             if keys[pygame.K_LEFT]:
-                car0.input((-1, 0))
+                cars[0].input((-1, 0))
             elif keys[pygame.K_RIGHT]:
-                car0.input((0, -1))
+                cars[0].input((0, -1))
             else:
-                car0.input((-1, -1))
+                cars[0].input((-1, -1))
         elif keys[pygame.K_LEFT]:
-            car0.input((-1, 1))
+            cars[0].input((-1, 1))
         elif keys[pygame.K_RIGHT]:
-            car0.input((1, -1))
-    car1.input(car1.algorithm.calc(car1.camera_info()))
+            cars[0].input((1, -1))
+    cars[1].input(cars[1].algorithm.calc(cars[1].camera_info()))
 
     # physics
-    car0.physics()
-    car1.physics()
+    for c in cars:
+        c.physics()
     for r in reds:
         r.physics()
     for o in obstacles:
@@ -315,12 +320,12 @@ while running:
     # room.debug_draw(draw_options)
 
     # cars camera
-    for c in car0, car1:
+    for c in cars:
         draw_polygon_alpha(screen, c.camera.color,
                            [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
                             c.camera.get_vertices()])
     # cars
-    for c in car0, car1:
+    for c in cars:
         for s in c.shape1, c.shape2, c.shape3:
             draw_polygon_alpha(screen, s.color, [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
                                                  s.get_vertices()])
