@@ -19,6 +19,7 @@
 - [src/](src/) -- 源代码。
   - [simulation/](src/simulation/) -- 基于pymunk的路径规划与避障算法。
   - [vision/](src/vision/) -- 基于树莓派OpenCV的图像识别算法。
+  - [vision2/](src/vision2/) -- 基于树莓派OpenCV的图像识别算法第二代。
 
 ## Mnky
 
