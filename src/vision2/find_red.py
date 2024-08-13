@@ -17,7 +17,8 @@ def find_red(image: np.ndarray) -> list[(int, int)]:
     #
     # double_saturation = np.array((((1, 2, 1), ), ))
     #
-    # cv2.imshow('im', np.array(cv2.cvtColor(np.minimum(image_hsv * double_saturation, 255).astype(np.uint8), cv2.COLOR_HSV2BGR)))
+    # cv2.imshow('im', np.array(cv2.cvtColor(np.minimum(image_hsv * double_saturation, 255).astype(np.uint8),
+    # cv2.COLOR_HSV2BGR)))
 
     target_color_1 = np.array(((0, 130, 100), (10, 255, 255)))
     target_color_2 = np.array(((165, 130, 100), (180, 255, 255)))
