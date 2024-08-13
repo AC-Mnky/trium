@@ -22,7 +22,7 @@ def draw_grid(color, x_start, x_stop, x_step, y_start, y_stop, y_step):
 
 if __name__ == "__main__":
 
-    camera_state = camera_convert.CameraState((100, 0, -90), (70, 0), (52, 40), (640, 480))
+    camera_state = camera_convert.CameraState((100, 0, -90), (70, 0), (96, 80), (640, 480))
 
     for image_index in range(50):
         version = '0'

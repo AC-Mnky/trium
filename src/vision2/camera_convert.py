@@ -11,8 +11,8 @@ class CameraState:
         self.x, self.y, self.z = camera_xyz
         self.theta = np.radians(camera_rotation[0])
         self.phi = np.radians(camera_rotation[1])
-        self.fov_h = np.radians(fov[0])
-        self.fov_v = np.radians(fov[1])
+        self.half_fov_h = np.radians(fov[0]) / 2
+        self.half_fov_v = np.radians(fov[1]) / 2
         self.res_h, self.res_v = resolution
 
         self.ax = np.array((
@@ -24,8 +24,8 @@ class CameraState:
 def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) -> (bool, float, float):
     c = camera_state
 
-    h = (i / c.res_h - 1 / 2) * np.tan(c.fov_h)
-    v = (j / c.res_v - 1 / 2) * np.tan(c.fov_v)
+    h = (i / c.res_h - 1 / 2) * np.tan(c.half_fov_h)
+    v = (j / c.res_v - 1 / 2) * np.tan(c.half_fov_v)
     ax_coo = np.array((1, h, v))
 
     vec = np.dot(ax_coo, c.ax)
@@ -51,8 +51,8 @@ def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> (b
     h = ax_coo[1] / ax_coo[0]
     v = ax_coo[2] / ax_coo[0]
 
-    i = int(np.round((h / np.tan(c.fov_h) + 1 / 2) * c.res_h))
-    j = int(np.round((v / np.tan(c.fov_v) + 1 / 2) * c.res_v))
+    i = int(np.round((h / np.tan(c.half_fov_h) + 1 / 2) * c.res_h))
+    j = int(np.round((v / np.tan(c.half_fov_v) + 1 / 2) * c.res_v))
 
     if not (0 <= i < c.res_h and 0 <= j < c.res_v):
         can_be_seen = False
@@ -60,7 +60,7 @@ def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> (b
     return can_be_seen, i, j
 
 
-example_camera_state = CameraState((100, 0, -200), (70, 0), (100, 60), (640, 480))
+example_camera_state = CameraState((100, 0, -200), (70, 0), (100, 80), (640, 480))
 
 print(img2space(example_camera_state, 320, 0))
 print(img2space(example_camera_state, 320, 400))
