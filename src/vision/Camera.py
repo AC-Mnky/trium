@@ -29,7 +29,7 @@ class Cam(object):
                 frame_rgb
             )  # convert the difference between the color-encoding method of arrays
 
-            cv2.imwrite(r'./pic/'+str(i)+'.jpg',frame_bgr)#save the current frame
+            cv2.imwrite(r'./pic/' + str(i) + '.jpg', frame_bgr)  # save the current frame
             i = i + 1
             cv2.imshow("capture", frame_bgr)  # show the current frame
 
@@ -88,12 +88,13 @@ class Cam(object):
             if cv2.contourArea(contour) > 20:
                 x, y, w, h = cv2.boundingRect(contour)
                 coords_list.append((x, y))
-        if len(coords_list)>=4:
-            coords_center,_ = Algo.k_means(coords_list)
+        if len(coords_list) >= 4:
+            coords_center, _ = Algo.k_means(coords_list)
         else:
             coords_center = coords_list
-        
-        for i in range(0,len(coords_center)):
-            cv2.putText(frame_hsv,"RED",(int(coords_center[i][0]), int(coords_center[i][1] - 10)),cv2.FONT_HERSHEY_SIMPLEX,0.9,(0, 255, 0),2)
-            
+
+        for i in range(0, len(coords_center)):
+            cv2.putText(frame_hsv, "RED", (int(coords_center[i][0]), int(coords_center[i][1] - 10)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
         return cv2.cvtColor(frame_hsv, cv2.COLOR_HSV2BGR), red_mask, coords_list
