@@ -24,7 +24,7 @@ def find_color(image: np.ndarray, color_range_list: list[np.ndarray], show: bool
     points = []
     for c in contours:
         m = cv2.moments(c)
-        if m['m00'] > 1000:
+        if m['m00'] > 100:
             cx = int(m['m10'] / m['m00'])
             cy = int(m['m01'] / m['m00'])
             points.append((cx, cy))
@@ -38,4 +38,4 @@ def find_red(image: np.ndarray, show: bool = False) -> list[(int, int)]:
 
 
 def find_yellow(image: np.ndarray, show: bool = False) -> list[(int, int)]:
-    return find_color(image, [np.array(((12.5, 130, 100), (17.5, 255, 255)))], show, 'yellow')
+    return find_color(image, [np.array(((15, 130, 50), (35, 255, 255)))], show, 'yellow')
