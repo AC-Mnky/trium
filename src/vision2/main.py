@@ -6,8 +6,8 @@ import camera_convert
 
 mode = 'file'
 # mode = 'camera'
-read_version = '0'
-write_version = '1'
+read_version = '1'
+write_version = '2'
 
 if mode == 'camera':
     from camera import Camera
@@ -73,6 +73,7 @@ if __name__ == "__main__":
             process(image, True)
             cv2.waitKey()
     if mode == 'camera':
+        os.mkdir(repository_path + '/assets/openCV_pic/version' + write_version)
         c = Camera()
         for image_index in range(100):
             image = c.capture()
