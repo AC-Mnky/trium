@@ -1,5 +1,6 @@
 import cv2
 import os.path
+# from picamera2 import Picamera2
 
 from find_red import find_red
 import camera_convert
@@ -39,7 +40,7 @@ def draw_grid(color, x_start, x_stop, x_step, y_start, y_stop, y_step):
 
 if __name__ == "__main__":
 
-    camera_state = camera_convert.CameraState((100, 0, -90), (70, 0), (96, 80), (640, 480))
+    camera_state = camera_convert.CameraState((100, 0, -90), (70, 0), (64, 50), (640, 480))
 
     for image_index in range(50):
         version = '0'
@@ -52,4 +53,11 @@ if __name__ == "__main__":
         print('yes ' + filename)
         image = cv2.imread(filename)
 
-        process(image)
+        process(image, True)
+
+    # cam = Picamera2()
+    # while True:
+    #     cam.start()
+    #     image_rgb = cam.capture_array("main")
+    #     cam.stop()
+    #     process(image)
