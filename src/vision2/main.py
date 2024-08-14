@@ -1,9 +1,9 @@
 import cv2
 import os.path
-# from picamera2 import Picamera2
 
 from find_red import find_red
 import camera_convert
+from camera import Camera
 
 
 def process(img, show: bool = False):
@@ -11,6 +11,7 @@ def process(img, show: bool = False):
 
     draw_grid((255, 255, 255, 255), 0, 1500, 50, -1000, 1000, 50)
 
+    print()
     for p in points:
         s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -12.5)
         if s:
@@ -20,7 +21,6 @@ def process(img, show: bool = False):
             cv2.circle(img, p, 10, (128, 128, 128, 255), 1)
     if show:
         cv2.imshow('image', img)
-        cv2.waitKey()
 
 
 def draw_grid(color, x_start, x_stop, x_step, y_start, y_stop, y_step):
@@ -42,22 +42,22 @@ if __name__ == "__main__":
 
     camera_state = camera_convert.CameraState((100, 0, -90), (70, 0), (64, 50), (640, 480))
 
-    for image_index in range(50):
-        version = '0'
-        filename = os.path.dirname(
-            os.path.realpath(__file__)) + '/' + '../../assets/openCV_pic/version' + version + '/' + str(
-            image_index) + '.jpg'
-        if not os.path.isfile(filename):
-            print('no ' + filename)
-            continue
-        print('yes ' + filename)
-        image = cv2.imread(filename)
+    # for image_index in range(50):
+    #     version = '0'
+    #     filename = os.path.dirname(
+    #         os.path.realpath(__file__)) + '/' + '../../assets/openCV_pic/version' + version + '/' + str(
+    #         image_index) + '.jpg'
+    #     if not os.path.isfile(filename):
+    #         print('no ' + filename)
+    #         continue
+    #     print('yes ' + filename)
+    #     image = cv2.imread(filename)
 
+    #     process(image, True)
+    #     cv2.waitKey()
+
+    c = Camera()
+    while True:
+        image = c.capture()
         process(image, True)
-
-    # cam = Picamera2()
-    # while True:
-    #     cam.start()
-    #     image_rgb = cam.capture_array("main")
-    #     cam.stop()
-    #     process(image)
+        cv2.waitKey(200)
