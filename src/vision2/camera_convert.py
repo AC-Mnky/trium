@@ -6,8 +6,8 @@ class CameraState:
     # 座标架：车向前为x，车向右为y，向下为z，方向与z轴夹角为theta，右手螺旋向下相对x轴旋转为phi
     # 方向指摄像头中央对准的位置
     # 摄像头必须是竖直对准的
-    def __init__(self, camera_xyz: (float, float, float), camera_rotation: (float, float), fov: (float, float),
-                 resolution: (int, int)):
+    def __init__(self, camera_xyz: tuple[float, float, float], camera_rotation: tuple[float, float], fov: tuple[float, float],
+                 resolution: tuple[int, int]):
         self.x, self.y, self.z = camera_xyz
         self.theta = np.radians(camera_rotation[0])
         self.phi = np.radians(camera_rotation[1])
@@ -21,7 +21,7 @@ class CameraState:
             (-np.cos(self.phi) * np.cos(self.theta), -np.sin(self.phi) * np.cos(self.theta), np.sin(self.theta))))
 
 
-def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) -> (bool, float, float):
+def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) -> tuple[bool, float, float]:
     c = camera_state
 
     h = (i / c.res_h - 1 / 2) * np.tan(c.half_fov_h)
@@ -37,7 +37,7 @@ def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) ->
     return on_the_ground, x, y
 
 
-def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> (bool, int, int):
+def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> tuple[bool, int, int]:
     c = camera_state
 
     can_be_seen = True
@@ -59,13 +59,13 @@ def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> (b
 
     return can_be_seen, i, j
 
+if __name__ == "__main__":
+    example_camera_state = CameraState((100, 0, -200), (70, 0), (100, 80), (640, 480))
 
-example_camera_state = CameraState((100, 0, -200), (70, 0), (100, 80), (640, 480))
+    print(img2space(example_camera_state, 320, 0))
+    print(img2space(example_camera_state, 320, 400))
+    print(img2space(example_camera_state, 320, 480))
+    print(img2space(example_camera_state, 0, 480))
 
-print(img2space(example_camera_state, 320, 0))
-print(img2space(example_camera_state, 320, 400))
-print(img2space(example_camera_state, 320, 480))
-print(img2space(example_camera_state, 0, 480))
-
-_, x1, y1 = img2space(example_camera_state, 320, 400)
-print(space2img(example_camera_state, x1, y1))
+    _, x1, y1 = img2space(example_camera_state, 320, 400)
+    print(space2img(example_camera_state, x1, y1))

@@ -1,7 +1,7 @@
 import cv2
 from os.path import isfile
 
-from src.vision2.find_red import find_red
+from find_red import find_red
 import camera_convert
 
 
