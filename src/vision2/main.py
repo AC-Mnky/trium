@@ -4,7 +4,8 @@ import os.path
 from find_red import find_red
 import camera_convert
 
-def process(img, show: bool=False):
+
+def process(img, show: bool = False):
     points = find_red(img, show)
 
     draw_grid((255, 255, 255, 255), 0, 1500, 50, -1000, 1000, 50)
@@ -42,7 +43,9 @@ if __name__ == "__main__":
 
     for image_index in range(50):
         version = '0'
-        filename = os.path.dirname(os.path.realpath(__file__)) + '/' + '../../assets/openCV_pic/version' + version + '/' + str(image_index) + '.jpg'
+        filename = os.path.dirname(
+            os.path.realpath(__file__)) + '/' + '../../assets/openCV_pic/version' + version + '/' + str(
+            image_index) + '.jpg'
         if not os.path.isfile(filename):
             print('no ' + filename)
             continue

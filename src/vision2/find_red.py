@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def find_red(image: np.ndarray, show: bool=False) -> list[(int, int)]:
+def find_red(image: np.ndarray, show: bool = False) -> list[(int, int)]:
     # print(image.shape)
 
     # average_color = np.average(image, (0, 1))
