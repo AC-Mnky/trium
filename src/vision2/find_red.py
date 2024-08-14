@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def find_red(image: np.ndarray) -> list[(int, int)]:
+def find_red(image: np.ndarray, show: bool = False) -> list[(int, int)]:
     # print(image.shape)
 
     # average_color = np.average(image, (0, 1))
@@ -28,7 +28,8 @@ def find_red(image: np.ndarray) -> list[(int, int)]:
     in_range_hsv_1 = cv2.inRange(erode_hsv, target_color_1[0], target_color_1[1])
     in_range_hsv_2 = cv2.inRange(erode_hsv, target_color_2[0], target_color_2[1])
     in_range_hsv = np.maximum(in_range_hsv_1, in_range_hsv_2)
-    cv2.imshow('im', cv2.cvtColor(in_range_hsv, cv2.COLOR_GRAY2BGR))
+    if show:
+        cv2.imshow('im', cv2.cvtColor(in_range_hsv, cv2.COLOR_GRAY2BGR))
 
     cnts = cv2.findContours(in_range_hsv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
     points = []
