@@ -31,9 +31,9 @@ def find_red(image: np.ndarray, show: bool = False) -> list[(int, int)]:
     if show:
         cv2.imshow('im', cv2.cvtColor(in_range_hsv, cv2.COLOR_GRAY2BGR))
 
-    cnts = cv2.findContours(in_range_hsv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
+    contours = cv2.findContours(in_range_hsv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
     points = []
-    for c in cnts:
+    for c in contours:
         if cv2.contourArea(c) > 100:
             m = cv2.moments(c)
             cx = int(m['m10'] / m['m00'])

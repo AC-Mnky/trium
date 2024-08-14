@@ -1,3 +1,4 @@
+# noinspection PyUnresolvedReferences
 from picamera2 import Picamera2
 import cv2
 import time

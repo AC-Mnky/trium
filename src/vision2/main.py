@@ -42,10 +42,10 @@ if __name__ == "__main__":
 
     camera_state = camera_convert.CameraState((100, 0, -90), (70, 0), (64, 50), (640, 480))
 
+    repository_path = os.path.dirname(os.path.realpath(__file__)) + '/../..'
     # for image_index in range(50):
     #     version = '0'
-    #     filename = os.path.dirname(
-    #         os.path.realpath(__file__)) + '/' + '../../assets/openCV_pic/version' + version + '/' + str(
+    #     filename = repository_path + '/assets/openCV_pic/version' + version + '/' + str(
     #         image_index) + '.jpg'
     #     if not os.path.isfile(filename):
     #         print('no ' + filename)
