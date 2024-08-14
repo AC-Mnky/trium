@@ -1,9 +1,16 @@
 import cv2
 import os.path
 
-from find_red import find_red
+from find_color import find_red
 import camera_convert
-from camera import Camera
+
+mode = 'file'
+# mode = 'camera'
+read_version = '0'
+write_version = '1'
+
+if mode == 'camera':
+    from camera import Camera
 
 
 def process(img, show: bool = False):
@@ -43,21 +50,23 @@ if __name__ == "__main__":
     camera_state = camera_convert.CameraState((100, 0, -90), (70, 0), (64, 50), (640, 480))
 
     repository_path = os.path.dirname(os.path.realpath(__file__)) + '/../..'
-    # for image_index in range(50):
-    #     version = '0'
-    #     filename = repository_path + '/assets/openCV_pic/version' + version + '/' + str(
-    #         image_index) + '.jpg'
-    #     if not os.path.isfile(filename):
-    #         print('no ' + filename)
-    #         continue
-    #     print('yes ' + filename)
-    #     image = cv2.imread(filename)
+    if mode == 'file':
+        for image_index in range(100):
+            filename = repository_path + '/assets/openCV_pic/version' + read_version + '/' + str(
+                image_index) + '.jpg'
+            if not os.path.isfile(filename):
+                print('cannot open ' + filename)
+                continue
+            image = cv2.imread(filename)
 
-    #     process(image, True)
-    #     cv2.waitKey()
-
-    c = Camera()
-    while True:
-        image = c.capture()
-        process(image, True)
-        cv2.waitKey(200)
+            process(image, True)
+            cv2.waitKey()
+    if mode == 'camera':
+        c = Camera()
+        for image_index in range(100):
+            image = c.capture()
+            filename = repository_path + '/assets/openCV_pic/version' + write_version + '/' + str(
+                image_index) + '.jpg'
+            cv2.imwrite(filename, image)
+            process(image, True)
+            cv2.waitKey(500)
