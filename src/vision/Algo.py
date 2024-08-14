@@ -1,10 +1,11 @@
 import math
 
 
-def k_means(coords):
-    num = len(coords)
-    center = [coords[int(num / 4) - 1], coords[int(3 * num / 4) - 1]]
+def k_means(cords):
+    num = len(cords)
+    center = [cords[int(num / 4) - 1], cords[int(3 * num / 4) - 1]]
     class_num = 2
+    classes = []
 
     if num >= 3:
         while True:
@@ -13,9 +14,9 @@ def k_means(coords):
             for i in range(0, num):
                 dist = []
                 for j in range(0, class_num):
-                    dist.append(math.sqrt((coords[i][0] - center[j][0]) ** 2 + (coords[i][1] - center[j][1]) ** 2))
+                    dist.append(math.sqrt((cords[i][0] - center[j][0]) ** 2 + (cords[i][1] - center[j][1]) ** 2))
                 center_belong = dist.index(min(dist))
-                classes[center_belong].append(coords[i])
+                classes[center_belong].append(cords[i])
 
             center = [[0, 0], [0, 0]]
             for i in range(0, class_num):

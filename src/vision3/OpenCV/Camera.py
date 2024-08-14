@@ -28,11 +28,11 @@ class Cam(object):
                 "main"
             )  # let the picture captured by the cam to be the current frame
 
-            frame_bgr, _, _ = self.color_detection(
+            frame_bgr, _ = self.color_detection(
                 frame_rgb
             )  # convert the difference between the color-encoding method of arrays
 
-            cv2.imwrite(r'./pic/' + str(i) + '.jpg', frame_bgr)  # save the current frame
+            # cv2.imwrite(r'./pic/'+str(i)+'.jpg',frame_bgr)#save the current frame
             i = i + 1
             cv2.imshow("capture", frame_bgr)  # show the current frame
 
@@ -50,7 +50,7 @@ class Cam(object):
                 "main"
             )  # let the picture captured by the cam to be the current frame
 
-            _, mask, _ = self.color_detection(
+            _, mask = self.color_detection(
                 frame_rgb
             )  # convert the difference between the color-encoding method of arrays
 
@@ -59,45 +59,62 @@ class Cam(object):
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
-            time.sleep(0.1)
+            time.sleep(0.5)
         self.cap.stop()
 
     def color_detection(self, frame_rgb):
         lower_red = self.settings.lower_red
         upper_red = self.settings.upper_red
-        # lower_blue = self.settings.lower_blue
-        # upper_blue = self.settings.upper_blue
-        # lower_green = self.settings.lower_green
-        # upper_green = self.settings.upper_green
-
-        cords_list = []
+        lower_yellow = self.settings.lower_yellow
+        upper_yellow = self.settings.upper_yellow
 
         frame_hsv = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2HSV)
 
         red_mask = cv2.inRange(frame_hsv, lower_red, upper_red)
-        # blue_mask = cv2.inRange(frame_hsv, lower_blue, upper_blue)
-        # green_mask = cv2.inRange(frame_hsv, lower_green, upper_green)
+        yellow_mask = cv2.inRange(frame_hsv, lower_yellow, upper_yellow)
 
         # filter the picture
         kernel = np.ones((5, 5), np.uint8)
         red_mask = cv2.morphologyEx(red_mask, cv2.MORPH_OPEN, kernel)
-        # blue_mask = cv2.morphologyEx(blue_mask, cv2.MORPH_OPEN, kernel)
-        # green_mask = cv2.morphologyEx(green_mask, cv2.MORPH_OPEN, kernel)
+        yellow_mask = cv2.morphologyEx(yellow_mask, cv2.MORPH_OPEN, kernel)
 
-        contours, _ = cv2.findContours(
+        # find red stuff
+        red_contours, _ = cv2.findContours(
             red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
-        for contour in contours:
+        cords_list_red = []
+        # cords_center_red = []
+        for contour in red_contours:
             if cv2.contourArea(contour) > 20:
                 x, y, w, h = cv2.boundingRect(contour)
-                cords_list.append((x, y))
-        if len(cords_list) >= 4:
-            cords_center, _ = Algo.k_means(cords_list)
-        else:
-            cords_center = cords_list
+                cords_list_red.append((x, y))
 
-        for i in range(0, len(cords_center)):
-            cv2.putText(frame_hsv, "RED", (int(cords_center[i][0]), int(cords_center[i][1] - 10)),
+        if len(cords_list_red) != 0:
+            cords_center_red = Algo.loop_check(cords_list_red)
+        else:
+            cords_center_red = cords_list_red
+
+        for i in range(0, len(cords_center_red)):
+            cv2.putText(frame_hsv, "RED", (int(cords_center_red[i][0]), int(cords_center_red[i][1] - 10)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
-        return cv2.cvtColor(frame_hsv, cv2.COLOR_HSV2BGR), red_mask, cords_list
+        # find yellow stuff
+        yellow_contours, _ = cv2.findContours(
+            yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
+        cords_list_yellow = []
+        # cords_center_yellow = []
+        for contour in yellow_contours:
+            if cv2.contourArea(contour) > 20:
+                x, y, w, h = cv2.boundingRect(contour)
+                cords_list_yellow.append((x, y))
+        if len(cords_list_yellow) != 0:
+            cords_center_yellow = Algo.loop_check(cords_list_yellow)
+        else:
+            cords_center_yellow = cords_list_yellow
+
+        for i in range(0, len(cords_center_yellow)):
+            cv2.putText(frame_hsv, "YELLOW", (int(cords_center_yellow[i][0]), int(cords_center_yellow[i][1] - 10)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+        return cv2.cvtColor(frame_hsv, cv2.COLOR_HSV2BGR), red_mask
