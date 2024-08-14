@@ -1,7 +1,7 @@
 import cv2
 import os.path
 
-from find_color import find_red
+import find_color
 import camera_convert
 
 mode = 'file'
@@ -14,18 +14,29 @@ if mode == 'camera':
 
 
 def process(img, show: bool = False):
-    points = find_red(img, show)
+    points_red = find_color.find_red(img, show)
+    points_yellow = find_color.find_yellow(img, show)
 
     draw_grid((255, 255, 255, 255), 0, 1500, 50, -1000, 1000, 50)
 
     print()
-    for p in points:
+
+    for p in points_red:
+        s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -12.5)
+        if s:
+            cv2.rectangle(img, (p[0]-10, p[1]-10, 20, 20), (255, 255, 255, 255), 2)
+            print((x, y), 'red')
+        else:
+            cv2.rectangle(img, (p[0]-10, p[1]-10, 20, 20), (128, 128, 128, 255), 1)
+
+    for p in points_yellow:
         s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -12.5)
         if s:
             cv2.circle(img, p, 10, (255, 255, 255, 255), 2)
-            print((x, y))
+            print((x, y), 'yellow')
         else:
             cv2.circle(img, p, 10, (128, 128, 128, 255), 1)
+
     if show:
         cv2.imshow('image', img)
 

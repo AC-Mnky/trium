@@ -2,7 +2,8 @@ import cv2
 import numpy as np
 
 
-def find_color(image: np.ndarray, color_range_list: list[np.ndarray], show: bool = False) -> list[(int, int)]:
+def find_color(image: np.ndarray, color_range_list: list[np.ndarray], show: bool = False, color_name: str = 'color')\
+        -> list[(int, int)]:
 
     x = cv2.GaussianBlur(image, (3, 3), 0)
     x = cv2.cvtColor(x, cv2.COLOR_BGR2HSV)
@@ -17,7 +18,7 @@ def find_color(image: np.ndarray, color_range_list: list[np.ndarray], show: bool
     output = x
 
     if show:
-        cv2.imshow('im', cv2.cvtColor(output, cv2.COLOR_GRAY2BGR))
+        cv2.imshow(color_name, cv2.cvtColor(output, cv2.COLOR_GRAY2BGR))
 
     contours = cv2.findContours(output, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
     points = []
@@ -33,4 +34,8 @@ def find_color(image: np.ndarray, color_range_list: list[np.ndarray], show: bool
 
 def find_red(image: np.ndarray, show: bool = False) -> list[(int, int)]:
     return find_color(image, [np.array(((0, 130, 100), (10, 255, 255))),
-                              np.array(((165, 130, 100), (180, 255, 255)))], show)
+                              np.array(((165, 130, 100), (180, 255, 255)))], show, 'red')
+
+
+def find_yellow(image: np.ndarray, show: bool = False) -> list[(int, int)]:
+    return find_color(image, [np.array(((12.5, 130, 100), (17.5, 255, 255)))], show, 'yellow')
