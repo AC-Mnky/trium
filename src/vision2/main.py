@@ -1,8 +1,24 @@
 import cv2
-from os.path import isfile
+import os.path
 
 from find_red import find_red
 import camera_convert
+
+def process(img, show: bool=False):
+    points = find_red(img, show)
+
+    draw_grid((255, 255, 255, 255), 0, 1500, 50, -1000, 1000, 50)
+
+    for p in points:
+        s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -12.5)
+        if s:
+            cv2.circle(img, p, 10, (255, 255, 255, 255), 2)
+            print((x, y))
+        else:
+            cv2.circle(img, p, 10, (128, 128, 128, 255), 1)
+    if show:
+        cv2.imshow('image', img)
+        cv2.waitKey()
 
 
 def draw_grid(color, x_start, x_stop, x_step, y_start, y_stop, y_step):
@@ -26,22 +42,11 @@ if __name__ == "__main__":
 
     for image_index in range(50):
         version = '0'
-        filename = '../../assets/openCV_pic/version' + version + '/' + str(image_index) + '.jpg'
-        if not isfile(filename):
+        filename = os.path.dirname(os.path.realpath(__file__)) + '/' + '../../assets/openCV_pic/version' + version + '/' + str(image_index) + '.jpg'
+        if not os.path.isfile(filename):
+            print('no ' + filename)
             continue
+        print('yes ' + filename)
         image = cv2.imread(filename)
 
-        points = find_red(image)
-
-        draw_grid((255, 255, 255, 255), 0, 1500, 50, -1000, 1000, 50)
-
-        for p in points:
-            s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -12.5)
-            if s:
-                cv2.circle(image, p, 10, (255, 255, 255, 255), 2)
-                print((x, y))
-            else:
-                cv2.circle(image, p, 10, (128, 128, 128, 255), 1)
-
-        cv2.imshow('image', image)
-        cv2.waitKey()
+        process(image)
