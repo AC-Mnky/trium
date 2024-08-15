@@ -2,6 +2,37 @@ import numpy as np
 from pymunk.vec2d import Vec2d
 
 
+def merge_collectable_prediction(dictionary):
+    merge_radius = 15  # 75mm
+
+    while True:
+        substitution = None
+
+        for k1 in dictionary:
+
+            neighbour_of_k1 = {}
+            for k2, v2 in dictionary.items():
+                if k1.get_distance(k2) < merge_radius:
+                    neighbour_of_k1[k2] = v2
+
+            if len(neighbour_of_k1) > 1:
+                pos_sum = Vec2d(0, 0)
+                value_sum = 0
+                for k2, v2 in neighbour_of_k1.items():
+                    pos_sum += k2 * v2
+                    value_sum += v2
+                pos_avg = pos_sum / value_sum
+                substitution = (neighbour_of_k1, pos_avg, value_sum)
+                break
+
+        if substitution is None:
+            break
+
+        for k in substitution[0]:
+            dictionary.pop(k)
+        dictionary[substitution[1]] = substitution[2]
+
+
 class Algorithm:
     def __init__(self, car):
         self.car = car
@@ -11,7 +42,7 @@ class Algorithm:
         self.predicted_angle = None
         self.last_update_time = 0
 
-        self.predicted_reds = []
+        self.predicted_reds = {}
 
         self.output = (0, 0)
 
@@ -48,13 +79,18 @@ class Algorithm:
             if camera_input[4] is not None:
                 self.predicted_angle = camera_input[4]
 
+            if self.predicted_angle is not None and self.predicted_x is not None and self.predicted_y is not None:
+                for r in camera_input[0]:
+                    pos = r.rotated(self.predicted_angle) + Vec2d(self.predicted_x, self.predicted_y)
+                    self.predicted_reds[pos] = self.predicted_reds.get(pos, 0) + 1
+
+                merge_collectable_prediction(self.predicted_reds)
+                print(len(self.predicted_reds))
+
             if len(camera_input[0] + camera_input[1]) > 0:
                 self.output = (1, 1)
             else:
                 self.output = (1, -1)
-
-
-
 
 # class Algorithm:
 #     def __init__(self, car):

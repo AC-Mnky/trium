@@ -9,7 +9,7 @@ from collectables import Red, Yellow
 from camera_convert import CameraState
 
 # 1px = 5mm
-simulation_speed_up = 5
+simulation_speed_up = 2
 
 if __name__ == "__main__":
     pygame.init()
@@ -98,6 +98,9 @@ if __name__ == "__main__":
                              (room.rect.right - 1, room.rect.top - 1, 2, room.rect.bottom - room.rect.top + 2))
         draw_alpha.rectangle(screen, (255, 255, 255, 255),
                              (room.rect.left - 1, room.rect.bottom - 1, room.rect.right - room.rect.left + 2, 2))
+
+        for r in room.cars[0].algorithm.predicted_reds:
+            draw_alpha.circle(screen, (255, 0, 0, 64), r, 2)
 
         pygame.display.flip()
 
