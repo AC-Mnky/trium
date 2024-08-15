@@ -1,19 +1,60 @@
-
-# from car import Car
+import numpy as np
+from pymunk.vec2d import Vec2d
 
 
 class Algorithm:
     def __init__(self, car):
         self.car = car
-        self.movement = (0, 0)
 
-    def get_output(self, camera_input, imu_input, ultrasonic_input):
+        self.predicted_x = None
+        self.predicted_y = None
+        self.predicted_angle = None
+        self.last_update_time = 0
+
+        self.predicted_reds = []
+
+        self.output = (0, 0)
+
+    def update(self, camera_input, encoder_input, imu_input, ultrasonic_input):
+        dt = self.car.room.time - self.last_update_time
+        self.last_update_time = self.car.room.time
+
+        # infer current movement from encoder
+        inferred_angular_speed = (encoder_input[0] - encoder_input[1]) / self.car.distance_between_wheels
+        inferred_relative_velocity = Vec2d((encoder_input[0] + encoder_input[1]) / 2,
+                                           -inferred_angular_speed * self.car.wheel_x_offset)
+
+        # predict current position and angle
+        if self.predicted_angle is not None:
+            self.predicted_angle += dt * inferred_angular_speed
+            inferred_velocity = inferred_relative_velocity.rotated(self.predicted_angle)
+            if self.predicted_x is not None:
+                self.predicted_x += dt * inferred_velocity[0]
+            if self.predicted_y is not None:
+                self.predicted_y += dt * inferred_velocity[1]
+        else:
+            self.predicted_x = self.predicted_y = None
+
+        # analyze camera input
         if camera_input is not None:
+            print()
+            print('delta_x: ', (self.predicted_x or np.nan) - self.car.body.position[0])
+            print('delta_y: ', (self.predicted_y or np.nan) - self.car.body.position[1])
+            print('delta_θ: ', (self.predicted_angle or np.nan) - self.car.body.angle)
+            if camera_input[2] is not None:
+                self.predicted_x = camera_input[2]
+            if camera_input[3] is not None:
+                self.predicted_y = camera_input[3]
+            if camera_input[4] is not None:
+                self.predicted_angle = camera_input[4]
+
             if len(camera_input[0] + camera_input[1]) > 0:
-                self.movement = (1, 1)
+                self.output = (1, 1)
             else:
-                self.movement = (1, -1)
-        return self.movement
+                self.output = (1, -1)
+
+
+
 
 # class Algorithm:
 #     def __init__(self, car):
@@ -69,4 +110,3 @@ class Algorithm:
 #             return -1, 1
 #         else:
 #             return 1, 1
-

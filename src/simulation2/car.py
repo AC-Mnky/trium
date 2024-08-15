@@ -5,6 +5,7 @@ from pymunk.vec2d import Vec2d
 from room import Room
 from algorithm import Algorithm
 from camera_input import Camera
+from encoder_input import Encoder
 from imu_input import Imu
 from ultrasonic_input import Ultrasonic
 import camera_convert
@@ -15,8 +16,10 @@ class Car:
     length = 42
     hole_width = 13
     hole_length = 26
-    left_wheel = Vec2d(-5, -20.1)
-    right_wheel = Vec2d(-5, 20.1)
+    distance_between_wheels = 40.2
+    wheel_x_offset = -5
+    left_wheel = Vec2d(wheel_x_offset, -distance_between_wheels / 2)
+    right_wheel = Vec2d(wheel_x_offset, distance_between_wheels / 2)
 
     mass = 1
     moment = 1000
@@ -31,7 +34,7 @@ class Car:
 
     camera_capturing = False
 
-    def __init__(self, room: Room, color, x, y, camera_state: camera_convert.CameraState):
+    def __init__(self, room: Room, color, x, y, angle, camera_state: camera_convert.CameraState):
         self.room = room
 
         self.body = pymunk.Body(mass=self.mass, moment=self.moment)
@@ -53,8 +56,10 @@ class Car:
             s.elasticity = self.elasticity
 
         self.body.position = (x, y)
+        self.body.angle = angle
 
         self.camera = Camera(self, camera_state)
+        self.encoder = Encoder(self)
         self.imu = Imu(self)
         self.ultrasonic = Ultrasonic(self)
 
@@ -81,10 +86,8 @@ class Car:
         self.room.cars.append(self)
 
     def physics(self):
-        left_wheel_relative_velocity = self.body.velocity.rotated(-self.body.angle) \
-                                       + self.body.angular_velocity * self.left_wheel.rotated_degrees(90)
-        right_wheel_relative_velocity = self.body.velocity.rotated(-self.body.angle) \
-                                        + self.body.angular_velocity * self.right_wheel.rotated_degrees(90)
+        left_wheel_relative_velocity, right_wheel_relative_velocity = self.get_relative_velocity()
+
         self.body.apply_impulse_at_local_point(
             (self.left_wheel_force - self.parallel_drag * left_wheel_relative_velocity[0]) * Vec2d(1, 0)
             + (- self.perpendicular_drag * left_wheel_relative_velocity[1]) * Vec2d(0, 1), self.left_wheel)
@@ -96,16 +99,26 @@ class Car:
         self.left_wheel_force = self.right_wheel_force = 0
 
     def output(self, wheel_outputs):
-        left_wheel_relative_velocity = self.body.velocity.rotated(-self.body.angle) \
-                                       + self.body.angular_velocity * self.left_wheel.rotated_degrees(90)
-        right_wheel_relative_velocity = self.body.velocity.rotated(-self.body.angle) \
-                                        + self.body.angular_velocity * self.right_wheel.rotated_degrees(90)
+        left_wheel_relative_velocity, right_wheel_relative_velocity = self.get_relative_velocity()
 
-        if left_wheel_relative_velocity[0] < self.left_wheel_max_speed * wheel_outputs[0]:
+        left_speed_diff = left_wheel_relative_velocity[0] - self.left_wheel_max_speed * wheel_outputs[0]
+        if left_speed_diff < -0.1 * self.left_wheel_max_speed:
             self.left_wheel_force = self.left_wheel_max_force
-        else:
+        elif left_speed_diff > 0.1 * self.left_wheel_max_speed:
             self.left_wheel_force = -self.left_wheel_max_force
-        if right_wheel_relative_velocity[0] < self.right_wheel_max_speed * wheel_outputs[1]:
-            self.right_wheel_force = self.right_wheel_max_force
         else:
+            self.left_wheel_force = 0
+
+        right_speed_diff = right_wheel_relative_velocity[0] - self.right_wheel_max_speed * wheel_outputs[1]
+        if right_speed_diff < -0.1 * self.right_wheel_max_speed:
+            self.right_wheel_force = self.right_wheel_max_force
+        elif right_speed_diff > 0.1 * self.right_wheel_max_speed:
             self.right_wheel_force = -self.right_wheel_max_force
+        else:
+            self.right_wheel_force = 0
+
+    def get_relative_velocity(self):
+        return self.body.velocity.rotated(
+            -self.body.angle) + self.body.angular_velocity * self.left_wheel.rotated_degrees(90), \
+               self.body.velocity.rotated(
+                   -self.body.angle) + self.body.angular_velocity * self.right_wheel.rotated_degrees(90)

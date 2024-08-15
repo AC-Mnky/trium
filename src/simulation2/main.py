@@ -9,6 +9,7 @@ from collectables import Red, Yellow
 from camera_convert import CameraState
 
 # 1px = 5mm
+simulation_speed_up = 5
 
 if __name__ == "__main__":
     pygame.init()
@@ -22,7 +23,7 @@ if __name__ == "__main__":
 
     Car(room,
         (255, 128, 0, 255),
-        100, 100,
+        200, 200, np.pi * 1.25,
         CameraState((21, 0, -40), (70, 0), (64, 50), (640, 480)))
     for i in range(10):
         Red(room,
@@ -41,12 +42,15 @@ if __name__ == "__main__":
             ):
                 running = False
 
-        # output
+        for c in room.cars:
+            c.algorithm.update(c.camera.get_input(), c.encoder.get_input(), c.imu.get_input(), c.ultrasonic.get_input())
+
+        # player control
         keys = pygame.key.get_pressed()
 
         for i, c in enumerate(room.cars):
             if i != 0 or keys[pygame.K_SPACE]:
-                c.output(c.algorithm.get_output(c.camera.get_input(), c.imu.get_input(), c.ultrasonic.get_input()))
+                c.output(c.algorithm.output)
             else:
                 if keys[pygame.K_UP]:
                     if keys[pygame.K_LEFT]:
@@ -103,4 +107,4 @@ if __name__ == "__main__":
         room.space.step(dt)
         room.time += dt
 
-        clock.tick(fps)
+        clock.tick(fps * simulation_speed_up)
