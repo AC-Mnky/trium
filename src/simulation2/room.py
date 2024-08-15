@@ -20,18 +20,17 @@ class Room:
         r = self.rect
         self.walls = [
             pymunk.Segment(self.space.static_body, (r.left, r.bottom), (r.left, r.top), wall_width),
-            pymunk.Segment(self.space.static_body, (r.left, r.top), (r.right, r.top), wall_width),
             pymunk.Segment(self.space.static_body, (r.right, r.top), (r.right, r.bottom), wall_width),
+            pymunk.Segment(self.space.static_body, (r.left, r.top), (r.right, r.top), wall_width),
             pymunk.Segment(self.space.static_body, (r.left, r.bottom), (r.right, r.bottom), wall_width),
         ]
         for wall in self.walls:
             wall.friction = friction
             wall.elasticity = elasticity
-            wall.group = 'wall'
         self.space.add(*self.walls)
 
 
 if __name__ == "__main__":
     import time
     example_room = Room(time.time(), pygame.Rect(50, 50, 600, 400))
-    example_room.make_walls(2, 0.5)
+    example_room.make_walls(2, 0.5, 1)

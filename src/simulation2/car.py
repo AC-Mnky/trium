@@ -109,24 +109,3 @@ class Car:
             self.right_wheel_force = self.right_wheel_max_force
         else:
             self.right_wheel_force = -self.right_wheel_max_force
-
-        # self.left_wheel_force = wheel_outputs[0] * self.left_wheel_max_force
-        # self.right_wheel_force = wheel_outputs[1] * self.right_wheel_max_force
-
-    # def camera_info(self):
-    #     seen_cars = []
-    #     for c1 in cars:
-    #         if len(self.camera.shapes_collide(c1.shape1).points) > 0 or \
-    #                 len(self.camera.shapes_collide(c1.shape2).points) > 0 or \
-    #                 len(self.camera.shapes_collide(c1.shape3).points) > 0:
-    #             seen_cars.append(c1.body.position)
-    #     seen_reds = []
-    #     for r1 in reds:
-    #         if len(self.camera.shapes_collide(r1.shape).points) > 0:
-    #             seen_reds.append(r1.body.position)
-    #     seen_obstacles = []
-    #     for o1 in obstacles:
-    #         if len(self.camera.shapes_collide(o1.shape).points) > 0:
-    #             seen_obstacles.append(o1.body.position)
-    #     return CameraInfo(seen_cars, seen_reds, seen_obstacles)
-    #

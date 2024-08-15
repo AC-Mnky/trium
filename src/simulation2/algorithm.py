@@ -9,7 +9,7 @@ class Algorithm:
 
     def get_output(self, camera_input, imu_input, ultrasonic_input):
         if camera_input is not None:
-            if len(camera_input[0]) > 0:
+            if len(camera_input[0] + camera_input[1]) > 0:
                 self.movement = (1, 1)
             else:
                 self.movement = (1, -1)
