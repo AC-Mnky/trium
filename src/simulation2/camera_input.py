@@ -17,12 +17,12 @@ class Camera:
 
         seen_reds = []
         for r in self.room.reds:
-            if len(self.car.camera_range.shapes_collide(r.shape).points) > 0:
+            if r is not None and len(self.car.camera_range.shapes_collide(r.shape).points) > 0:
                 seen_reds.append(self.car.body.world_to_local(r.body.position))
 
         seen_yellows = []
         for y in self.room.yellows:
-            if len(self.car.camera_range.shapes_collide(y.shape).points) > 0:
+            if y is not None and len(self.car.camera_range.shapes_collide(y.shape).points) > 0:
                 seen_yellows.append(self.car.body.world_to_local(y.body.position))
 
         wall_inferred_x = None

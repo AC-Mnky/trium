@@ -16,6 +16,7 @@ class Car:
     length = 42
     hole_width = 13
     hole_length = 26
+    brush_effective_length = 10
     distance_between_wheels = 40.2
     wheel_x_offset = -5
     left_wheel = Vec2d(wheel_x_offset, -distance_between_wheels / 2)
@@ -28,6 +29,7 @@ class Car:
     angular_drag = 5000
     friction = 0.5
     elasticity = 0.5
+    brush_force = 0.1
     left_wheel_max_speed = right_wheel_max_speed = 42  # 每秒一个车身
     left_wheel_max_force = right_wheel_max_force = 5
     left_wheel_force = right_wheel_force = 0
@@ -43,10 +45,11 @@ class Car:
         w = self.width
         l0 = self.hole_length
         w0 = self.hole_width
+        e = self.brush_effective_length
 
         self.shapes = [
-            pymunk.Poly(self.body, [(-l / 2, -w / 2), (-l / 2, w / 2), (l / 2 - l0, w / 2), (l / 2 - l0, -w / 2), ]),
-            pymunk.Poly(self.body, [(l / 2 - l0, -w / 2), (l / 2 - l0, -w0 / 2), (l / 2, -w0 / 2), (l / 2, -w / 2), ]),
+            pymunk.Poly(self.body, [(-l / 2, -w / 2), (-l / 2, w / 2), (l / 2 - l0, w / 2), (l / 2 - l0, -w / 2)]),
+            pymunk.Poly(self.body, [(l / 2 - l0, -w / 2), (l / 2 - l0, -w0 / 2), (l / 2, -w0 / 2), (l / 2, -w / 2)]),
             pymunk.Poly(self.body, [(l / 2 - l0, w / 2), (l / 2 - l0, w0 / 2), (l / 2, w0 / 2), (l / 2, w / 2), ]),
         ]
 
@@ -58,7 +61,9 @@ class Car:
         self.body.position = (x, y)
         self.body.angle = angle
 
-        # TODO: cars suck collectables
+        self.brush = pymunk.Poly(self.body,
+                                 [(l / 2 - e, -w0 / 2), (l / 2 - e, w0 / 2), (l / 2, w0 / 2), (l / 2, -w0 / 2)])
+        self.brush.sensor = True
 
         self.camera = Camera(self, camera_state)
         self.encoder = Encoder(self)
@@ -84,7 +89,7 @@ class Car:
 
         self.algorithm = Algorithm(self)
 
-        self.room.space.add(self.body, *self.shapes, self.camera_range)
+        self.room.space.add(self.body, *self.shapes, self.brush, self.camera_range)
         self.room.cars.append(self)
 
     def physics(self):
@@ -99,6 +104,13 @@ class Car:
 
         self.body.torque -= self.body.angular_velocity * self.angular_drag
         self.left_wheel_force = self.right_wheel_force = 0
+
+        # brush
+        for x in self.room.reds + self.room.yellows:
+            if x is not None and len(self.brush.shapes_collide(x.shape).points) > 0:
+                force = Vec2d(-self.brush_force, 0).rotated(self.body.angle)
+                x.body.apply_impulse_at_world_point(force, x.body.position)
+                self.body.apply_impulse_at_world_point(-force, x.body.position)
 
     def output(self, wheel_outputs):
         left_wheel_relative_velocity, right_wheel_relative_velocity = self.get_relative_velocity()

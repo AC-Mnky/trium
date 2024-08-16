@@ -30,10 +30,10 @@ if __name__ == "__main__":
     for i in range(5):
         Red(room,
             room.rand.randint(room.rect.left + 2, room.rect.right - 2),
-            room.rand.randint(room.rect.top + 2, room.rect.bottom - 2),)
+            room.rand.randint(room.rect.top + 2, room.rect.bottom - 2), )
         Yellow(room,
                room.rand.randint(room.rect.left + 3, room.rect.right - 3),
-               room.rand.randint(room.rect.top + 3, room.rect.bottom - 3),)
+               room.rand.randint(room.rect.top + 3, room.rect.bottom - 3), )
 
     while running:
         for event in pygame.event.get():
@@ -75,7 +75,20 @@ if __name__ == "__main__":
 
         # physics
         for x in room.cars + room.reds + room.yellows:
-            x.physics()
+            if x is not None:
+                x.physics()
+
+        # # car eat collectables
+        # for c in room.cars:
+        #     c_pos = c.body.position
+        #     for i, r in enumerate(room.reds):
+        #         if r is not None and c_pos.get_distance(r.body.position) < c.hole_width / 2:
+        #             room.space.remove(r.body, r.shape)
+        #             room.reds[i] = None
+        #     for i, y in enumerate(room.yellows):
+        #         if y is not None and c_pos.get_distance(y.body.position) < c.hole_width / 2:
+        #             room.space.remove(y.body, y.shape)
+        #             room.yellows[i] = None
 
         # draw
         screen.fill(pygame.Color("black"))
@@ -83,15 +96,21 @@ if __name__ == "__main__":
             draw_alpha.polygon(screen, (255, 255, 255, 128) if c.camera_capturing else (255, 255, 255, 32),
                                [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
                                 c.camera_range.get_vertices()])
+            draw_alpha.polygon(screen, (255, 255, 255, 64),
+                               [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in c.brush.get_vertices()])
         for c in room.cars:
             for s in c.shapes:
                 draw_alpha.polygon(screen, s.color, [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
                                                      s.get_vertices()])
         for r in room.reds:
-            draw_alpha.polygon(screen, (255, 0, 0, 255),
-                               [(v.rotated(r.body.angle) + r.body.position).int_tuple for v in r.shape.get_vertices()])
+            if r is not None:
+                draw_alpha.polygon(screen, (255, 0, 0, 255),
+                                   [(v.rotated(r.body.angle) + r.body.position).int_tuple for v in
+                                    r.shape.get_vertices()])
         for y in room.yellows:
-            draw_alpha.circle(screen, (255, 255, 0, 255), y.body.position, 3)
+            if y is not None:
+                draw_alpha.circle(screen, (255, 255, 0, 255), y.body.position, 3)
+
         draw_alpha.rectangle(screen, (255, 255, 255, 255),
                              (room.rect.left - 1, room.rect.top - 1, 2, room.rect.bottom - room.rect.top + 2))
         draw_alpha.rectangle(screen, (255, 255, 255, 255),
