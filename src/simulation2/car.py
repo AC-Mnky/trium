@@ -58,6 +58,8 @@ class Car:
         self.body.position = (x, y)
         self.body.angle = angle
 
+        # TODO: cars suck collectables
+
         self.camera = Camera(self, camera_state)
         self.encoder = Encoder(self)
         self.imu = Imu(self)

@@ -8,6 +8,8 @@ from car import Car
 from collectables import Red, Yellow
 from camera_convert import CameraState
 
+from algorithm import merge_radius
+
 # 1px = 5mm
 simulation_speed_up = 2
 
@@ -25,7 +27,7 @@ if __name__ == "__main__":
         (255, 128, 0, 255),
         200, 200, np.pi * 1.25,
         CameraState((21, 0, -40), (70, 0), (64, 50), (640, 480)))
-    for i in range(10):
+    for i in range(5):
         Red(room,
             room.rand.randint(room.rect.left + 2, room.rect.right - 2),
             room.rand.randint(room.rect.top + 2, room.rect.bottom - 2),)
@@ -99,8 +101,8 @@ if __name__ == "__main__":
         draw_alpha.rectangle(screen, (255, 255, 255, 255),
                              (room.rect.left - 1, room.rect.bottom - 1, room.rect.right - room.rect.left + 2, 2))
 
-        for r in room.cars[0].algorithm.predicted_reds:
-            draw_alpha.circle(screen, (255, 0, 0, 64), r, 2)
+        for x, v in room.cars[0].algorithm.predicted_collectables.items():
+            draw_alpha.circle(screen, (255, 255 if v[1] == 1 else 0, 0, 16 * v[0]), x, merge_radius)
 
         pygame.display.flip()
 
