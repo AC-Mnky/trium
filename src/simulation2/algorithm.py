@@ -8,7 +8,6 @@ merge_radius = 15  # 75mm
 
 
 def merge_collectable_prediction(dictionary):
-
     while True:
         substitution = None
 
@@ -127,14 +126,17 @@ class Algorithm:
                 print(self.predicted_collectables)
                 print(len(self.predicted_collectables))
 
-        to_delete_red = []
-        for x in self.predicted_collectables:
-            self.predicted_collectables[x][0] *= self.unseen_decay_exponential
-            if x.get_distance(self.predicted_position()) < self.contact_radius \
-                    or self.predicted_collectables[x][0] < self.delete_value:
-                to_delete_red.append(x)
-        for x in to_delete_red:
-            self.predicted_collectables.pop(x)
+        if self.position_predictable():
+            car_center = self.predicted_position() + Vec2d(1, 0).rotated(self.predicted_angle) * (
+                        self.car.length / 2 - self.car.com_to_car_back)
+            to_delete_red = []
+            for x in self.predicted_collectables:
+                self.predicted_collectables[x][0] *= self.unseen_decay_exponential
+                if x.get_distance(car_center) < self.contact_radius \
+                        or self.predicted_collectables[x][0] < self.delete_value:
+                    to_delete_red.append(x)
+            for x in to_delete_red:
+                self.predicted_collectables.pop(x)
 
         x = self.get_closest_collectable()
         if x is None or not self.position_predictable():

@@ -1,3 +1,6 @@
+# 关于仿真的基本方法论：
+# 尽可能用简单的方法模拟现实情况，从而使得写出好的算法更为方便。最终在现实中测试时所使用的算法相较于仿真中使用的算法，只需要做一些参数的调整，不需要增加新的代码。
+
 import numpy as np
 import time
 import pygame
@@ -11,7 +14,7 @@ from camera_convert import CameraState
 from algorithm import merge_radius
 
 # 1px = 5mm
-simulation_speed_up = 2
+simulation_speed_up = 10
 
 if __name__ == "__main__":
     pygame.init()
@@ -26,7 +29,7 @@ if __name__ == "__main__":
     Car(room,
         (255, 128, 0, 255),
         200, 200, np.pi * 1.25,
-        CameraState((21, 0, -40), (70, 0), (64, 50), (640, 480)))
+        CameraState((205 / 5, 0, -170 / 5), (70, 0), (62.2, 48.8), (640, 480)))
     for i in range(5):
         Red(room,
             room.rand.randint(room.rect.left + 2, room.rect.right - 2),

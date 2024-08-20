@@ -25,8 +25,8 @@ class CameraState:
 def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) -> tuple[bool, float, float]:
     c = camera_state
 
-    h = (i / c.res_h - 1 / 2) * np.tan(c.half_fov_h)
-    v = (j / c.res_v - 1 / 2) * np.tan(c.half_fov_v)
+    h = (2 * i / c.res_h - 1) * np.tan(c.half_fov_h)
+    v = (2 * j / c.res_v - 1) * np.tan(c.half_fov_v)
     ax_coo = np.array((1, h, v))
 
     vec = np.dot(ax_coo, c.ax)
@@ -52,8 +52,8 @@ def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> tu
     h = ax_coo[1] / ax_coo[0]
     v = ax_coo[2] / ax_coo[0]
 
-    i = int(np.round((h / np.tan(c.half_fov_h) + 1 / 2) * c.res_h))
-    j = int(np.round((v / np.tan(c.half_fov_v) + 1 / 2) * c.res_v))
+    i = int(np.round((h / np.tan(c.half_fov_h) + 1) / 2 * c.res_h))
+    j = int(np.round((v / np.tan(c.half_fov_v) + 1) / 2 * c.res_v))
 
     if not (0 <= i < c.res_h and 0 <= j < c.res_v):
         can_be_seen = False

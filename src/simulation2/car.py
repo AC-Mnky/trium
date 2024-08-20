@@ -12,13 +12,15 @@ import camera_convert
 
 
 class Car:
-    width = 45.6
-    length = 42
-    hole_width = 13
+    width = 154 / 5
+    length = 205 / 5
+    com_to_car_back = 75 / 5  # center of mass to car back
+    width_with_wheels = 208 / 5
+    hole_width = 75 / 5
     hole_length = 26
-    brush_effective_length = 10
-    distance_between_wheels = 40.2
-    wheel_x_offset = -5
+    brush_effective_length = 90 / 5
+    wheel_x_offset = - com_to_car_back + 98 / 5
+    distance_between_wheels = (width + width_with_wheels) / 2
     left_wheel = Vec2d(wheel_x_offset, -distance_between_wheels / 2)
     right_wheel = Vec2d(wheel_x_offset, distance_between_wheels / 2)
 
@@ -43,14 +45,15 @@ class Car:
 
         l = self.length
         w = self.width
+        lc = self.com_to_car_back
         l0 = self.hole_length
         w0 = self.hole_width
         e = self.brush_effective_length
 
         self.shapes = [
-            pymunk.Poly(self.body, [(-l / 2, -w / 2), (-l / 2, w / 2), (l / 2 - l0, w / 2), (l / 2 - l0, -w / 2)]),
-            pymunk.Poly(self.body, [(l / 2 - l0, -w / 2), (l / 2 - l0, -w0 / 2), (l / 2, -w0 / 2), (l / 2, -w / 2)]),
-            pymunk.Poly(self.body, [(l / 2 - l0, w / 2), (l / 2 - l0, w0 / 2), (l / 2, w0 / 2), (l / 2, w / 2), ]),
+            pymunk.Poly(self.body, [(-lc, -w0 / 2), (-lc, w0 / 2), (-lc + l - l0, w0 / 2), (-lc + l - l0, -w0 / 2)]),
+            pymunk.Poly(self.body, [(-lc, -w / 2), (-lc, -w0 / 2), (-lc + l, -w0 / 2), (-lc + l, -w / 2)]),
+            pymunk.Poly(self.body, [(-lc, w / 2), (-lc, w0 / 2), (-lc + l, w0 / 2), (-lc + l, w / 2), ]),
         ]
 
         for s in self.shapes:
@@ -62,7 +65,7 @@ class Car:
         self.body.angle = angle
 
         self.brush = pymunk.Poly(self.body,
-                                 [(l / 2 - e, -w0 / 2), (l / 2 - e, w0 / 2), (l / 2, w0 / 2), (l / 2, -w0 / 2)])
+                                 [(-lc + l - e, -w0 / 2), (-lc + l - e, w0 / 2), (-lc + l, w0 / 2), (-lc + l, -w0 / 2)])
         self.brush.sensor = True
 
         self.camera = Camera(self, camera_state)
