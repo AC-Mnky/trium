@@ -16,8 +16,8 @@ class Car:
     length = 205 / 5
     com_to_car_back = 75 / 5  # center of mass to car back
     width_with_wheels = 208 / 5
-    hole_width = 75 / 5
-    hole_length = 26
+    hole_width = 67 / 5
+    hole_length = length - 10 / 5
     brush_effective_length = 90 / 5
     wheel_x_offset = - com_to_car_back + 98 / 5
     distance_between_wheels = (width + width_with_wheels) / 2
@@ -115,7 +115,7 @@ class Car:
                 x.body.apply_impulse_at_world_point(force, x.body.position)
                 self.body.apply_impulse_at_world_point(-force, x.body.position)
 
-    def output(self, wheel_outputs):
+    def output(self, wheel_outputs: tuple[float, float], back_open: bool):
         left_wheel_relative_velocity, right_wheel_relative_velocity = self.get_relative_velocity()
 
         left_speed_diff = left_wheel_relative_velocity[0] - self.left_wheel_max_speed * wheel_outputs[0]
@@ -133,6 +133,8 @@ class Car:
             self.right_wheel_force = -self.right_wheel_max_force
         else:
             self.right_wheel_force = 0
+
+        self.shapes[0].sensor = back_open
 
     def get_relative_velocity(self):
         return self.body.velocity.rotated(

@@ -21,11 +21,13 @@ def merge_collectable_prediction(dictionary):
             if len(neighbour_of_k1) > 1:
                 pos_sum = Vec2d(0, 0)
                 value_sum = 0
+                interest_max = 0
                 for k2, v2 in neighbour_of_k1.items():
                     pos_sum += k2 * v2[0]
                     value_sum += v2[0]
+                    interest_max = max(interest_max, v2[2])
                 pos_avg = pos_sum / value_sum
-                substitution = (neighbour_of_k1, pos_avg, value_sum, v1[1])
+                substitution = (neighbour_of_k1, pos_avg, value_sum, v1[1], interest_max)
                 break
 
         if substitution is None:
@@ -33,15 +35,18 @@ def merge_collectable_prediction(dictionary):
 
         for k in substitution[0]:
             dictionary.pop(k)
-        dictionary[substitution[1]] = [substitution[2], substitution[3]]
+        dictionary[substitution[1]] = list(substitution[2:])
 
 
 class Algorithm:
-    contact_radius = 20
+    contact_radius = 40 / 5
+    contact_center_to_back = 180 / 5
     aim_angle = 0.05
     seen_decay_exponential = 0.5
     unseen_decay_exponential = 0.999
     delete_value = 0.2
+    interest_addition = 5
+    interest_maximum = 30
 
     def __init__(self, car):
         self.car = car
@@ -51,9 +56,11 @@ class Algorithm:
         self.predicted_angle = None
         self.last_update_time = 0
 
-        self.predicted_collectables: dict[Vec2d, list[float, int]] = {}
+        # dict[position, list[value, color, interest]]
+        self.predicted_collectables: dict[Vec2d, list[float, int, float]] = {}
 
-        self.output = (0, 0)
+        self.wheel_output = (0, 0)
+        self.back_open_output = True
 
     def position_predictable(self) -> bool:
         return self.predicted_angle is not None and self.predicted_x is not None and self.predicted_y is not None
@@ -64,8 +71,8 @@ class Algorithm:
     def get_closest_collectable(self) -> Vec2d or None:
         closest = None
         closest_distance = np.inf
-        for x in self.predicted_collectables:
-            x_distance = x.get_distance(self.predicted_position())
+        for x, v in self.predicted_collectables.items():
+            x_distance = x.get_distance(self.predicted_position()) - v[2]
             if x_distance < closest_distance:
                 closest = x
                 closest_distance = x_distance
@@ -107,10 +114,10 @@ class Algorithm:
             if self.position_predictable():
                 for x in camera_input[0]:
                     pos = x.rotated(self.predicted_angle) + Vec2d(self.predicted_x, self.predicted_y)
-                    self.predicted_collectables[pos] = [self.predicted_collectables.get(pos, (0, 0))[0] + 2, 0]
+                    self.predicted_collectables[pos] = [self.predicted_collectables.get(pos, (0, 0))[0] + 2, 0, 0]
                 for y in camera_input[1]:
                     pos = y.rotated(self.predicted_angle) + Vec2d(self.predicted_x, self.predicted_y)
-                    self.predicted_collectables[pos] = [self.predicted_collectables.get(pos, (0, 1))[0] + 3, 1]
+                    self.predicted_collectables[pos] = [self.predicted_collectables.get(pos, (0, 1))[0] + 3, 1, 0]
 
                 merge_collectable_prediction(self.predicted_collectables)
 
@@ -127,12 +134,12 @@ class Algorithm:
                 print(len(self.predicted_collectables))
 
         if self.position_predictable():
-            car_center = self.predicted_position() + Vec2d(1, 0).rotated(self.predicted_angle) * (
-                        self.car.length / 2 - self.car.com_to_car_back)
+            contact_center = self.predicted_position() + Vec2d(1, 0).rotated(self.predicted_angle) * (
+                    self.contact_center_to_back - self.car.com_to_car_back)
             to_delete_red = []
             for x in self.predicted_collectables:
                 self.predicted_collectables[x][0] *= self.unseen_decay_exponential
-                if x.get_distance(car_center) < self.contact_radius \
+                if x.get_distance(contact_center) < self.contact_radius \
                         or self.predicted_collectables[x][0] < self.delete_value:
                     to_delete_red.append(x)
             for x in to_delete_red:
@@ -140,16 +147,18 @@ class Algorithm:
 
         x = self.get_closest_collectable()
         if x is None or not self.position_predictable():
-            self.output = (1, -1)
+            self.wheel_output = (1, -1)
         else:
+            self.predicted_collectables[x][2] = min(self.predicted_collectables[x][2] + self.interest_addition,
+                                                    self.interest_maximum)
             x_angle = (x - self.predicted_position()).angle - self.predicted_angle
             x_angle -= round(x_angle / np.tau) * np.tau
             if x_angle > self.aim_angle:
-                self.output = (1, -1)
+                self.wheel_output = (1, -1)
             elif x_angle < -self.aim_angle:
-                self.output = (-1, 1)
+                self.wheel_output = (-1, 1)
             else:
-                self.output = (1, 1)
+                self.wheel_output = (1, 1)
 
 # class Algorithm:
 #     def __init__(self, car):

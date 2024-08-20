@@ -15,6 +15,9 @@ from algorithm import merge_radius
 
 # 1px = 5mm
 simulation_speed_up = 10
+always_algorithm = True
+display_algorithm = True
+display_camera_and_brush = True
 
 if __name__ == "__main__":
     pygame.init()
@@ -30,6 +33,18 @@ if __name__ == "__main__":
         (255, 128, 0, 255),
         200, 200, np.pi * 1.25,
         CameraState((205 / 5, 0, -170 / 5), (70, 0), (62.2, 48.8), (640, 480)))
+    # Car(room,
+    #     (0, 0, 255, 255),
+    #     500, 300, np.pi * 0.25,
+    #     CameraState((205 / 5, 0, -170 / 5), (70, 0), (62.2, 48.8), (640, 480)))
+    # Car(room,
+    #     (128, 128, 128, 255),
+    #     200, 300, np.pi * 0.75,
+    #     CameraState((205 / 5, 0, -170 / 5), (70, 0), (62.2, 48.8), (640, 480)))
+    # Car(room,
+    #     (128, 128, 128, 255),
+    #     500, 200, np.pi * 1.75,
+    #     CameraState((205 / 5, 0, -170 / 5), (70, 0), (62.2, 48.8), (640, 480)))
     for i in range(5):
         Red(room,
             room.rand.randint(room.rect.left + 2, room.rect.right - 2),
@@ -54,27 +69,49 @@ if __name__ == "__main__":
         keys = pygame.key.get_pressed()
 
         for i, c in enumerate(room.cars):
-            if i != 0 or keys[pygame.K_SPACE]:
-                c.output(c.algorithm.output)
+            if i > 1 or keys[pygame.K_SPACE] or always_algorithm:
+                c.output(c.algorithm.wheel_output, c.algorithm.back_open_output)
             else:
-                if keys[pygame.K_UP]:
-                    if keys[pygame.K_LEFT]:
-                        c.output((0, 1))
+                if i == 0:
+                    back_open = keys[pygame.K_o]
+                    if keys[pygame.K_UP]:
+                        if keys[pygame.K_LEFT]:
+                            c.output((0, 1), back_open)
+                        elif keys[pygame.K_RIGHT]:
+                            c.output((1, 0), back_open)
+                        else:
+                            c.output((1, 1), back_open)
+                    elif keys[pygame.K_DOWN]:
+                        if keys[pygame.K_LEFT]:
+                            c.output((-1, 0), back_open)
+                        elif keys[pygame.K_RIGHT]:
+                            c.output((0, -1), back_open)
+                        else:
+                            c.output((-1, -1), back_open)
+                    elif keys[pygame.K_LEFT]:
+                        c.output((-1, 1), back_open)
                     elif keys[pygame.K_RIGHT]:
-                        c.output((1, 0))
-                    else:
-                        c.output((1, 1))
-                elif keys[pygame.K_DOWN]:
-                    if keys[pygame.K_LEFT]:
-                        c.output((-1, 0))
-                    elif keys[pygame.K_RIGHT]:
-                        c.output((0, -1))
-                    else:
-                        c.output((-1, -1))
-                elif keys[pygame.K_LEFT]:
-                    c.output((-1, 1))
-                elif keys[pygame.K_RIGHT]:
-                    c.output((1, -1))
+                        c.output((1, -1), back_open)
+                elif i == 1:
+                    back_open = keys[pygame.K_r]
+                    if keys[pygame.K_w]:
+                        if keys[pygame.K_a]:
+                            c.output((0, 1), back_open)
+                        elif keys[pygame.K_d]:
+                            c.output((1, 0), back_open)
+                        else:
+                            c.output((1, 1), back_open)
+                    elif keys[pygame.K_s]:
+                        if keys[pygame.K_a]:
+                            c.output((-1, 0), back_open)
+                        elif keys[pygame.K_d]:
+                            c.output((0, -1), back_open)
+                        else:
+                            c.output((-1, -1), back_open)
+                    elif keys[pygame.K_a]:
+                        c.output((-1, 1), back_open)
+                    elif keys[pygame.K_d]:
+                        c.output((1, -1), back_open)
 
         # physics
         for x in room.cars + room.reds + room.yellows:
@@ -95,12 +132,21 @@ if __name__ == "__main__":
 
         # draw
         screen.fill(pygame.Color("black"))
-        for c in room.cars:
-            draw_alpha.polygon(screen, (255, 255, 255, 128) if c.camera_capturing else (255, 255, 255, 32),
-                               [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
-                                c.camera_range.get_vertices()])
-            draw_alpha.polygon(screen, (255, 255, 255, 64),
-                               [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in c.brush.get_vertices()])
+        if display_camera_and_brush:
+            for c in room.cars:
+                draw_alpha.polygon(screen, (255, 255, 255, 128) if c.camera_capturing else (255, 255, 255, 32),
+                                   [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
+                                    c.camera_range.get_vertices()])
+                draw_alpha.polygon(screen, (255, 255, 255, 64),
+                                   [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in c.brush.get_vertices()])
+
+        if display_algorithm:
+            for x, v in room.cars[0].algorithm.predicted_collectables.items():
+                draw_alpha.circle(screen, (
+                    255, 255 if v[1] == 1 else 0, 0, 16 * np.minimum(v[0], 8)), x, merge_radius)
+                if v[2] > 0:
+                    draw_alpha.circle(screen, (255, 255, 255, 128), x, merge_radius)
+
         for c in room.cars:
             for s in c.shapes:
                 draw_alpha.polygon(screen, s.color, [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
@@ -122,9 +168,6 @@ if __name__ == "__main__":
                              (room.rect.right - 1, room.rect.top - 1, 2, room.rect.bottom - room.rect.top + 2))
         draw_alpha.rectangle(screen, (255, 255, 255, 255),
                              (room.rect.left - 1, room.rect.bottom - 1, room.rect.right - room.rect.left + 2, 2))
-
-        for x, v in room.cars[0].algorithm.predicted_collectables.items():
-            draw_alpha.circle(screen, (255, 255 if v[1] == 1 else 0, 0, 16 * v[0]), x, merge_radius)
 
         pygame.display.flip()
 
