@@ -79,6 +79,7 @@ def DueData(inputdata):  # 新增的核心程序，对读取的数据进行划�
                         "a(g):%10.3f %10.3f %10.3f w(deg/s):%10.3f %10.3f %10.3f Angle(deg):%10.3f %10.3f %10.3f"
                         % d
                     )
+                    print("Angle(deg):%10.3f %10.3f %10.3f" % Angle)
                 CheckSum = 0
                 Bytenum = 0
                 FrameState = 0
