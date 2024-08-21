@@ -60,7 +60,18 @@ class Algorithm:
         self.predicted_collectables: dict[Vec2d, list[float, int, float]] = {}
 
         self.wheel_output = (0, 0)
-        self.back_open_output = True
+        self.back_open_output = False
+
+    def reset(self):
+        self.predicted_x = None
+        self.predicted_y = None
+        self.predicted_angle = None
+        self.last_update_time = 0
+
+        self.predicted_collectables.clear()
+
+        self.wheel_output = (0, 0)
+        self.back_open_output = False
 
     def position_predictable(self) -> bool:
         return self.predicted_angle is not None and self.predicted_x is not None and self.predicted_y is not None
