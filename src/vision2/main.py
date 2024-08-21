@@ -1,23 +1,28 @@
 import cv2
+import numpy as np
 import os.path
 
 import find_color
 import camera_convert
 
-mode = 'file'
-# mode = 'camera'
-read_version = '1'
-write_version = '2'
+MODE = 'file'
+# MODE = 'camera'
+READ_DIR = 'wall'
+WRITE_DIR = 'version2'
 
-if mode == 'camera':
+DRAW_GRID = False
+
+if MODE == 'camera':
     from camera import Camera
 
 
 def process(img, show: bool = False):
     points_red = find_color.find_red(img, show)
     points_yellow = find_color.find_yellow(img, show)
+    walls = find_color.find_wall_bottom(img)
 
-    draw_grid((255, 255, 255, 255), 0, 1500, 50, -1000, 1000, 50)
+    if DRAW_GRID:
+        draw_grid((255, 255, 255, 255), 0, 1500, 50, -1000, 1000, 50)
 
     print()
 
@@ -30,12 +35,27 @@ def process(img, show: bool = False):
             cv2.rectangle(img, (p[0]-10, p[1]-10, 20, 20), (128, 128, 128, 255), 1)
 
     for p in points_yellow:
-        s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -12.5)
+        s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -15)
         if s:
             cv2.circle(img, p, 10, (255, 255, 255, 255), 2)
             print((x, y), 'yellow')
         else:
             cv2.circle(img, p, 10, (128, 128, 128, 255), 1)
+
+    for w in walls:
+        rho, theta = w[0]
+        a = np.cos(theta)
+        b = np.sin(theta)
+        h0 = a * rho
+        v0 = b * rho
+        h1 = int(h0 + 1000 * (-b))
+        v1 = int(v0 + 1000 * a)
+        h2 = int(h0 - 1000 * (-b))
+        v2 = int(v0 - 1000 * a)
+        cv2.line(img, (h1, v1), (h2, v2), (255, 255, 255, 255), 1)
+        s1, x1, y1 = camera_convert.img2space(camera_state, h1, v1, 0)
+        s2, x2, y2 = camera_convert.img2space(camera_state, h2, v2, 0)
+        print(((x1, y1), (x2, y2)), 'wall')
 
     if show:
         cv2.imshow('image', img)
@@ -61,9 +81,9 @@ if __name__ == "__main__":
     camera_state = camera_convert.CameraState((100, 0, -90), (70, 0), (64, 50), (640, 480))
 
     repository_path = os.path.dirname(os.path.realpath(__file__)) + '/../..'
-    if mode == 'file':
+    if MODE == 'file':
         for image_index in range(100):
-            filename = repository_path + '/assets/openCV_pic/version' + read_version + '/' + str(
+            filename = repository_path + '/assets/openCV_pic/' + READ_DIR + '/' + str(
                 image_index) + '.jpg'
             if not os.path.isfile(filename):
                 print('cannot open ' + filename)
@@ -72,12 +92,12 @@ if __name__ == "__main__":
 
             process(image, True)
             cv2.waitKey()
-    if mode == 'camera':
-        os.mkdir(repository_path + '/assets/openCV_pic/version' + write_version)
+    if MODE == 'camera':
+        os.mkdir(repository_path + '/assets/openCV_pic/' + WRITE_DIR + '/')
         c = Camera()
         for image_index in range(100):
             image = c.capture()
-            filename = repository_path + '/assets/openCV_pic/version' + write_version + '/' + str(
+            filename = repository_path + '/assets/openCV_pic/' + WRITE_DIR + '/' + str(
                 image_index) + '.jpg'
             cv2.imwrite(filename, image)
             process(image, True)
