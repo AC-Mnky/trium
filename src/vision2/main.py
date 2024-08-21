@@ -42,20 +42,21 @@ def process(img, show: bool = False):
         else:
             cv2.circle(img, p, 10, (128, 128, 128, 255), 1)
 
-    for w in walls:
-        rho, theta = w[0]
-        a = np.cos(theta)
-        b = np.sin(theta)
-        h0 = a * rho
-        v0 = b * rho
-        h1 = int(h0 + 1000 * (-b))
-        v1 = int(v0 + 1000 * a)
-        h2 = int(h0 - 1000 * (-b))
-        v2 = int(v0 - 1000 * a)
-        cv2.line(img, (h1, v1), (h2, v2), (255, 255, 255, 255), 1)
-        s1, x1, y1 = camera_convert.img2space(camera_state, h1, v1, 0)
-        s2, x2, y2 = camera_convert.img2space(camera_state, h2, v2, 0)
-        print(((x1, y1), (x2, y2)), 'wall')
+    if walls is not None:
+        for w in walls:
+            rho, theta = w[0]
+            a = np.cos(theta)
+            b = np.sin(theta)
+            h0 = a * rho
+            v0 = b * rho
+            h1 = int(h0 + 1000 * (-b))
+            v1 = int(v0 + 1000 * a)
+            h2 = int(h0 - 1000 * (-b))
+            v2 = int(v0 - 1000 * a)
+            cv2.line(img, (h1, v1), (h2, v2), (255, 255, 255, 255), 1)
+            s1, x1, y1 = camera_convert.img2space(camera_state, h1, v1, 0)
+            s2, x2, y2 = camera_convert.img2space(camera_state, h2, v2, 0)
+            print(((x1, y1), (x2, y2)), 'wall')
 
     if show:
         cv2.imshow('image', img)
