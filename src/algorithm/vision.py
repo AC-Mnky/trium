@@ -1,7 +1,7 @@
 import cv2
 
 
-def process(image: cv2.UMat | None) -> ... | None:
+def process(image: cv2.UMat | None) -> ...:
 
     if image is None:
         return None

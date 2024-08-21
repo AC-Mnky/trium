@@ -10,7 +10,7 @@ class Core:
                encoder_input: tuple[int, int],
                ultrasonic_input: ...,
                imu_input: ...,
-               camera_input: ... | None) -> None:
+               camera_input: ...) -> None:
 
         ...  # TODO
 
