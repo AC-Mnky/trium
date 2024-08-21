@@ -69,6 +69,8 @@ if __name__ == "__main__":
         keys = pygame.key.get_pressed()
 
         for i, c in enumerate(room.cars):
+            if keys[pygame.K_r]:
+                c.algorithm.reset()
             if i > 1 or keys[pygame.K_SPACE] or always_algorithm:
                 c.output(c.algorithm.wheel_output, c.algorithm.back_open_output)
             else:
@@ -93,7 +95,7 @@ if __name__ == "__main__":
                     elif keys[pygame.K_RIGHT]:
                         c.output((1, -1), back_open)
                 elif i == 1:
-                    back_open = keys[pygame.K_r]
+                    back_open = keys[pygame.K_e]
                     if keys[pygame.K_w]:
                         if keys[pygame.K_a]:
                             c.output((0, 1), back_open)
