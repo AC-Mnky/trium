@@ -7,13 +7,17 @@ import find_color
 import camera_convert
 
 # MODE = 'file'
-MODE = 'camera'
-GLOBAL_SHOW = False
+MODE = 'adjust'
+# MODE = 'camera'
+GLOBAL_SHOW = True
 MASK_SHOW = False
-READ_DIR = 'wall4'
+READ_DIR = 'grid1'
 WRITE_DIR = 'grid1'
 
-CAMERA_STATE = camera_convert.CameraState((230, 0, -180), (90 - 27, 0), (62.2, 48.8), (640, 480))
+# CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
+# CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
+# CAMERA_STATE = camera_convert.CameraState((303, 0, -212), (53.7, 2.0, 0.4), (62.2, 60), (640, 480))
+CAMERA_STATE = camera_convert.CameraState((309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480))
 
 SHOW_RED = SHOW_YELLOW = True
 SHOW_WALL = True
@@ -32,7 +36,7 @@ def process(img, show: bool = False):
         find_color.find_wall_bottom(img, show and MASK_SHOW)
 
     if show and DRAW_GRID:
-        draw_grid((255, 255, 255, 255), 0, 2000, 50, -1000, 1000, 50)
+        draw_grid(img, (255, 255, 255, 255), 400, 2000, 50, -1000, 1000, 50)
 
     print()
 
@@ -80,8 +84,8 @@ def process(img, show: bool = False):
         cv2.imshow('image', img)
 
 
-def draw_grid(color, x_start, x_stop, x_step, y_start, y_stop, y_step):
-    overlay = np.zeros(image.shape, np.uint8)
+def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
+    overlay = np.zeros(img.shape, np.uint8)
 
     for x in range(x_start, x_stop + x_step, x_step):
         for y in range(y_start, y_stop, y_step):
@@ -97,16 +101,16 @@ def draw_grid(color, x_start, x_stop, x_step, y_start, y_stop, y_step):
                 cv2.line(overlay, (i1, j1), (i2, j2), color, 1)
 
     overlay = np.minimum(overlay,
-                         np.repeat((255 - find_color.get_color_mask(image, find_color.RED))[:, :, np.newaxis], 3,
+                         np.repeat((255 - find_color.get_color_mask(img, find_color.RED))[:, :, np.newaxis], 3,
                                    axis=2))
     overlay = np.minimum(overlay,
-                         np.repeat((255 - find_color.get_color_mask(image, find_color.YELLOW))[:, :, np.newaxis], 3,
+                         np.repeat((255 - find_color.get_color_mask(img, find_color.YELLOW))[:, :, np.newaxis], 3,
                                    axis=2))
     overlay = np.minimum(overlay,
-                         np.repeat((255 - find_color.get_color_mask(image, find_color.BLUE))[:, :, np.newaxis], 3,
+                         np.repeat((255 - find_color.get_color_mask(img, find_color.BLUE))[:, :, np.newaxis], 3,
                                    axis=2))
 
-    cv2.add(overlay, image, image)
+    cv2.add(overlay, img, img)
 
 
 if __name__ == "__main__":
@@ -123,6 +127,46 @@ if __name__ == "__main__":
 
             process(image, True)
             cv2.waitKey()
+
+    if MODE == 'adjust':
+        filename = repository_path + '/assets/openCV_pic/' + READ_DIR + '/0.jpg'
+        if not os.path.isfile(filename):
+            print('cannot open ' + filename)
+            exit(0)
+        image = cv2.imread(filename)
+        while True:
+            img_temp = image.copy()
+            process(img_temp, True)
+            key = cv2.waitKey()
+            print(key)
+            if key == ord('a'):
+                CAMERA_STATE.phi += np.radians(0.1)
+            elif key == ord('d'):
+                CAMERA_STATE.phi += np.radians(-0.1)
+            elif key == ord('w'):
+                CAMERA_STATE.theta += np.radians(-0.1)
+            elif key == ord('s'):
+                CAMERA_STATE.theta += np.radians(0.1)
+            elif key == ord('q'):
+                CAMERA_STATE.omega += np.radians(0.1)
+            elif key == ord('e'):
+                CAMERA_STATE.omega += np.radians(-0.1)
+            elif key == ord('i'):
+                CAMERA_STATE.z += 1
+            elif key == ord('k'):
+                CAMERA_STATE.z += -1
+            elif key == ord('u'):
+                CAMERA_STATE.x += -1
+            elif key == ord('j'):
+                CAMERA_STATE.x += 1
+            elif key == ord('o'):
+                CAMERA_STATE.y += 1
+            elif key == ord('p'):
+                CAMERA_STATE.y += -1
+            CAMERA_STATE.update()
+            print((CAMERA_STATE.x, CAMERA_STATE.y, CAMERA_STATE.z),
+                  np.degrees((CAMERA_STATE.theta, CAMERA_STATE.phi, CAMERA_STATE.omega)))
+
     if MODE == 'camera':
         os.mkdir(repository_path + '/assets/openCV_pic/' + WRITE_DIR + '/')
         c = Camera()
