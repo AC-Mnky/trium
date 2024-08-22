@@ -9,9 +9,13 @@ MODE = 'file'
 # MODE = 'camera'
 SHOW = True
 READ_DIR = 'wall2'
-WRITE_DIR = 'wall4'
+WRITE_DIR = 'wall5'
 
+SHOW_RED = SHOW_YELLOW = True
+SHOW_WALL = True
 DRAW_GRID = False
+
+USE_HOUGH_P = True
 
 if MODE == 'camera':
     from camera import Camera
@@ -20,44 +24,53 @@ if MODE == 'camera':
 def process(img, show: bool = False):
     points_red = find_color.find_red(img, show)
     points_yellow = find_color.find_yellow(img, show)
-    walls = find_color.find_wall_bottom(img, show)
+    walls = find_color.find_wall_bottom_p(img, show) if USE_HOUGH_P else \
+        find_color.find_wall_bottom(img, show)
 
     if DRAW_GRID:
         draw_grid((255, 255, 255, 255), 0, 1500, 50, -1000, 1000, 50)
 
     print()
 
-    for p in points_red:
-        s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -12.5)
-        if s:
-            cv2.rectangle(img, (p[0]-10, p[1]-10, 20, 20), (255, 255, 255, 255), 2)
-            print((x, y), 'red')
-        else:
-            cv2.rectangle(img, (p[0]-10, p[1]-10, 20, 20), (128, 128, 128, 255), 1)
+    if SHOW_RED:
+        for p in points_red:
+            s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -12.5)
+            if s:
+                cv2.rectangle(img, (p[0] - 10, p[1] - 10, 20, 20), (255, 255, 255, 255), 2)
+                print((x, y), 'red')
+            else:
+                cv2.rectangle(img, (p[0] - 10, p[1] - 10, 20, 20), (128, 128, 128, 255), 1)
 
-    for p in points_yellow:
-        s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -15)
-        if s:
-            cv2.circle(img, p, 10, (255, 255, 255, 255), 2)
-            print((x, y), 'yellow')
-        else:
-            cv2.circle(img, p, 10, (128, 128, 128, 255), 1)
+    if SHOW_YELLOW:
+        for p in points_yellow:
+            s, x, y = camera_convert.img2space(camera_state, p[0], p[1], -15)
+            if s:
+                cv2.circle(img, p, 10, (255, 255, 255, 255), 2)
+                print((x, y), 'yellow')
+            else:
+                cv2.circle(img, p, 10, (128, 128, 128, 255), 1)
 
-    if walls is not None:
-        for w in walls:
-            rho, theta = w[0]
-            a = np.cos(theta)
-            b = np.sin(theta)
-            h0 = a * rho
-            v0 = b * rho
-            h1 = int(h0 + 1000 * (-b))
-            v1 = int(v0 + 1000 * a)
-            h2 = int(h0 - 1000 * (-b))
-            v2 = int(v0 - 1000 * a)
-            cv2.line(img, (h1, v1), (h2, v2), (255, 255, 255, 255), 1)
-            s1, x1, y1 = camera_convert.img2space(camera_state, h1, v1, 0)
-            s2, x2, y2 = camera_convert.img2space(camera_state, h2, v2, 0)
-            print(((x1, y1), (x2, y2)), 'wall')
+    if SHOW_WALL and walls is not None:
+        if USE_HOUGH_P:
+            for w in walls:
+                h1, v1, h2, v2 = w[0]
+                cv2.line(img, (h1, v1), (h2, v2), (255, 255, 255, 255), 1)
+                print(((h1, v1), (h2, v2)), 'wall')
+        else:
+            for w in walls:
+                rho, theta = w[0]
+                a = np.cos(theta)
+                b = np.sin(theta)
+                h0 = a * rho
+                v0 = b * rho
+                h1 = int(h0 + 1000 * (-b))
+                v1 = int(v0 + 1000 * a)
+                h2 = int(h0 - 1000 * (-b))
+                v2 = int(v0 - 1000 * a)
+                cv2.line(img, (h1, v1), (h2, v2), (255, 255, 255, 255), 1)
+                s1, x1, y1 = camera_convert.img2space(camera_state, h1, v1, 0)
+                s2, x2, y2 = camera_convert.img2space(camera_state, h2, v2, 0)
+                print(((x1, y1), (x2, y2)), 'wall')
 
     if show:
         cv2.imshow('image', img)
