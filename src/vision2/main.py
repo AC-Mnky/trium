@@ -1,16 +1,17 @@
 import cv2
 import numpy as np
 import os.path
+import time
 
 import find_color
 import camera_convert
 
-MODE = 'file'
-# MODE = 'camera'
-GLOBAL_SHOW = True
+# MODE = 'file'
+MODE = 'camera'
+GLOBAL_SHOW = False
 MASK_SHOW = False
 READ_DIR = 'wall4'
-WRITE_DIR = 'wall5'
+WRITE_DIR = 'grid1'
 
 CAMERA_STATE = camera_convert.CameraState((230, 0, -180), (90 - 27, 0), (62.2, 48.8), (640, 480))
 
@@ -30,30 +31,32 @@ def process(img, show: bool = False):
     walls = find_color.find_wall_bottom_p(img, show and MASK_SHOW) if USE_HOUGH_P else \
         find_color.find_wall_bottom(img, show and MASK_SHOW)
 
-    if DRAW_GRID:
+    if show and DRAW_GRID:
         draw_grid((255, 255, 255, 255), 0, 2000, 50, -1000, 1000, 50)
 
     print()
 
-    if SHOW_RED:
-        for p in points_red:
-            s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -12.5)
-            if s:
+    for p in points_red:
+        s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -12.5)
+        if s:
+            if show and SHOW_RED:
                 cv2.rectangle(img, (p[0] - 10, p[1] - 10, 20, 20), (255, 255, 255, 255), 2)
-                print((x, y), 'red')
-            else:
+            print((x, y), 'red')
+        else:
+            if SHOW_RED:
                 cv2.rectangle(img, (p[0] - 10, p[1] - 10, 20, 20), (128, 128, 128, 255), 1)
 
-    if SHOW_YELLOW:
-        for p in points_yellow:
-            s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -15)
-            if s:
+    for p in points_yellow:
+        s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -15)
+        if s:
+            if show and SHOW_YELLOW:
                 cv2.circle(img, p, 10, (255, 255, 255, 255), 2)
-                print((x, y), 'yellow')
-            else:
+            print((x, y), 'yellow')
+        else:
+            if show and SHOW_YELLOW:
                 cv2.circle(img, p, 10, (128, 128, 128, 255), 1)
 
-    if SHOW_WALL and walls is not None:
+    if walls is not None:
         for w in walls:
             if USE_HOUGH_P:
                 h1, v1, h2, v2 = w[0]
@@ -67,7 +70,8 @@ def process(img, show: bool = False):
                 v1 = int(v0 + 1000 * a)
                 h2 = int(h0 - 1000 * (-b))
                 v2 = int(v0 - 1000 * a)
-            cv2.line(img, (h1, v1), (h2, v2), (255, 255, 255, 255), 1)
+            if show and SHOW_WALL:
+                cv2.line(img, (h1, v1), (h2, v2), (255, 255, 255, 255), 1)
             s1, x1, y1 = camera_convert.img2space(CAMERA_STATE, h1, v1, 0)
             s2, x2, y2 = camera_convert.img2space(CAMERA_STATE, h2, v2, 0)
             print(((x1, y1), (x2, y2)), 'wall')
@@ -122,10 +126,14 @@ if __name__ == "__main__":
     if MODE == 'camera':
         os.mkdir(repository_path + '/assets/openCV_pic/' + WRITE_DIR + '/')
         c = Camera()
+        time_last_capture = time.time() + 1.5
         for image_index in range(100):
+            print(int((time.time() - time_last_capture) * 1000))
+            time.sleep(max(time_last_capture + 0.5 - time.time(), 0))
             image = c.capture()
+            time_last_capture = time.time()
             filename = repository_path + '/assets/openCV_pic/' + WRITE_DIR + '/' + str(
                 image_index) + '.jpg'
             cv2.imwrite(filename, image)
             process(image, GLOBAL_SHOW)
-            cv2.waitKey(500)
+            # cv2.waitKey(500)
