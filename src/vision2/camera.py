@@ -11,5 +11,5 @@ class Camera:
         sleep(2)
 
     def capture(self):
-        return cv2.cvtColor(self.cam.capture_array("main"), cv2.COLOR_RGB2BGR)
+        return cv2.flip(cv2.cvtColor(self.cam.capture_array("main"), cv2.COLOR_RGB2BGR), -1)
     

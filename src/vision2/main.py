@@ -5,11 +5,11 @@ import os.path
 import find_color
 import camera_convert
 
-# MODE = 'file'
-MODE = 'camera'
-SHOW = False
-READ_DIR = 'wall'
-WRITE_DIR = 'test'
+MODE = 'file'
+# MODE = 'camera'
+SHOW = True
+READ_DIR = 'wall2'
+WRITE_DIR = 'wall4'
 
 DRAW_GRID = False
 
