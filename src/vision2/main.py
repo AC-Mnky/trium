@@ -5,10 +5,11 @@ import os.path
 import find_color
 import camera_convert
 
-MODE = 'file'
-# MODE = 'camera'
+# MODE = 'file'
+MODE = 'camera'
+SHOW = False
 READ_DIR = 'wall'
-WRITE_DIR = 'version2'
+WRITE_DIR = 'test'
 
 DRAW_GRID = False
 
@@ -19,7 +20,7 @@ if MODE == 'camera':
 def process(img, show: bool = False):
     points_red = find_color.find_red(img, show)
     points_yellow = find_color.find_yellow(img, show)
-    walls = find_color.find_wall_bottom(img)
+    walls = find_color.find_wall_bottom(img, show)
 
     if DRAW_GRID:
         draw_grid((255, 255, 255, 255), 0, 1500, 50, -1000, 1000, 50)
@@ -101,5 +102,5 @@ if __name__ == "__main__":
             filename = repository_path + '/assets/openCV_pic/' + WRITE_DIR + '/' + str(
                 image_index) + '.jpg'
             cv2.imwrite(filename, image)
-            process(image, True)
+            process(image, SHOW)
             cv2.waitKey(500)

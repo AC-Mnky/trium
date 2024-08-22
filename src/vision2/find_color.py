@@ -69,7 +69,7 @@ def show_white(image: np.ndarray) -> None:
     get_color_mask(image, WHITE, True, 'white')
 
 
-def find_wall_bottom(image: np.ndarray):
+def find_wall_bottom(image: np.ndarray, show: bool = False):
     blue = get_color_mask(image, BLUE)
     white = get_color_mask(image, WHITE)
 
@@ -97,7 +97,8 @@ def find_wall_bottom(image: np.ndarray):
             y2 = int(y0 - 1000 * a)
             cv2.line(draw, (x1, y1), (x2, y2), (255, 0, 0), 1)
 
-    cv2.imshow('wall bottom', draw)
+    if show:
+        cv2.imshow('wall bottom', draw)
 
     return lines
 
