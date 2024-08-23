@@ -5,6 +5,8 @@ for /f "tokens=1-4 delims=:. " %%a in ("%time%") do (
     set sec=%%c
 )
 echo Current Time is %hour%:%min%:%sec%. Hello from Trium!
+
+color 07
 echo Auto pull changes from remote repository.
 git pull
 echo Pull success, start to commit changes.
@@ -14,5 +16,5 @@ set /p var=Please enter commit message:
 git commit -m "%var%"
 git pull
 git push
-echo Commit success!
+echo Commit success (?)
 pause
