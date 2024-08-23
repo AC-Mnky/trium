@@ -1,6 +1,7 @@
 import time
 
 ENABLE_COMMUNICATION = True  # True
+ENABLE_IMU = False  # True
 ENABLE_CAMERA = False  # True
 ENABLE_CORE = True  # True
 USE_DUMMY = True  # False
@@ -10,6 +11,7 @@ CYCLE_MIN_TIME = 0.01
 
 if ENABLE_COMMUNICATION:
     from communication import stm_communication as stm
+if ENABLE_IMU:
     from communication import imu
 if ENABLE_CAMERA:
     from communication import camera
@@ -48,7 +50,7 @@ if __name__ == '__main__':
     if stm is not None:
         print('STM32 connected, used time:', next(module_time))
 
-    imu = imu.IMU() if ENABLE_COMMUNICATION else None
+    imu = imu.IMU() if ENABLE_IMU else None
     if imu is not None:
         print('IMU connected, used time:', next(module_time))
 
@@ -79,8 +81,10 @@ if __name__ == '__main__':
 
         if ENABLE_COMMUNICATION:
             encoder_and_ultrasonic_input = stm.get_encoder_and_ultrasonic_input()
-            imu_input = imu.get_imu_input()
             print('Got STM32 input, used time:', next(module_time))
+        if ENABLE_IMU:
+            imu_input = imu.get_imu_input()
+            print('Got IMU input, used time:', next(module_time))
 
         if ENABLE_CAMERA and time.time() - camera_last_used_time > CAMERA_COOLDOWN:
             camera_image = camera.get_image_bgr()
