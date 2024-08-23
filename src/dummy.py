@@ -13,7 +13,6 @@ class Dummy:
         self.screen = pygame.display.set_mode((200, 200))
 
     def get_output(self) -> ...:
-        print('dummy system running.')
         for event in pygame.event.get():
             if (
                     event.type == pygame.QUIT
