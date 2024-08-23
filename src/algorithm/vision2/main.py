@@ -115,7 +115,7 @@ def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
 
 if __name__ == "__main__":
 
-    repository_path = os.path.dirname(os.path.realpath(__file__)) + '/../..'
+    repository_path = os.path.dirname(os.path.realpath(__file__)) + '/../../..'
     if MODE == 'file':
         for image_index in range(100):
             filename = repository_path + '/assets/openCV_pic/' + READ_DIR + '/' + str(
