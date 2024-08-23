@@ -6,12 +6,12 @@ import time
 import find_color
 import camera_convert
 
-# MODE = 'file'
+MODE = 'file'
 # MODE = 'adjust'
-MODE = 'camera'
-GLOBAL_SHOW = False
+# MODE = 'camera'
+GLOBAL_SHOW = True
 MASK_SHOW = False
-READ_DIR = 'grid1'
+READ_DIR = 'wall4'
 WRITE_DIR = 'test2'
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))

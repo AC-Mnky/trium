@@ -5,7 +5,13 @@ from communication import imu
 from algorithm import vision
 from algorithm import core
 
+import dummy
+
 ENABLE_CAMERA = False  # True
+ENABLE_CORE = True  # True
+
+USE_DUMMY = False  # False
+
 CAMERA_COOLDOWN = 0.5
 
 if ENABLE_CAMERA:
@@ -23,7 +29,9 @@ if __name__ == '__main__':
     else:
         camera = None
 
-    core = core.Core()
+    output = None
+    core = core.Core() if ENABLE_CORE else None
+    dummy = dummy.Dummy() if USE_DUMMY else None
 
     camera_last_used_time = -100
 
@@ -34,8 +42,7 @@ if __name__ == '__main__':
         time.sleep(0.001)
         print(time.time() - start_time)
 
-        encoder_input = stm.get_encoder_input()
-        ultrasonic_input = stm.get_ultrasonic_input()
+        encoder_and_ultrasonic_input = stm.get_encoder_and_ultrasonic_input()
         imu_input = imu.get_imu_input()
 
         camera_input = None
@@ -44,9 +51,11 @@ if __name__ == '__main__':
             camera_last_used_time = time.time()
             camera_input = vision.process(camera_image)
 
-        core.update(time.time() - start_time, encoder_input, ultrasonic_input, imu_input, camera_input)
-
-        output = core.get_output()
+        if ENABLE_CORE:
+            core.update(time.time() - start_time, encoder_and_ultrasonic_input, imu_input, camera_input)
+            output = core.get_output()
+        if USE_DUMMY:
+            output = dummy.get_output()
 
         stm.send_output(output)
 
