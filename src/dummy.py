@@ -12,7 +12,7 @@ class Dummy:
         pygame.init()
         self.screen = pygame.display.set_mode((200, 200))
 
-    def get_output(self) -> ...:
+    def get_output(self) -> tuple[tuple[float, float], bool, bool]:
         for event in pygame.event.get():
             if (
                     event.type == pygame.QUIT
