@@ -79,9 +79,9 @@ if __name__ == '__main__':
 
         camera_input = None
 
-        if ENABLE_COMMUNICATION:
-            encoder_and_ultrasonic_input = stm.get_encoder_and_ultrasonic_input()
-            print('Got STM32 input, used time:', next(module_time))
+        # if ENABLE_COMMUNICATION:
+        #     encoder_and_ultrasonic_input = stm.get_encoder_and_ultrasonic_input()
+        #     print('Got STM32 input, used time:', next(module_time))
         if ENABLE_IMU:
             imu_input = imu.get_imu_input()
             print('Got IMU input, used time:', next(module_time))

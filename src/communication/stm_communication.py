@@ -14,7 +14,9 @@ class STM:
         self.baud = "115200"
         self.ser = serial.Serial(self.port, self.baud)
         self.message_length = 8
-
+        if not self.ser.is_open:
+            self.ser.open()
+            
     def get_message(self):
         if not self.ser.is_open:
             self.ser.open()
@@ -38,9 +40,9 @@ class STM:
 
         return velocity_1, velocity_2, ultrasonar_1, ultrasonar_2
     
-    def send_message(self,output):
+    def send_output(self,output):
         if not self.ser.is_open:
-            self.ser.Open()
+            self.ser.open()
 
         message = [int(output[0][1] * PWM_PERIOD), int(output[0][0] * PWM_PERIOD), int(output[1]), int(output[2])]
         if message[0] < 0:
@@ -48,7 +50,8 @@ class STM:
         if message[1] < 0:
             message[1] += 256
 
-        bytes(message)
+        message = bytes(message)
+        # print(message)
 
         self.ser.write(message)
-        self.ser.close()
+        # self.ser.close()

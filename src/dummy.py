@@ -24,7 +24,7 @@ class Dummy:
         keys = pygame.key.get_pressed()
 
         motor = (0, 0)
-        brush = True
+        brush = not keys[pygame.K_i]
         back_open = keys[pygame.K_o]
 
         if keys[pygame.K_UP]:
@@ -46,7 +46,7 @@ class Dummy:
         elif keys[pygame.K_RIGHT]:
             motor = (1, -1)
 
-        motor /= 10
+        motor = motor[0] / 2, motor[1] / 2
 
         self.screen.fill(BACK)
         pygame.draw.rect(self.screen, FRONT, (50 - HALF_A, 100 - motor[0] * 50 - HALF_A, A, A))
