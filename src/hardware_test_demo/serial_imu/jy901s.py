@@ -158,5 +158,5 @@ if __name__ == "__main__":
     print(ser.is_open)
     while 1:
         datahex = ser.read(33)
-        DueData(datahex)
+        due_data(datahex)
 
