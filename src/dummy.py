@@ -46,6 +46,8 @@ class Dummy:
         elif keys[pygame.K_RIGHT]:
             motor = (1, -1)
 
+        motor /= 10
+
         self.screen.fill(BACK)
         pygame.draw.rect(self.screen, FRONT, (50 - HALF_A, 100 - motor[0] * 50 - HALF_A, A, A))
         pygame.draw.rect(self.screen, FRONT, (150 - HALF_A, 100 - motor[1] * 50 - HALF_A, A, A))
