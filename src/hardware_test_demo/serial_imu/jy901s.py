@@ -12,7 +12,7 @@ w = [0.0] * 3
 Angle = [0.0] * 3
 
 
-def DueData(inputdata):  # 新增的核心程序，对读取的数据进行划分，各自读到对应的数组里
+def due_data(inputdata):  # 新增的核心程序，对读取的数据进行划分，各自读到对应的数组里
     global FrameState  # 在局部修改全局变量，要进行global的定义
     global Bytenum
     global CheckSum
@@ -159,3 +159,4 @@ if __name__ == "__main__":
     while 1:
         datahex = ser.read(33)
         DueData(datahex)
+
