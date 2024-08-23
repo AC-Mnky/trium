@@ -1,15 +1,16 @@
 import time
 
-ENABLE_COMMUNICATION = True  # True
+ENABLE_STM_INPUT = True  # True
 ENABLE_IMU = False  # True
 ENABLE_CAMERA = False  # True
 ENABLE_CORE = True  # True
 USE_DUMMY = True  # False
+ENABLE_STM_OUTPUT = True  # True
 
 CAMERA_COOLDOWN = 0.5
 CYCLE_MIN_TIME = 0.01
 
-if ENABLE_COMMUNICATION:
+if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT:
     from communication import stm_communication as stm
 if ENABLE_IMU:
     from communication import imu
@@ -46,7 +47,7 @@ if __name__ == '__main__':
     encoder_and_ultrasonic_input = None
     imu_input = None
 
-    stm = stm.STM() if ENABLE_COMMUNICATION else None
+    stm = stm.STM() if ENABLE_STM_INPUT and ENABLE_STM_OUTPUT else None
     if stm is not None:
         print('STM32 connected, used time:', next(module_time))
 
@@ -79,9 +80,9 @@ if __name__ == '__main__':
 
         camera_input = None
 
-        # if ENABLE_COMMUNICATION:
-        #     encoder_and_ultrasonic_input = stm.get_encoder_and_ultrasonic_input()
-        #     print('Got STM32 input, used time:', next(module_time))
+        if ENABLE_STM_INPUT:
+            encoder_and_ultrasonic_input = stm.get_encoder_and_ultrasonic_input()
+            print('Got STM32 input, used time:', next(module_time))
         if ENABLE_IMU:
             imu_input = imu.get_imu_input()
             print('Got IMU input, used time:', next(module_time))
@@ -102,7 +103,7 @@ if __name__ == '__main__':
             output = dummy.get_output()
             print('Got dummy output, used time:', next(module_time))
 
-        if ENABLE_COMMUNICATION:
+        if ENABLE_STM_OUTPUT:
             stm.send_output(output)
             print('Sent out output to STM32, used time:', next(module_time))
 
