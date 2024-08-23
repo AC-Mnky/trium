@@ -7,7 +7,7 @@ const int Encoder_Pulse_Every_round = 22; // ppr = 11, double frequency
 const int Motor_Reduction_Ration = 35;
 const int Motor_Max_Velocity = 163;//RPS, before velocity decrease
 const int PWM_Period = 100;
-const int Encoder_Read_freq = 25; //s^-1
+const int Encoder_Read_freq = 500; //s^-1
 const int upper_integral = 100;
 
 void PID_init(struct PID_struct* pid){
