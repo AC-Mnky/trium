@@ -1,4 +1,8 @@
+@echo off
 git add .
-git commit -m "minor changes (quick sync)"
+set /p var=please enter commit message: 
+git commit -m var
 git pull
 git push
+echo commit success!
+pause
