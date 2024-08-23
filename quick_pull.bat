@@ -1,3 +1,5 @@
+@echo off
+echo Auto pull changes from remote repository.
 git pull
-echo pull success
+echo Pull success
 pause
