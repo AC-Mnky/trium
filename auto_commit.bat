@@ -1,12 +1,12 @@
 @echo off
+echo Auto pull changes from remote repository.
 git pull
-echo pull success, start to commit changes.
-pause
+echo Pull success, start to commit changes.
 
 git add .
-set /p var=please enter commit message: 
+set /p var=Please enter commit message: 
 git commit -m "%var%"
 git pull
 git push
-echo commit success!
+echo Commit success!
 pause

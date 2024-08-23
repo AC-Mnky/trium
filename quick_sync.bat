@@ -1,8 +1,9 @@
 @echo off
+echo Auto synchronize changes from remote repository.
 git add .
-set /p var=please enter commit message: 
+set /p var=Please enter commit message: 
 git commit -m "%var%"
 git pull
 git push
-echo commit success!
+echo Commit success!
 pause
