@@ -50,7 +50,7 @@ class Dummy:
         pygame.draw.rect(self.screen, FRONT, (50 - HALF_A, 100 - motor[0] * 50 - HALF_A, A, A))
         pygame.draw.rect(self.screen, FRONT, (150 - HALF_A, 100 - motor[1] * 50 - HALF_A, A, A))
         pygame.draw.rect(self.screen, FRONT, (100 - HALF_A, 50 - HALF_A, A, A), 0 if brush else WIDTH)
-        pygame.draw.rect(self.screen, FRONT, (100 - HALF_A, 150 - HALF_A, A, A), 0 if back_open else WIDTH)
+        pygame.draw.rect(self.screen, FRONT, (100 - HALF_A, 150 - HALF_A, A, A), 0 if not back_open else WIDTH)
         pygame.display.flip()
 
         return motor, brush, back_open

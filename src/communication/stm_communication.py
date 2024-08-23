@@ -17,17 +17,17 @@ class STM:
 
     def get_message(self):
         if not self.ser.is_open:
-            self.ser.Open()
+            self.ser.open()
         message = self.ser.read(self.message_length)
         self.ser.close()
         return message
     
     def get_encoder_and_ultrasonic_input(self) -> tuple[float, float, int, int]:
         message: bytes = self.get_message()
-        encoder_1: int = int.from_bytes(message[0:2])
-        encoder_2: int = int.from_bytes(message[2:4])
-        ultrasonar_1: int = int.from_bytes(message[4:6])
-        ultrasonar_2: int = int.from_bytes(message[6:8])
+        encoder_1: int = int.from_bytes(message[0:2], 'big')
+        encoder_2: int = int.from_bytes(message[2:4], 'big')
+        ultrasonar_1: int = int.from_bytes(message[4:6], 'big')
+        ultrasonar_2: int = int.from_bytes(message[6:8], 'big')
         if encoder_1 >= 2 ** 15:
             encoder_1 -= 2 ** 16
         if encoder_2 >= 2 ** 15:
