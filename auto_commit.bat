@@ -16,5 +16,5 @@ set /p var=Please enter commit message:
 git commit -m "%var%"
 git pull
 git push
-echo Commit success!
+echo Commit success (?)
 pause
