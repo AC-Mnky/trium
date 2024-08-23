@@ -51,7 +51,7 @@
 
 启动时与stm32建立串口通讯，开始由外部进程将收到的信息存入缓冲区。被主进程调用`get_encoder_and_ultrasonic_input()`时，返回所有新的信息。被主进程调用`send_output()`时，将需要发送的信息存入输出缓冲区，随后由外部进程发送。（由于收发都是由外部进程进行的，因此这个函数不应当占用主进程的过多市场。期望每次调用函数执行时间不超过2ms。）
 
-`imu.py`	招聘负责人
+`imu.py`	Auto Completed
 
 与`stm_communication.py`类似，但不存在缓冲区，主进程调用`get_imu_input()`通过串口向IMU发出请求并等待回复。如果IMU在一定时间内（如5ms）没有回复，则请求超时并退出，返回None。
 
