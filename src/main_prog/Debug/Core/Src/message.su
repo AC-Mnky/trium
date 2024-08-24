@@ -1,0 +1,2 @@
+../Core/Src/message.c:6:6:send_message	32	static
+../Core/Src/message.c:12:9:convert	24	static
