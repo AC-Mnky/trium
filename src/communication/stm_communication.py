@@ -10,7 +10,7 @@ STANDARD_SPEED = 280/60*math.tau*WHEEL_RADIUS
 
 class STM:
     def __init__(self):
-        self.port = "/dev/ttyAMA0"
+        self.port = "/dev/ttyAMA5"
         self.baud = "115200"
         self.ser = serial.Serial(self.port, self.baud)
         self.message_length = 8
@@ -51,7 +51,7 @@ class STM:
             message[1] += 256
 
         message = bytes(message)
-        # print(message)
+        print(message)
 
         self.ser.write(message)
         # self.ser.close()

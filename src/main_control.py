@@ -5,10 +5,10 @@ ENABLE_IMU = False  # True
 ENABLE_CAMERA = False  # True
 ENABLE_CORE = False  # True
 USE_DUMMY = True  # False
-ENABLE_STM_OUTPUT = False  # True
+ENABLE_STM_OUTPUT = True  # True
 
 CAMERA_COOLDOWN = 0.5
-CYCLE_MIN_TIME = 0.01
+CYCLE_MIN_TIME = 0.1
 
 if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT:
     from communication import stm_communication as stm
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     encoder_and_ultrasonic_input = None
     imu_input = None
 
-    stm = stm.STM() if ENABLE_STM_INPUT and ENABLE_STM_OUTPUT else None
+    stm = stm.STM() if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT else None
     if stm is not None:
         print('STM32 connected, used time:', next(module_time))
 

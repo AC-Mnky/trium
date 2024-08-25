@@ -7,7 +7,8 @@ WIDTH = 4
 BACK = (0, 0, 0)
 FRONT = (255, 255, 255)
 LOCK = (255, 0, 0)
-CLICK_MAX_MILLISECONDS = 100
+CLICK_MAX_MILLISECONDS = 200
+MAX_SPEED_CLIP = 1
 
 
 class Dummy:
@@ -61,10 +62,10 @@ class Dummy:
 
         if pygame.mouse.get_pressed()[0]:
             if self.left_mouse_offset is not None:
-                self.motor = clip((100 - pygame.mouse.get_pos()[1] + self.left_mouse_offset) / 50, -1, 1), self.motor[1]
+                self.motor = clip((100 - pygame.mouse.get_pos()[1] + self.left_mouse_offset) / 50, -MAX_SPEED_CLIP, MAX_SPEED_CLIP), self.motor[1]
             if self.right_mouse_offset is not None:
-                self.motor = self.motor[0], clip((100 - pygame.mouse.get_pos()[1] + self.right_mouse_offset) / 50, -1,
-                                                 1)
+                self.motor = self.motor[0],\
+                    clip((100 - pygame.mouse.get_pos()[1] + self.right_mouse_offset) / 50, -MAX_SPEED_CLIP, MAX_SPEED_CLIP)
 
         keys = pygame.key.get_pressed()
 
