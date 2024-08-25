@@ -32,7 +32,7 @@ class Dummy:
         self.right_mouse_offset = None
         self.mouse_on_text = None
 
-        self.motor_PID = [[5, 1, 0, 10, 0, 10], [5, 1, 0, 10, 0, 10]]
+        self.motor_PID = [[3, 2, 0, 10, 0, 10], [3, 2, 0, 10, 0, 10]]
 
     def get_output(self) -> list[
                                 list[float, float],  # motor speed / max speed
@@ -140,7 +140,7 @@ class Dummy:
                 text = self.font.render(str(self.motor_PID[i][2 * j]), True, FRONT)
                 rect = text.get_rect()
                 offset = 50 + 250 * i - rect.centerx, 50 + 50 * j - rect.centery
-                self.text_rect[i][j][0] = rect.move(offset)
+                self.text_rect[i][j][0] = rect.move(offset).inflate(20, 20)
                 if self.text_rect[i][j][0].collidepoint(pos):
                     self.mouse_on_text = i, j, 0
                     text = self.font.render(str(self.motor_PID[i][2 * j]), True, BACK, FRONT)
@@ -149,13 +149,13 @@ class Dummy:
                 text = self.font.render('/', True, FRONT)
                 rect = text.get_rect()
                 offset = 75 + 250 * i - rect.centerx, 50 + 50 * j - rect.centery
-                self.text_rect[i][j][1] = rect.move(offset)
+                self.text_rect[i][j][1] = rect.move(offset).inflate(20, 20)
                 self.screen.blit(text, offset)
 
                 text = self.font.render(str(self.motor_PID[i][2 * j + 1]), True, FRONT)
                 rect = text.get_rect()
                 offset = 100 + 250 * i - rect.centerx, 50 + 50 * j - rect.centery
-                self.text_rect[i][j][2] = rect.move(offset)
+                self.text_rect[i][j][2] = rect.move(offset).inflate(20, 20)
                 if self.text_rect[i][j][2].collidepoint(pos):
                     self.mouse_on_text = i, j, 2
                     text = self.font.render(str(self.motor_PID[i][2 * j + 1]), True, BACK, FRONT)

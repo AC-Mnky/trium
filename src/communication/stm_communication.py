@@ -1,5 +1,5 @@
 import serial
-from output_to_message import output_to_message
+# from output_to_message import output_to_message
 import math
 
 ENCODER_PULSE_EACH_ROUND = 22
