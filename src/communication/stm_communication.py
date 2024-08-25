@@ -44,12 +44,11 @@ class STM:
         if not self.ser.is_open:
             self.ser.open()
 
-        message = [int(output[0][1] * PWM_PERIOD), int(output[0][0] * PWM_PERIOD), int(output[1]), int(output[2])]
-        if message[0] < 0:
-            message[0] += 256
-        if message[1] < 0:
-            message[1] += 256
-
+        message = [0x80, int(output[0][1] * PWM_PERIOD), int(output[0][0] * PWM_PERIOD), int(output[1]), int(output[2])]
+        for i in range(len(message)):
+            if message[i] < 0:
+                message[i] += 256
+                
         message = bytes(message)
         print(message)
 
