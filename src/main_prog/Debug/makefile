@@ -60,8 +60,8 @@ all: main-build
 main-build: main_prog.elf secondary-outputs
 
 # Tool invocations
-main_prog.elf main_prog.map: $(OBJS) $(USER_OBJS) E:\main_prog\STM32F103VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "main_prog.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"E:\main_prog\STM32F103VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="main_prog.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+main_prog.elf main_prog.map: $(OBJS) $(USER_OBJS) D:\CodeWork\stm32_workspace\main_prog\STM32F103VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "main_prog.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\CodeWork\stm32_workspace\main_prog\STM32F103VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="main_prog.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
