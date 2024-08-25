@@ -1,4 +1,5 @@
 import serial
+from output_to_message import output_to_message
 import math
 
 ENCODER_PULSE_EACH_ROUND = 22
@@ -6,7 +7,8 @@ ENCODER_READ_FREQUENCY = 500
 PWM_PERIOD = 100
 
 WHEEL_RADIUS = 33
-STANDARD_SPEED = 280/60*math.tau*WHEEL_RADIUS
+STANDARD_SPEED = 280 / 60 * math.tau * WHEEL_RADIUS
+
 
 class STM:
     def __init__(self):
@@ -16,41 +18,38 @@ class STM:
         self.message_length = 8
         if not self.ser.is_open:
             self.ser.open()
-            
+
     def get_message(self):
         if not self.ser.is_open:
             self.ser.open()
         message = self.ser.read(self.message_length)
         self.ser.close()
         return message
-    
+
     def get_encoder_and_ultrasonic_input(self) -> tuple[float, float, int, int]:
         message: bytes = self.get_message()
         encoder_1: int = int.from_bytes(message[0:2], 'big')
         encoder_2: int = int.from_bytes(message[2:4], 'big')
-        ultrasonar_1: int = int.from_bytes(message[4:6], 'big')
-        ultrasonar_2: int = int.from_bytes(message[6:8], 'big')
+        ultrasonic_1: int = int.from_bytes(message[4:6], 'big')
+        ultrasonic_2: int = int.from_bytes(message[6:8], 'big')
         if encoder_1 >= 2 ** 15:
             encoder_1 -= 2 ** 16
         if encoder_2 >= 2 ** 15:
             encoder_2 -= 2 ** 16
 
-        velocity_1 = encoder_1*(ENCODER_READ_FREQUENCY/ENCODER_PULSE_EACH_ROUND)*math.tau*WHEEL_RADIUS
-        velocity_2 = encoder_2*(ENCODER_READ_FREQUENCY/ENCODER_PULSE_EACH_ROUND)*math.tau*WHEEL_RADIUS
+        velocity_1 = encoder_1 * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND) * math.tau * WHEEL_RADIUS
+        velocity_2 = encoder_2 * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND) * math.tau * WHEEL_RADIUS
 
-        return velocity_1, velocity_2, ultrasonar_1, ultrasonar_2
-    
-    def send_output(self,output):
+        return velocity_1, velocity_2, ultrasonic_1, ultrasonic_2
+
+    def send_message(self, message):
+
         if not self.ser.is_open:
             self.ser.open()
 
-        message = [0x80, int(output[0][1] * PWM_PERIOD), int(output[0][0] * PWM_PERIOD), int(output[1]), int(output[2])]
-        for i in range(len(message)):
-            if message[i] < 0:
-                message[i] += 256
-                
-        message = bytes(message)
-        print(message)
+        # message = output_to_message(output)
+
+        print('Message to STM32:', message.hex(' '))
 
         self.ser.write(message)
         # self.ser.close()
