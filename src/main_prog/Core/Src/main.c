@@ -103,7 +103,8 @@ int main(void) {
 	MX_TIM7_Init();
 	/* USER CODE BEGIN 2 */
 
-	const uint8_t max_attempt = 5;
+	const uint8_t max_attempt = 10;
+	const uint8_t head_length = 6;
 
 	uint8_t buffer[16] =
 			{ 0, 0, 0, 0, 5, 1, 1, 100, 1, 10, 5, 1, 1, 100, 1, 10 }; // buffer used to receive messages
@@ -117,6 +118,16 @@ int main(void) {
 	struct PID_struct PID_obj_1;
 	struct PID_struct PID_obj_2;
 
+	// receive controlling message
+	HAL_UART_Transmit(&huart3, (uint8_t*) "PIDparas\n", 9, 50);
+	for (uint8_t attempt_count = 0; attempt_count < max_attempt;
+			++attempt_count) {
+		HAL_UART_Receive(&huart3, &buffer_0x80, 1, 500);
+		if (buffer_0x80 == 0x80)
+			HAL_UART_Receive(&huart3, buffer, 16, 500);
+		break;
+	}
+
 	PID_init(&PID_obj_1, buffer[4], buffer[5], buffer[6], buffer[7], buffer[8],
 			buffer[9]);
 	PID_init(&PID_obj_2, buffer[10], buffer[11], buffer[12], buffer[13],
@@ -125,15 +136,6 @@ int main(void) {
 	motor_init();
 	HAL_TIM_Base_Start(&htim6);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, SET);
-
-	// receive controlling message
-	for (uint8_t attempt_count = 0; attempt_count < max_attempt;
-			++attempt_count) {
-		HAL_UART_Receive(&huart3, &buffer_0x80, 1, 500);
-		if (buffer_0x80 == 0x80)
-			HAL_UART_Receive(&huart3, buffer, 16, 500);
-		break;
-	}
 
 	/* USER CODE END 2 */
 
@@ -151,12 +153,6 @@ int main(void) {
 			HAL_NVIC_SystemReset();	    // software reset
 		}
 
-		PID_change_para(&PID_obj_1, buffer[4], buffer[5], buffer[6], buffer[7],
-				buffer[8], buffer[9]);
-		PID_change_para(&PID_obj_2, buffer[10], buffer[11], buffer[12],
-				buffer[13], buffer[14], buffer[15]);
-
-		const uint8_t head_length = 6;
 		uint8_t head[head_length];
 		memset(head, 170, head_length);
 		HAL_UART_Transmit(&huart1, head, head_length, 50);
