@@ -103,7 +103,8 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-	int8_t buffer[4] = { 0, 0, 0, 0 }; //buffer used to receive messages
+	uint8_t buffer[16] = { 0,0,0,0, 5,1,1,100,1,10, 5,1,1,100,1,10}; //buffer used to receive messages
+	uint8_t buffer_0x80 = 0; //buffer used to receive 0x80
 	struct PID_struct PID_obj_1;
 	struct PID_struct PID_obj_2;
 	uint8_t encoder_1 = 0;
@@ -111,11 +112,10 @@ int main(void)
 	uint8_t encoder_3 = 0;
 	uint8_t encoder_4 = 0;
 
-
+	PID_init(&PID_obj_1, buffer[4],buffer[5],buffer[6], buffer[7], buffer[8], buffer[9]);
+	PID_init(&PID_obj_2, buffer[10],buffer[11],buffer[12], buffer[13], buffer[14], buffer[15]);
 
 	motor_init();
-	PID_init(&PID_obj_1);
-	PID_init(&PID_obj_2);
 	HAL_TIM_Base_Start(&htim6);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, SET);
 
@@ -128,11 +128,25 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
+
+
+		uint8_t attempt_count = 0;
+		const uint8_t max_attempt = 5;
 		//receive controlling message
-		HAL_UART_Receive(&huart3, buffer, 4, 10);
-		uint8_t head[12];
-		memset(head, 170, 12);
-		HAL_UART_Transmit(&huart1, head, 12, 50);
+		for(;attempt_count<max_attempt;++attempt_count){
+			HAL_UART_Receive(&huart3, &buffer_0x80, 1, 500);
+			if(buffer_0x80==0x80) break;
+		}
+		if(attempt_count<max_attempt) HAL_UART_Receive(&huart3, buffer, 16, 500);
+
+		PID_change_para(&PID_obj_1, buffer[4],buffer[5],buffer[6], buffer[7], buffer[8], buffer[9]);
+		PID_change_para(&PID_obj_2, buffer[10],buffer[11],buffer[12], buffer[13], buffer[14], buffer[15]);
+
+		const uint8_t head_length = 6;
+		uint8_t head[head_length];
+		memset(head, 170, head_length);
+		HAL_UART_Transmit(&huart1, head, head_length, 50);
+		HAL_UART_Transmit(&huart1, buffer, 4, 50);
 //		HAL_UART_Transmit(&huart1, (uint8_t*) "Received\n", 9, 50);
 
 //		uint32_t t = get_real_tick();
@@ -143,7 +157,7 @@ int main(void)
 
 //		HAL_UART_Transmit(&huart1, (uint8_t*)(&t), 4, 50);
 //		HAL_UART_Transmit(&huart1, (uint8_t*)(&real_tick_2), 4, 50);
-//		HAL_UART_Transmit(&huart1, (uint8_t*)(&encoder_CNT_2), 4, 50);
+		HAL_UART_Transmit(&huart1, (uint8_t*)(&encoder_CNT_2), 2, 50);
 //		PID_vel(&PID_obj_2, buffer[1], encoder_CNT_2, real_tick_2);
 		HAL_UART_Transmit(&huart1, (uint8_t*)(&PID_obj_2.actual_val), 4, 50);
 		HAL_UART_Transmit(&huart1, (uint8_t*)(&PID_obj_2.target_val), 4, 50);
@@ -152,11 +166,21 @@ int main(void)
 
 		uint32_t  real_tick_1;
 		uint16_t encoder_CNT_1 = get_encoder_CNT(1, &real_tick_1);
-		set_motor_speed(1, buffer[0]);//PID_vel(&PID_obj_1, buffer[0], encoder_CNT_1, real_tick_1));
+		set_motor_speed(1, PID_vel(&PID_obj_1, buffer[0], encoder_CNT_1, real_tick_1));
 		PID_vel(&PID_obj_1, buffer[0], encoder_CNT_1, real_tick_1);
-		HAL_UART_Transmit(&huart1, (uint8_t*)(&real_tick_1), 4, 50);
-		HAL_UART_Transmit(&huart1, (uint8_t*)(&encoder_CNT_1), 4, 50);
+//		HAL_UART_Transmit(&huart1, (uint8_t*)(&real_tick_1), 4, 50);
+//		HAL_UART_Transmit(&huart1, (uint8_t*)(&encoder_CNT_1), 2, 50);
+		HAL_UART_Transmit(&huart1, (uint8_t*)(&PID_obj_1.actual_val), 4, 50);
+		HAL_UART_Transmit(&huart1, (uint8_t*)(&PID_obj_1.target_val), 4, 50);
 		HAL_UART_Transmit(&huart1, (uint8_t*)(&PID_obj_1.output_val), 4, 50);
+
+		PID_obj_1.integral -= PID_obj_1.integral >> 8;
+		PID_obj_2.integral -= PID_obj_2.integral >> 8;
+
+		if(encoder_CNT_1 == 0 && encoder_CNT_2 ==0){
+			PID_obj_1.integral = 0;
+			PID_obj_2.integral = 0;
+		}
 
 
 //		if (buffer[2]) {
@@ -165,7 +189,7 @@ int main(void)
 //			set_motor_speed(3, 0);
 //		}
 //		if (buffer[3]) {
-//			set_servo_angle(200);
+//			set_servo_angle(250);
 //		} else {
 //			set_servo_angle(150);
 //		}
@@ -178,8 +202,9 @@ int main(void)
 
 		send_message(encoder_1, encoder_2, encoder_3, encoder_4, 0, 0, 0, 0);
 		//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+
 		//time controller
-		while (__HAL_TIM_GET_COUNTER(&htim6) < 20) {
+		while (__HAL_TIM_GET_COUNTER(&htim6) < 1000) {
 		}
 		__HAL_TIM_SET_COUNTER(&htim6, 0);
 	}
