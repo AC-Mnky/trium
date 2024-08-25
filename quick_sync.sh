@@ -7,7 +7,7 @@ read message
 git commit -m "$message"
 git pull
 git push
-echo "Commit success!"
+echo "Commit success (?)"
 echo "Press any key to continue..."
 read input
 
