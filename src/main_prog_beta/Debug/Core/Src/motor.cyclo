@@ -1,0 +1,5 @@
+../Core/Src/motor.c:6:6:motor_init	1
+../Core/Src/motor.c:26:6:set_motor_speed	10
+../Core/Src/motor.c:76:10:get_encoder_CNT	4
+../Core/Src/motor.c:103:9:get_encoder_direction	4
+../Core/Src/motor.c:120:6:set_servo_angle	1
