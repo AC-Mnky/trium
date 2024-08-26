@@ -24,28 +24,31 @@ class Dummy:
     def __init__(self):
         pygame.init()
         pygame.font.init()
-        self.font = pygame.font.SysFont('Cambria', 20)
+        self.font = pygame.font.SysFont('Cambria', 10)
         self.screen = pygame.display.set_mode((400, 200))
         self.motor = [0.0, 0.0]
         self.brush = True
         self.back_open = False
         self.left_rect = self.right_rect = \
             self.top_rect = self.bottom_rect = pygame.Rect(0, 0, 0, 0)
-        self.text_rect = [[[pygame.Rect(0, 0, 0, 0), ] * 3, ] * 3, ] * 2
+        self.text_rect = [[[pygame.Rect(0, 0, 0, 0), ] * 3, ] * 4, ] * 2
         self.left_lock = False
         self.right_lock = False
         self.mouse_down_tick = -1000
+        self.mouse_pos = (0, 0)
         self.left_mouse_offset = None
         self.right_mouse_offset = None
         self.mouse_on_text = None
 
         self.motor_PID = [[3, 2, 0, 10, 0, 10, 100, 0], [3, 2, 0, 10, 0, 10, 100, 0]]
 
-    def get_output(self, stm_input: bytes) -> bytes:
-        if stm_input is None:
-            stm_input = bytes((0, ) * 96)
+        self.stm_input = bytes((0, ) * 96)
 
-        pos = pygame.mouse.get_pos()
+    def get_output(self, stm_input: bytes) -> bytes:
+        if stm_input is not None:
+            self.stm_input = stm_input
+
+        self.mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if (
                     event.type == pygame.QUIT
@@ -55,16 +58,16 @@ class Dummy:
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.mouse_down_tick = pygame.time.get_ticks()
-                if self.top_rect.collidepoint(pos):
+                if self.top_rect.collidepoint(self.mouse_pos):
                     self.brush = not self.brush
-                if self.bottom_rect.collidepoint(pos):
+                if self.bottom_rect.collidepoint(self.mouse_pos):
                     self.back_open = not self.back_open
-                if self.left_rect.collidepoint(pos):
+                if self.left_rect.collidepoint(self.mouse_pos):
                     self.left_lock = True
-                    self.left_mouse_offset = pos[1] - self.left_rect.centery
-                if self.right_rect.collidepoint(pos):
+                    self.left_mouse_offset = self.mouse_pos[1] - self.left_rect.centery
+                if self.right_rect.collidepoint(self.mouse_pos):
                     self.right_lock = True
-                    self.right_mouse_offset = pos[1] - self.right_rect.centery
+                    self.right_mouse_offset = self.mouse_pos[1] - self.right_rect.centery
             elif event.type == pygame.MOUSEBUTTONUP:
                 if pygame.time.get_ticks() - self.mouse_down_tick < CLICK_MAX_MILLISECONDS:
                     if self.left_mouse_offset is not None:
@@ -126,50 +129,20 @@ class Dummy:
 
         self.screen.fill(BACK)
 
-        self.drawn_rect(150, unpack('<I', stm_input[48:52])[0] / 256 / 100, OUTPUT)
-        self.drawn_rect(150, unpack('<I', stm_input[44:48])[0] / 256 / 100, TARGET)
-        self.drawn_rect(150, unpack('<I', stm_input[40:44])[0] / 256 / 100, ACTUAL)
+        self.drawn_rect(150, unpack('<I', self.stm_input[48:52])[0] / 256 / 100, OUTPUT)
+        self.drawn_rect(150, unpack('<I', self.stm_input[44:48])[0] / 256 / 100, TARGET)
+        self.drawn_rect(150, unpack('<I', self.stm_input[40:44])[0] / 256 / 100, ACTUAL)
         self.left_rect = self.drawn_rect(150, self.motor[0], LOCK if self.left_lock else FRONT)
 
-        self.drawn_rect(250, unpack('<I', stm_input[80:84])[0] / 256 / 100, OUTPUT)
-        self.drawn_rect(250, unpack('<I', stm_input[76:80])[0] / 256 / 100, TARGET)
-        self.drawn_rect(250, unpack('<I', stm_input[72:76])[0] / 256 / 100, ACTUAL)
+        self.drawn_rect(250, unpack('<I', self.stm_input[80:84])[0] / 256 / 100, OUTPUT)
+        self.drawn_rect(250, unpack('<I', self.stm_input[76:80])[0] / 256 / 100, TARGET)
+        self.drawn_rect(250, unpack('<I', self.stm_input[72:76])[0] / 256 / 100, ACTUAL)
         self.right_rect = self.drawn_rect(250, self.motor[1], LOCK if self.right_lock else FRONT)
 
         self.top_rect = self.drawn_rect(200, 1, FRONT, 0 if self.brush else WIDTH)
         self.bottom_rect = self.drawn_rect(200, -1, FRONT, 0 if self.back_open else WIDTH)
 
-        self.mouse_on_text = None
-        for i in range(2):
-            for j in range(3):
-                text = self.font.render(str(self.motor_PID[i][2 * j]), True, FRONT)
-                rect = text.get_rect()
-                offset = 50 + 250 * i - rect.centerx, 50 + 50 * j - rect.centery
-                self.text_rect[i][j][0] = rect.move(offset).inflate(20, 20)
-                if self.text_rect[i][j][0].collidepoint(pos):
-                    self.mouse_on_text = i, j, 0
-                    text = self.font.render(str(self.motor_PID[i][2 * j]), True, BACK, FRONT)
-                self.screen.blit(text, offset)
-
-                text = self.font.render('/', True, FRONT)
-                rect = text.get_rect()
-                offset = 75 + 250 * i - rect.centerx, 50 + 50 * j - rect.centery
-                self.text_rect[i][j][1] = rect.move(offset).inflate(20, 20)
-                self.screen.blit(text, offset)
-
-                text = self.font.render(str(self.motor_PID[i][2 * j + 1]), True, FRONT)
-                rect = text.get_rect()
-                offset = 100 + 250 * i - rect.centerx, 50 + 50 * j - rect.centery
-                self.text_rect[i][j][2] = rect.move(offset).inflate(20, 20)
-                if self.text_rect[i][j][2].collidepoint(pos):
-                    self.mouse_on_text = i, j, 2
-                    text = self.font.render(str(self.motor_PID[i][2 * j + 1]), True, BACK, FRONT)
-                self.screen.blit(text, offset)
-
-                # self.screen.blit(self.font.render('/', True, FRONT),
-                #                  (200 + 120 * (i * 2 - 1) - 10, 50 + 50 * j - 10))
-                # self.screen.blit(self.font.render(str(self.motor_PID[i][2 * j + 1]), True, FRONT),
-                #                  (200 + 90 * (i * 2 - 1) - 10, 50 + 50 * j - 10))
+        self.draw_text()
 
         pygame.display.flip()
 
@@ -193,3 +166,42 @@ class Dummy:
         rect = pygame.Rect(x - HALF_A, 100 - y_normalized * 50 - HALF_A, A, A)
         pygame.draw.rect(self.screen, color, rect, width)
         return rect
+
+    def draw_text(self):
+        def j_offset(_j):
+            return 120 if _j == 3 else 50 + 50 * j
+
+        def j_text(_j):
+            return '<<' if _j == 3 else '/'
+
+        self.mouse_on_text = None
+        for i in range(2):
+            for j in range(4):
+                text = self.font.render(str(self.motor_PID[i][2 * j]), True, FRONT)
+                rect = text.get_rect()
+                offset = 50 + 250 * i - rect.centerx, j_offset(j) - rect.centery
+                self.text_rect[i][j][0] = rect.move(offset).inflate(20, 20)
+                if self.text_rect[i][j][0].collidepoint(self.mouse_pos):
+                    self.mouse_on_text = i, j, 0
+                    text = self.font.render(str(self.motor_PID[i][2 * j]), True, BACK, FRONT)
+                self.screen.blit(text, offset)
+
+                text = self.font.render(j_text(j), True, FRONT)
+                rect = text.get_rect()
+                offset = 75 + 250 * i - rect.centerx, j_offset(j) - rect.centery
+                self.text_rect[i][j][1] = rect.move(offset).inflate(20, 20)
+                self.screen.blit(text, offset)
+
+                text = self.font.render(str(self.motor_PID[i][2 * j + 1]), True, FRONT)
+                rect = text.get_rect()
+                offset = 100 + 250 * i - rect.centerx, j_offset(j) - rect.centery
+                self.text_rect[i][j][2] = rect.move(offset).inflate(20, 20)
+                if self.text_rect[i][j][2].collidepoint(self.mouse_pos):
+                    self.mouse_on_text = i, j, 2
+                    text = self.font.render(str(self.motor_PID[i][2 * j + 1]), True, BACK, FRONT)
+                self.screen.blit(text, offset)
+
+            text = self.font.render(str(unpack('<I', self.stm_input[52+32*(1-i):56+32*(1-i)])[0]), True, ACTUAL)
+            rect = text.get_rect()
+            offset = 75 + 250 * i - rect.centerx, 80 - rect.centery
+            self.screen.blit(text, offset)

@@ -34,7 +34,7 @@ class STM:
             if flag_match:
                 break
 
-        message = self.ser.read(self.message_length - len(self.message_head))
+        message = self.message_head + self.ser.read(self.message_length - len(self.message_head))
 
         print('Message from STM32:', message.hex(' '))
 
