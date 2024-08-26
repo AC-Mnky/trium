@@ -1,4 +1,5 @@
 @echo off
+title Trium Auto Commit Script
 for /f "tokens=1-4 delims=:. " %%a in ("%time%") do (
     set hour=%%a
     set min=%%b
@@ -11,6 +12,7 @@ echo.
 echo Please choose your operation (enter A, B or C):
 echo [A] Pull only  [B] Commit only  [C] Pull and Commit
 set /p var=
+echo.
 if %var%==A goto pull
 if %var%==B goto commit
 if %var%==C goto pull_commit
