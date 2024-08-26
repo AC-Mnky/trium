@@ -15,15 +15,31 @@ class STM:
         self.port = "/dev/ttyAMA5"
         self.baud = "115200"
         self.ser = serial.Serial(self.port, self.baud)
-        self.message_length = 8
+        self.message_length = 96
+        self.message_head = bytes((128, ) * 4)
         if not self.ser.is_open:
             self.ser.open()
 
     def get_message(self):
+
         if not self.ser.is_open:
             self.ser.open()
-        message = self.ser.read(self.message_length)
-        self.ser.close()
+
+        while True:
+            flag_match = True
+            for b in self.message_head:
+                if self.ser.read(1) != b:
+                    flag_match = False
+                    break
+            if flag_match:
+                break
+
+        message = self.ser.read(self.message_length - len(self.message_head))
+
+        print('Message from STM32:', message.hex(' '))
+
+        # self.ser.close()
+
         return message
 
     def get_encoder_and_ultrasonic_input(self) -> tuple[float, float, int, int]:
@@ -47,9 +63,8 @@ class STM:
         if not self.ser.is_open:
             self.ser.open()
 
-        # message = output_to_message(output)
-
         print('Message to STM32:', message.hex(' '))
 
         self.ser.write(message)
+
         # self.ser.close()

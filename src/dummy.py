@@ -1,5 +1,8 @@
 import pygame
 from numpy import clip
+from struct import unpack
+
+PWM_PERIOD = 100
 
 HALF_A = 10
 A = HALF_A * 2
@@ -7,6 +10,9 @@ WIDTH = 4
 BACK = (0, 0, 0)
 FRONT = (255, 255, 255)
 LOCK = (255, 0, 0)
+ACTUAL = (0, 0, 255)
+TARGET = (128, 128, 128)
+OUTPUT = (255, 128, 0)
 # MOUSE_ON = (255, 255, 0)
 CLICK_MAX_MILLISECONDS = 200
 MAX_SPEED_CLIP = 1
@@ -18,12 +24,13 @@ class Dummy:
     def __init__(self):
         pygame.init()
         pygame.font.init()
-        self.font = pygame.font.SysFont('Cambria Math', 20)
+        self.font = pygame.font.SysFont('Cambria', 20)
         self.screen = pygame.display.set_mode((400, 200))
         self.motor = [0.0, 0.0]
         self.brush = True
         self.back_open = False
-        self.left_rect = self.right_rect = self.top_rect = self.bottom_rect = pygame.Rect(0, 0, 0, 0)
+        self.left_rect = self.right_rect = \
+            self.top_rect = self.bottom_rect = pygame.Rect(0, 0, 0, 0)
         self.text_rect = [[[pygame.Rect(0, 0, 0, 0), ] * 3, ] * 3, ] * 2
         self.left_lock = False
         self.right_lock = False
@@ -32,17 +39,12 @@ class Dummy:
         self.right_mouse_offset = None
         self.mouse_on_text = None
 
-        self.motor_PID = [[3, 2, 0, 10, 0, 10], [3, 2, 0, 10, 0, 10]]
+        self.motor_PID = [[3, 2, 0, 10, 0, 10, 100, 0], [3, 2, 0, 10, 0, 10, 100, 0]]
 
-    def get_output(self) -> list[
-                                list[float, float],  # motor speed / max speed
-                                bool,  # brush
-                                bool,  # back open
-                                list[  # motor PID
-                                    list[int, int, int, int, int, int],  # left motor Kp_mul, Kp_frac, Ki_..., Kd_...
-                                    list[int, int, int, int, int, int],  # right motor Kp_mul, Kp_frac, Ki_..., Kd_...
-                                    ],
-                                ]:
+    def get_output(self, stm_input: bytes) -> bytes:
+        if stm_input is None:
+            stm_input = bytes((0, ) * 96)
+
         pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if (
@@ -124,15 +126,18 @@ class Dummy:
 
         self.screen.fill(BACK)
 
-        self.left_rect = pygame.Rect(150 - HALF_A, 100 - self.motor[0] * 50 - HALF_A, A, A)
-        self.right_rect = pygame.Rect(250 - HALF_A, 100 - self.motor[1] * 50 - HALF_A, A, A)
-        self.top_rect = pygame.Rect(200 - HALF_A, 50 - HALF_A, A, A)
-        self.bottom_rect = pygame.Rect(200 - HALF_A, 150 - HALF_A, A, A)
+        self.drawn_rect(150, unpack('<I', stm_input[48:52])[0] / 256 / 100, OUTPUT)
+        self.drawn_rect(150, unpack('<I', stm_input[44:48])[0] / 256 / 100, TARGET)
+        self.drawn_rect(150, unpack('<I', stm_input[40:44])[0] / 256 / 100, ACTUAL)
+        self.left_rect = self.drawn_rect(150, self.motor[0], LOCK if self.left_lock else FRONT)
 
-        pygame.draw.rect(self.screen, LOCK if self.left_lock else FRONT, self.left_rect)
-        pygame.draw.rect(self.screen, LOCK if self.right_lock else FRONT, self.right_rect)
-        pygame.draw.rect(self.screen, FRONT, self.top_rect, 0 if self.brush else WIDTH)
-        pygame.draw.rect(self.screen, FRONT, self.bottom_rect, 0 if self.back_open else WIDTH)
+        self.drawn_rect(250, unpack('<I', stm_input[80:84])[0] / 256 / 100, OUTPUT)
+        self.drawn_rect(250, unpack('<I', stm_input[76:80])[0] / 256 / 100, TARGET)
+        self.drawn_rect(250, unpack('<I', stm_input[72:76])[0] / 256 / 100, ACTUAL)
+        self.right_rect = self.drawn_rect(250, self.motor[1], LOCK if self.right_lock else FRONT)
+
+        self.top_rect = self.drawn_rect(200, 1, FRONT, 0 if self.brush else WIDTH)
+        self.bottom_rect = self.drawn_rect(200, -1, FRONT, 0 if self.back_open else WIDTH)
 
         self.mouse_on_text = None
         for i in range(2):
@@ -168,4 +173,23 @@ class Dummy:
 
         pygame.display.flip()
 
-        return [self.motor, self.brush, self.back_open, self.motor_PID]
+        output = [128,
+                  0,
+                  int(self.motor[1] * PWM_PERIOD),
+                  int(self.motor[0] * PWM_PERIOD),
+                  int(self.brush),
+                  int(self.back_open),
+                  0, 0] \
+            + self.motor_PID[1] \
+            + self.motor_PID[0]
+
+        for i in range(len(output)):
+            if output[i] < 0:
+                output[i] += 256
+
+        return bytes(output)
+
+    def drawn_rect(self, x, y_normalized, color, width=0) -> pygame.Rect:
+        rect = pygame.Rect(x - HALF_A, 100 - y_normalized * 50 - HALF_A, A, A)
+        pygame.draw.rect(self.screen, color, rect, width)
+        return rect

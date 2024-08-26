@@ -1,12 +1,12 @@
 import time
-from communication.output_to_message import output_to_message
 
 ENABLE_STM_INPUT = False  # True
 ENABLE_IMU = False  # True
 ENABLE_CAMERA = False  # True
 ENABLE_CORE = False  # True
+ENABLE_DUMMY = True  # False
 USE_DUMMY = True  # False
-ENABLE_STM_OUTPUT = True  # True
+ENABLE_STM_OUTPUT = False  # True
 
 CAMERA_COOLDOWN = 0.5
 CYCLE_MIN_TIME = 0.1
@@ -20,7 +20,7 @@ if ENABLE_CAMERA:
     from algorithm import vision
 if ENABLE_CORE:
     from algorithm import core
-if USE_DUMMY:
+if ENABLE_DUMMY:
     import dummy
 
 
@@ -47,6 +47,7 @@ if __name__ == '__main__':
     output = None
     encoder_and_ultrasonic_input = None
     imu_input = None
+    stm32_input = None
 
     stm = stm.STM() if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT else None
     if stm is not None:
@@ -82,7 +83,8 @@ if __name__ == '__main__':
         camera_input = None
 
         if ENABLE_STM_INPUT:
-            encoder_and_ultrasonic_input = stm.get_encoder_and_ultrasonic_input()
+            stm32_input = stm.get_message()
+            # encoder_and_ultrasonic_input = stm.get_encoder_and_ultrasonic_input()
             print('Got STM32 input, used time:', next(module_time))
         if ENABLE_IMU:
             imu_input = imu.get_imu_input()
@@ -100,15 +102,15 @@ if __name__ == '__main__':
             output = core.get_output()
             print('Core calculated output, used time:', next(module_time))
 
-        if USE_DUMMY:
-            output = dummy.get_output()
-            print('Got dummy output, used time:', next(module_time))
-
-        output_message = output_to_message(output)
-        print('Message:', output_message.hex(' '))
+        if ENABLE_DUMMY:
+            dummy_output = dummy.get_output(stm32_input)
+            if USE_DUMMY:
+                output = dummy_output
+            print('Got dummy output:', dummy_output.hex(' '))
+            print('Used time:', next(module_time))
 
         if ENABLE_STM_OUTPUT:
-            stm.send_message(output_message)
+            stm.send_message(output)
             print('Sent out output to STM32, used time:', next(module_time))
 
         sleep_time = max(0.0, cycle_start_time + CYCLE_MIN_TIME - time.time())
