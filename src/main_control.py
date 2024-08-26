@@ -106,6 +106,8 @@ if __name__ == '__main__':
             dummy_output = dummy.get_output(stm32_input)
             if USE_DUMMY:
                 output = dummy_output
+            if dummy.force_stop:
+                output = dummy.FORCE_STOP_MESSAGE
             print('Got dummy output:', dummy_output.hex(' '))
             print('Used time:', next(module_time))
 

@@ -30,7 +30,10 @@ SPEED_CONTROL = 0.9
 
 
 class Dummy:
+    FORCE_STOP_MESSAGE = bytes((128, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0))
+
     def __init__(self, enabled: bool):
+        self.force_stop = False
         self.enabled = enabled
 
         pygame.init()
@@ -151,6 +154,7 @@ class Dummy:
 
         keys = pygame.key.get_pressed()
 
+        self.force_stop = keys[pygame.K_s]
         self.status_code = 1 if keys[pygame.K_r] else 0
 
         motor_prev = self.motor
