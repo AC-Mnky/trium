@@ -3,6 +3,6 @@
 #include <stdint.h>
 
 void TIM1_Delay_us(uint16_t n_us);
-uint8_t get_distance(uint8_t type);
+void get_distance(uint8_t* distance, uint8_t type);
 
 #endif
