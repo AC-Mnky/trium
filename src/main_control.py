@@ -4,7 +4,7 @@ ENABLE_STM_INPUT = False  # True
 ENABLE_IMU = False  # True
 ENABLE_CAMERA = False  # True
 ENABLE_CORE = True  # True
-ENABLE_DUMMY = False  # False
+ENABLE_DUMMY = True  # False
 USE_DUMMY = False  # False
 ENABLE_STM_OUTPUT = False  # True
 
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     if core is not None:
         print('Core initialized, used time:', next(module_time))
 
-    dummy = dummy.Dummy() if USE_DUMMY else None
+    dummy = dummy.Dummy(USE_DUMMY) if ENABLE_DUMMY else None
     if dummy is not None:
         print('Dummy started, used time:', next(module_time))
 
