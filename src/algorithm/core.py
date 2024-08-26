@@ -1,6 +1,5 @@
 import numpy as np
 from struct import unpack
-from pymunk.vec2d import Vec2d
 
 ENABLE_INFER_POSITION_FROM_WALLS = False  # True
 
@@ -15,8 +14,8 @@ WIDTH_WITH_WHEELS = 208
 # hole_width = 68
 WHEEL_X_OFFSET = -COM_TO_CAR_BACK + 98
 DISTANCE_BETWEEN_WHEELS = 182
-LEFT_WHEEL = Vec2d(WHEEL_X_OFFSET, -DISTANCE_BETWEEN_WHEELS / 2)
-RIGHT_WHEEL = Vec2d(WHEEL_X_OFFSET, DISTANCE_BETWEEN_WHEELS / 2)
+LEFT_WHEEL = (WHEEL_X_OFFSET, -DISTANCE_BETWEEN_WHEELS / 2)
+RIGHT_WHEEL = (WHEEL_X_OFFSET, DISTANCE_BETWEEN_WHEELS / 2)
 
 ROOM_X = 3000
 ROOM_Y = 2000
@@ -70,14 +69,14 @@ def merge_item_prediction(dictionary):
                     neighbour_of_k1[k2] = v2
 
             if len(neighbour_of_k1) > 1:
-                pos_sum = Vec2d(0, 0)
+                pos_sum = (0, 0)
                 value_sum = 0
                 interest_max = 0
                 for k2, v2 in neighbour_of_k1.items():
                     pos_sum += k2 * v2[0]
                     value_sum += v2[0]
                     interest_max = max(interest_max, v2[2])
-                pos_avg = pos_sum / value_sum
+                pos_avg = (pos_sum[0] / value_sum, pos_sum[1] / value_sum)
                 substitution = (neighbour_of_k1, pos_avg, value_sum, v1[1], interest_max)
                 break
 
@@ -91,11 +90,11 @@ def merge_item_prediction(dictionary):
 
 class Core:
     def __init__(self, time: float):
-        self.predicted_cords = Vec2d(INITIAL_CORD_X, INITIAL_CORD_Y)
+        self.predicted_cords = (INITIAL_CORD_X, INITIAL_CORD_Y)
         self.predicted_angle = INITIAL_ANGLE
         self.last_update_time = time
 
-        self.predicted_items: dict[Vec2d, list[float, int, float]] = {}
+        self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
 
         self.status_code = 1
         self.motor = [0.0, 0.0]
@@ -107,11 +106,11 @@ class Core:
 
     # There is no reset function. When you want to reset the core, just create a new object.
 
-    def get_closest_item(self) -> Vec2d or None:
+    def get_closest_item(self) -> tuple[float, float] or None:
         closest = None
         closest_distance = np.inf
         for x, v in self.predicted_items.items():
-            x_distance = x.get_distance(self.predicted_cords) - v[2]
+            x_distance = get_distance(x, self.predicted_cords) - v[2]
             if x_distance < closest_distance:
                 closest = x
                 closest_distance = x_distance
@@ -121,18 +120,16 @@ class Core:
         vote_x_angle = []
         vote_y_angle = []
         for w in walls:
-            point_1, point_2 = Vec2d(w[0][0], w[0][1]), Vec2d(w[1][0], w[1][1])
-            line = point_2 - point_1
-            perpendicular = point_1 - point_1.projection(line)
-            vote_x_angle.append(
-                (ROOM_X - perpendicular.length, -perpendicular.angle, perpendicular.length, line.length))
-            vote_x_angle.append(
-                (perpendicular.length, np.pi - perpendicular.angle, perpendicular.length, line.length))
-            vote_y_angle.append(
-                (ROOM_Y - perpendicular.length, np.pi / 2 - perpendicular.angle, perpendicular.length,
-                 line.length))
-            vote_y_angle.append(
-                (perpendicular.length, 3 * np.pi / 2 - perpendicular.angle, perpendicular.length, line.length))
+            point_1, point_2 = (w[0][0], w[0][1]), (w[1][0], w[1][1])
+            line = vec_subtract(point_2, point_1)
+            line_length = get_length(line)
+            perpendicular = vec_subtract(point_1, projection(point_1, line))
+            distance = get_length(perpendicular)
+            angle = get_angle(perpendicular)
+            vote_x_angle.append((ROOM_X - distance, -angle, distance, line_length))
+            vote_x_angle.append((distance, np.pi - angle, distance, line_length))
+            vote_y_angle.append((ROOM_Y - distance, np.pi / 2 - angle, distance, line_length))
+            vote_y_angle.append((distance, 3 * np.pi / 2 - angle, distance, line_length))
 
         x_weight_sum = y_weight_sum = angle_weight_sum = 1
         x_diff_sum = y_diff_sum = angle_diff_sum = 0
@@ -179,11 +176,11 @@ class Core:
         # infer current relative movement from encoder
         encoder = unpack('<h', self.stm_input[68:70])[0], unpack('<h', self.stm_input[36:38])[0]
         inferred_angular_speed = (encoder[0] - encoder[1]) / DISTANCE_BETWEEN_WHEELS
-        inferred_relative_velocity = Vec2d((encoder[0] + encoder[1]) / 2, -inferred_angular_speed * WHEEL_X_OFFSET)
+        inferred_relative_velocity = ((encoder[0] + encoder[1]) / 2, -inferred_angular_speed * WHEEL_X_OFFSET)
 
         # predict current position
         self.predicted_angle += dt * inferred_angular_speed
-        inferred_velocity = inferred_relative_velocity.rotated(self.predicted_angle)
+        inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
         self.predicted_cords += inferred_velocity
 
         # analyze camera input
@@ -207,17 +204,17 @@ class Core:
             # TODO: seen items decay
 
         # decay all items and delete items with low value
-        contact_center = self.predicted_cords + Vec2d(1, 0).rotated(self.predicted_angle) * (
+        contact_center = self.predicted_cords + rotated((1, 0), self.predicted_angle) * (
                 CONTACT_CENTER_TO_BACK - COM_TO_CAR_BACK)
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
-            if item.get_distance(contact_center) < CONTACT_RADIUS or self.predicted_items[item][0] < DELETE_VALUE:
+            if get_distance(item, contact_center) < CONTACT_RADIUS or self.predicted_items[item][0] < DELETE_VALUE:
                 items_to_delete.append(item)
         for item in items_to_delete:
             self.predicted_items.pop(item)
 
-        # go toward closest item
+        # go toward the closest item
         item = self.get_closest_item()
         if item is None:
             self.motor = [MOTOR_SPEED, -MOTOR_SPEED]
@@ -258,7 +255,42 @@ class Core:
         return bytes(output)
 
 
+def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> float:
+    return get_length(vec_subtract(point1, point2))
+
+
+def get_length(vec: tuple[float, float]) -> float:
+    return np.sqrt(vec[0] * vec[0] + vec[1] * vec[1])
+
+
+def get_angle(vec: tuple[float, float]) -> float:
+    if vec[0] == 0 and vec[1] == 0:
+        return 0
+    return np.arctan2(vec[1], vec[0])
+
+
+def vec_subtract(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+    return vec1[0] - vec2[0], vec1[1] - vec2[1]
+
+
 def angle_subtract(angle1: float, angle2: float) -> float:
     diff = angle1 - angle2
     diff -= round(diff / np.tau) * np.tau
     return diff
+
+
+def projection(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+    length_square = vec2[0] * vec2[0] + vec2[1] * vec2[1]
+    if length_square == 0.0:
+        return 0, 0
+    dot = vec1[0] * vec2[0] + vec1[1] * vec2[1]
+    new_length = dot / length_square
+    return vec2[0] * new_length, vec2[1] * new_length
+
+
+def rotated(vec: tuple[float, float], angle_radians: float) -> tuple[float, float]:
+    cos = np.cos(angle_radians)
+    sin = np.sin(angle_radians)
+    x = vec[0] * cos - vec[1] * sin
+    y = vec[0] * sin + vec[1] * cos
+    return x, y
