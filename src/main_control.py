@@ -1,12 +1,12 @@
 import time
 
-ENABLE_STM_INPUT = True  # True
+ENABLE_STM_INPUT = False  # True
 ENABLE_IMU = False  # True
 ENABLE_CAMERA = False  # True
-ENABLE_CORE = False  # True
-ENABLE_DUMMY = True  # False
-USE_DUMMY = True  # False
-ENABLE_STM_OUTPUT = True  # True
+ENABLE_CORE = True  # True
+ENABLE_DUMMY = False  # False
+USE_DUMMY = False  # False
+ENABLE_STM_OUTPUT = False  # True
 
 CAMERA_COOLDOWN = 0.5
 CYCLE_MIN_TIME = 0.02
@@ -24,8 +24,8 @@ if ENABLE_DUMMY:
     import dummy
 
 
-def time_since_start(mul: int = 1000):
-    return int(mul*(time.time() - start_time))
+def real_time() -> float:
+    return time.time() - start_time
 
 
 def time_since_last_call(mul: int = 1000):
@@ -45,7 +45,6 @@ if __name__ == '__main__':
     print('\nLaunching')
 
     output = None
-    encoder_and_ultrasonic_input = None
     imu_input = None
     stm32_input = None
 
@@ -62,7 +61,7 @@ if __name__ == '__main__':
     if camera is not None:
         print('CAMERA enabled, used time:', next(module_time))
 
-    core = core.Core() if ENABLE_CORE else None
+    core = core.Core(real_time()) if ENABLE_CORE else None
     if core is not None:
         print('Core initialized, used time:', next(module_time))
 
@@ -77,7 +76,7 @@ if __name__ == '__main__':
     while True:
 
         cycle_count += 1
-        cycle_start_time = time.time()
+        cycle_start_time = real_time()
         print('\nCycle', cycle_count, 'begins.')
 
         camera_input = None
@@ -90,17 +89,18 @@ if __name__ == '__main__':
             imu_input = imu.get_imu_input()
             print('Got IMU input, used time:', next(module_time))
 
-        if ENABLE_CAMERA and time.time() - camera_last_used_time > CAMERA_COOLDOWN:
+        if ENABLE_CAMERA and real_time() - camera_last_used_time > CAMERA_COOLDOWN:
+            camera_last_used_time = real_time()
             camera_image = camera.get_image_bgr()
-            camera_last_used_time = time.time()
             print('Got camera input, used time:', next(module_time))
-            camera_input = vision.process(camera_image)
+            camera_input = vision.process(camera_last_used_time, camera_image)
             print('Processed camera input, used time:', next(module_time))
 
         if ENABLE_CORE:
-            core.update(time.time() - start_time, encoder_and_ultrasonic_input, imu_input, camera_input)
+            core.update(real_time(), stm32_input, imu_input, camera_input)
             output = core.get_output()
-            print('Core calculated output, used time:', next(module_time))
+            print('Got core output:', output.hex(' '))
+            print('Used time:', next(module_time))
 
         if ENABLE_DUMMY:
             dummy_output = dummy.get_output(stm32_input)
@@ -113,7 +113,7 @@ if __name__ == '__main__':
             stm.send_message(output)
             print('Sent out output to STM32, used time:', next(module_time))
 
-        sleep_time = max(0.0, cycle_start_time + CYCLE_MIN_TIME - time.time())
+        sleep_time = max(0.0, cycle_start_time + CYCLE_MIN_TIME - real_time())
         print('Cycle', cycle_count, 'ends, used time in total:', next(cycle_time))
         time.sleep(sleep_time)
         print('Slept:', next(cycle_time))
