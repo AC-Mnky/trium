@@ -9,7 +9,7 @@ echo.
 
 :choose
 echo Please choose your operation (enter A, B or C):
-echo [A] Pull only [B] Commit only [C] Pull and Commit
+echo [A] Pull only  [B] Commit only  [C] Pull and Commit
 set /p var=
 if %var%==A goto pull
 if %var%==B goto commit
