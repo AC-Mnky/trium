@@ -1,15 +1,15 @@
 import time
 
-ENABLE_STM_INPUT = False  # True
+ENABLE_STM_INPUT = True  # True
 ENABLE_IMU = False  # True
 ENABLE_CAMERA = False  # True
 ENABLE_CORE = False  # True
 ENABLE_DUMMY = True  # False
 USE_DUMMY = True  # False
-ENABLE_STM_OUTPUT = False  # True
+ENABLE_STM_OUTPUT = True  # True
 
 CAMERA_COOLDOWN = 0.5
-CYCLE_MIN_TIME = 0.1
+CYCLE_MIN_TIME = 0.02
 
 if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT:
     from communication import stm_communication as stm

@@ -28,7 +28,7 @@ class STM:
         while True:
             flag_match = True
             for b in self.message_head:
-                if self.ser.read(1) != b:
+                if self.ser.read(1)[0] != b:
                     flag_match = False
                     break
             if flag_match:
