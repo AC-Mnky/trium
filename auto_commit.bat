@@ -15,7 +15,6 @@ if %var%==A goto pull
 if %var%==B goto commit
 if %var%==C goto pull_commit
 else echo Invalid input, please try again.
-
 goto choose
 
 :pull
@@ -38,7 +37,7 @@ exit
 :pull_commit
 echo Auto pull changes from remote repository.
 git pull
-echo Pull success, start to commit changes.
+echo Pull success (?), start to commit changes.
 git add .
 set /p commit_message="Please enter commit message: "
 git commit -m "%commit_message%"
