@@ -36,9 +36,7 @@ class Dummy:
         pygame.font.init()
         self.font = pygame.font.SysFont("Cambria", FONT_SIZE)
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
-        self.motor = [0.0, 0.0]
-        self.brush = False
-        self.back_open = False
+
         self.left_rect = self.right_rect = self.top_rect = self.bottom_rect = (
             pygame.Rect(0, 0, 0, 0)
         )
@@ -59,7 +57,11 @@ class Dummy:
         self.right_mouse_offset = None
         self.mouse_on_text = None
 
-        self.motor_PID = [[15, 10, 40, 5, 0, 10, 5, 0], [15, 10, 40, 5, 0, 10, 5, 0]]
+        self.status_code = 0
+        self.motor = [0.0, 0.0]
+        self.brush = False
+        self.back_open = False
+        self.motor_PID = [[15, 10, 40, 10, 0, 10, 5, 0], [15, 10, 40, 10, 0, 10, 5, 0]]
 
         self.stm_input = bytes((0,) * 96)
 
@@ -147,6 +149,8 @@ class Dummy:
 
         keys = pygame.key.get_pressed()
 
+        self.status_code = 1 if keys[pygame.K_r] else 0
+
         motor_prev = self.motor
 
         self.motor = [0, 0]
@@ -216,7 +220,7 @@ class Dummy:
         output = (
             [
                 128,
-                0,
+                self.status_code,
                 int(self.motor[1] * PWM_PERIOD),
                 int(self.motor[0] * PWM_PERIOD),
                 int(self.brush),

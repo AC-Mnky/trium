@@ -5,7 +5,7 @@ from vision2 import camera_convert
 CAMERA_STATE = camera_convert.CameraState((309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480))
 
 
-def process(image) -> ...:
+def process(time: float, image) -> tuple[float, list, list, list] | None:
 
     if image is None:
         return None
@@ -33,4 +33,4 @@ def process(image) -> ...:
                   camera_convert.img2space(CAMERA_STATE, wall[0][2], wall[0][3])[1:]
                   ) for wall in walls_in_image]
 
-    return reds, yellows, walls
+    return time, reds, yellows, walls

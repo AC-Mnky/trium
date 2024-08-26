@@ -5,14 +5,19 @@ for /f "tokens=1-4 delims=:. " %%a in ("%time%") do (
     set min=%%b
     set sec=%%c
 )
+
+@REM XCOPY ./assets/trium.txt
+echo %cd%
+
+echo.
 echo Current Time is %hour%:%min%:%sec%. Hello from Trium!
 echo.
-
 :choose
 echo Please choose your operation (enter A, B or C):
 echo [A] Pull only  [B] Commit only  [C] Pull and Commit
 set /p var=
 echo.
+
 if %var%==A goto pull
 if %var%==B goto commit
 if %var%==C goto pull_commit
