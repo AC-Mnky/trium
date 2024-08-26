@@ -5,6 +5,7 @@ for /f "tokens=1-4 delims=:. " %%a in ("%time%") do (
     set sec=%%c
 )
 echo Current Time is %hour%:%min%:%sec%. Hello from Trium!
+echo.
 
 :choose
 echo Please choose your operation (enter A, B or C):
