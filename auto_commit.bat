@@ -6,9 +6,7 @@ for /f "tokens=1-4 delims=:. " %%a in ("%time%") do (
     set sec=%%c
 )
 
-@REM XCOPY ./assets/trium.txt
-echo %cd%
-
+type %cd%\assets\trium.txt
 echo.
 echo Current Time is %hour%:%min%:%sec%. Hello from Trium!
 echo.
