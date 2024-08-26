@@ -27,6 +27,8 @@ MAX_SPEED_CLIP = 1
 MIN_PID_CLIP = 0
 MAX_PID_CLIP = 127
 
+SPEED_CONTROL = 0.9
+
 
 class Dummy:
     def __init__(self):
@@ -57,7 +59,7 @@ class Dummy:
         self.right_mouse_offset = None
         self.mouse_on_text = None
 
-        self.motor_PID = [[15, 10, 5, 10, 0, 10, 5, 0], [15, 10, 5, 10, 0, 10, 5, 0]]
+        self.motor_PID = [[15, 10, 40, 10, 0, 10, 5, 0], [15, 10, 40, 10, 0, 10, 5, 0]]
 
         self.stm_input = bytes((0,) * 96)
 
@@ -167,7 +169,7 @@ class Dummy:
         elif keys[pygame.K_RIGHT]:
             self.motor = [1, -1]
 
-        self.motor = [self.motor[0] / 2, self.motor[1] / 2]
+        self.motor = [self.motor[0] * SPEED_CONTROL, self.motor[1] * SPEED_CONTROL]
 
         if self.left_lock:
             self.motor[0] = motor_prev[0]
