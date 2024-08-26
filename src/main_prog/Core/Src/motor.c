@@ -56,12 +56,12 @@ void set_motor_speed(int num, int pulse){
 	}
 	else if(num==3){
 		if (pulse > 0) {
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET); //IN1
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET); //IN2
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pulse); //Set CCR, also called 'pulse'
-		} else if (pulse < 0) {
 			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET); //IN1
 			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_RESET); //IN2
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pulse); //Set CCR, also called 'pulse'
+		} else if (pulse < 0) {
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET); //IN1
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET); //IN2
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, -pulse);
 		} else {
 			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET); //IN1
