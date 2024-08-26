@@ -16,8 +16,8 @@
 一、所传之信凡八位，编码器各据二，超声各据二。
 一、首二位者编码器一，次二位者编码器二，三二位者超声一，末二位者超声二。
 
->  [!NOTE]
->  【所有整型都是先发送低位，再发送高位】
+> [!NOTE]
+> 【所有整型都是先发送低位，再发送高位】
 >
 > STM32传树莓派协议Debug版：
 >
@@ -63,9 +63,7 @@
 >
 > [16, 24)：同[8, 16)，但是左轮
 >
-> 
-
-
+>
 
 一、树莓派须传乎STM32之信者，起始码一，右轮速（PWM），左轮速（与output列表相反），刷一，盖一，PID参数左右各六。
 一、所传之信凡十七位，校验一位，诸轮各据一，刷一，盖一，右轮PID参数据位五，六，七，八，九，十，左轮PID参数据位十一，十二，十三，十四，十五，十六。参数历为Kp_mul, Kp_frac, Ki_mul, Ki_frac, Kd_mul, Kd_frac。（此为调试之信）
@@ -75,20 +73,20 @@
 单线程，`main_control.py`调用其它程序，细节如下
 
 ```bash
-.
-├── main_control.py 调用 stm_communication.py 和 imu.py 建立连接
-├── main_control.py 调用 camera.py 启动相机
-└── main_control.py 调用 core.py 创建算法对象
+main_control.py
+├── 调用 stm_communication.py 和 imu.py 建立连接
+├── 调用 camera.py 启动相机
+└── 调用 core.py 创建算法对象
 ```
 
 循环：
 
 ```bash
-.
-├── ​main_control.py 从 stm_communication.py 和 imu.py 读取编码器、超声传感器、IMU输入
-├── ​main_control.py 从 camera.py 读取图片，用 vision.py 转化为信息
-├── ​main_control.py 用相机信息、编码器、超声传感器、IMU输入更新 core.py
-└── ​main_control.py 调用 stm_communication.py 传递 core.py 得到的电机转速与舵机角度
+​main_control.py
+├── 从 stm_communication.py 和 imu.py 读取编码器、超声传感器、IMU输入
+├── 从 camera.py 读取图片，用 vision.py 转化为信息
+├── 用相机信息、编码器、超声传感器、IMU输入更新 core.py
+└── 调用 stm_communication.py 传递 core.py 得到的电机转速与舵机角度
 ```
 
 ### 关于树莓派接收的信息的格式
