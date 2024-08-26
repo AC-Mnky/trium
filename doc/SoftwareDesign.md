@@ -6,9 +6,12 @@
 
 单线程，`main.c`调用其它程序
 
-`main.c`调用`motor.h`使用控制电机、舵机的函数
-`main.c`调用`PID.h`使用PID函数
-`main.c`调用`message.h`通过串口向树莓派发送信息
+```bash
+main.c
+├── 调用 motor.h 使用控制电机、舵机的函数
+├── 调用 PID.h 使用PID函数
+└── 调用 message.h 通过串口向树莓派发送信息
+```
 
 ### 传输协定凡例
 
