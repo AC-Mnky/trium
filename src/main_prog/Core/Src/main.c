@@ -112,7 +112,7 @@ int main(void) {
 	struct PID_struct PID_obj_1;
 	struct PID_struct PID_obj_2;
 
-	uint32_t distance[2];
+	uint8_t distance[2];
 	uint8_t urgent_flag = 0;
 
 	PID_init(&PID_obj_1, buffer[7], buffer[8], buffer[9], buffer[10],
@@ -236,7 +236,7 @@ int main(void) {
 			} else {
 				urgent_flag = 2;
 			}
-		} else if ((distance[0] >= safe_distance & distance[1] >= safe_distance)
+		} else if ((distance[0] >= safe_distance && distance[1] >= safe_distance)
 				&& urgent_flag != 0) {
 			urgent_flag = 0;
 		} else {
