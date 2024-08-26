@@ -59,7 +59,7 @@ class Dummy:
         self.right_mouse_offset = None
         self.mouse_on_text = None
 
-        self.motor_PID = [[15, 10, 40, 10, 0, 10, 5, 0], [15, 10, 40, 10, 0, 10, 5, 0]]
+        self.motor_PID = [[15, 10, 40, 5, 0, 10, 5, 0], [15, 10, 40, 5, 0, 10, 5, 0]]
 
         self.stm_input = bytes((0,) * 96)
 
