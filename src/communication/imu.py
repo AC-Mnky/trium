@@ -10,7 +10,8 @@ class IMU:
         """
         Initializes the IMU class with the port and baud rate.
         """
-        self.port = "COM6"
+        # self.port = "COM6"  # PC
+        self.port = "/dev/ttyAMA5"  # Pi 4B
         self.baud = 115200
 
     def get_imu_input(self) -> None:
@@ -21,7 +22,7 @@ class IMU:
         print(ser.is_open)
 
         # A test demo. May be modified later.
-        for _ in range(5):
+        for _ in range(1):
             datahex = ser.read(33)
             self._process_input_data(datahex)
 
