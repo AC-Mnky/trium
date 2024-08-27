@@ -2,13 +2,13 @@ import time
 
 ENABLE_STM_INPUT = False  # True
 ENABLE_IMU = False  # True
-ENABLE_CAMERA = True  # True
+ENABLE_CAMERA = False  # True
 ENABLE_CORE = True  # True
 ENABLE_STM_OUTPUT = False  # True
 
-ENABLE_DUMMY = True  # False
+ENABLE_DUMMY = False  # False
 USE_DUMMY = False  # False
-ENABLE_CORE_VISUALIZER = False  # False
+ENABLE_CORE_VISUALIZER = True  # False
 
 CAMERA_COOLDOWN = 0.5
 CYCLE_MIN_TIME = 0.02
