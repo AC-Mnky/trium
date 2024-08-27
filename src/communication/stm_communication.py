@@ -1,5 +1,4 @@
 import serial
-# from output_to_message import output_to_message
 import math
 
 ENCODER_PULSE_EACH_ROUND = 22
@@ -14,7 +13,7 @@ class STM:
     def __init__(self):
         self.port = "/dev/ttyAMA5"
         self.baud = "115200"
-        self.ser = serial.Serial(self.port, self.baud)
+        self.ser = serial.Serial(self.port, self.baud, parity=serial.PARITY_EVEN)
         self.message_length = 96
         self.message_head = bytes((128, ) * 4)
         if not self.ser.is_open:
