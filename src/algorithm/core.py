@@ -65,7 +65,7 @@ def merge_item_prediction(dictionary):
 
             neighbour_of_k1 = {}
             for k2, v2 in dictionary.items():
-                if v1[1] == v2[1] and k1.get_distance(k2) < MERGE_RADIUS:
+                if v1[1] == v2[1] and get_distance(k1, k2) < MERGE_RADIUS:
                     neighbour_of_k1[k2] = v2
 
             if len(neighbour_of_k1) > 1:
