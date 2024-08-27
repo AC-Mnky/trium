@@ -24,7 +24,7 @@ BACK = (0, 0, 0, 0)
 CAR = (255, 128, 0, 128)
 WHITE = (255, 255, 255, 255)
 
-SPEED_CONTROL = 0.3
+SPEED_CONTROL = 0.5
 
 
 class Visualizer:
@@ -42,7 +42,8 @@ class Visualizer:
         ...
 
     def update(self, time: float) -> core.Core:
-
+        
+        self.mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if (
                     event.type == pygame.QUIT
@@ -50,8 +51,13 @@ class Visualizer:
                     and (event.key in [pygame.K_ESCAPE, pygame.K_q])
             ):
                 exit()
-            elif self.control:
-                if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                cords = window2real(self.mouse_pos)
+                self.core.predicted_items[cords] = [self.core.predicted_items.get(cords, (0, 0))[0] + 2, 0, 0]
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_t:
+                    self.control = not self.control
+                elif self.control:
                     if event.key == pygame.K_i:
                         self.core.brush = not self.core.brush
                     elif event.key == pygame.K_o:
@@ -118,3 +124,6 @@ class Visualizer:
 
 def real2window(vec: tuple[float, float]) -> tuple[float, float]:
     return core.vec_add(VEC_MARGIN, core.vec_multiply(vec, 1 / UNIT))
+
+def window2real(vec: tuple[float, float]) -> tuple[float, float]:
+    return core.vec_multiply(core.vec_subtract(vec, VEC_MARGIN), UNIT)

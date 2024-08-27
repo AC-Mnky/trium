@@ -13,7 +13,7 @@ COM_TO_CAR_BACK = 87  # center of mass to car back
 WIDTH_WITH_WHEELS = 208
 # hole_width = 68
 WHEEL_X_OFFSET = -COM_TO_CAR_BACK + 98
-DISTANCE_BETWEEN_WHEELS = 182
+DISTANCE_BETWEEN_WHEELS = 178.3
 LEFT_WHEEL = (WHEEL_X_OFFSET, -DISTANCE_BETWEEN_WHEELS / 2)
 RIGHT_WHEEL = (WHEEL_X_OFFSET, DISTANCE_BETWEEN_WHEELS / 2)
 
@@ -21,7 +21,7 @@ ROOM_X = 3000
 ROOM_Y = 2000
 
 INITIAL_CORD_X = 200
-INITIAL_CORD_Y = 200
+INITIAL_CORD_Y = ROOM_Y - 200
 INITIAL_ANGLE = 0
 
 MAX_CORD_DIFFERENCE = 100
@@ -40,7 +40,7 @@ INTEREST_MAXIMUM = 30
 AIM_ANGLE = 0.2
 ROOM_MARGIN = 200
 
-MOTOR_SPEED = 0.2
+MOTOR_SPEED = 0.5
 
 
 def calc_weight(cord_difference: float, angle_difference: float, distance_to_wall: float,
@@ -106,7 +106,7 @@ class Core:
         self.predicted_cords = (INITIAL_CORD_X, INITIAL_CORD_Y)
         self.predicted_angle = INITIAL_ANGLE
         
-        self.predicted_vertices = [[0, 0], [0, 0]].copy()
+        self.predicted_vertices = [[(0, 0), (0, 0)], [(0, 0), (0, 0)]].copy()
         
         self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
 
@@ -236,7 +236,7 @@ class Core:
         # go toward the closest item
         item = self.get_closest_item()
         if item is None:
-            self.motor = [MOTOR_SPEED, -MOTOR_SPEED]
+            self.motor = [0.25 * MOTOR_SPEED, -0.25 * MOTOR_SPEED]
         else:
             self.predicted_items[item][2] = min(self.predicted_items[item][2] + INTEREST_ADDITION,
                                                 INTEREST_MAXIMUM)
