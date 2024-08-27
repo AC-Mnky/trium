@@ -100,7 +100,6 @@ if __name__ == '__main__':
 
         if ENABLE_STM_INPUT:
             stm32_input = stm.get_message()
-            # encoder_and_ultrasonic_input = stm.get_encoder_and_ultrasonic_input()
             print('Got STM32 input, used time:', next(module_time))
         if ENABLE_IMU:
             imu_input = imu.get_imu_input()
@@ -117,7 +116,7 @@ if __name__ == '__main__':
         if ENABLE_CORE:
             core.update(real_time(), stm32_input, imu_input, camera_input)
             output = core.get_output()
-            print('Got _core output:', output.hex(' '))
+            print('Got core output:', output.hex(' '))
             print('Used time:', next(module_time))
 
         if ENABLE_DUMMY:

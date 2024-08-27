@@ -57,7 +57,7 @@ def calc_weight(cord_difference: float, angle_difference: float, distance_to_wal
     return weight
 
 
-def merge_item_prediction(dictionary):
+def merge_item_prediction(dictionary) -> None:
     while True:
         substitution = None
 
@@ -123,7 +123,7 @@ class Core:
                 closest_distance = x_distance
         return closest
 
-    def infer_position_from_walls(self):
+    def infer_position_from_walls(self) -> None:
         vote_x_angle = []
         vote_y_angle = []
         for w in self.walls:
@@ -171,7 +171,7 @@ class Core:
     def update(self,
                time: float,
                stm32_input: bytes,
-               imu_input: ...,
+               imu_input: tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None,
                camera_input: tuple[float, list[tuple[float, float]], list[tuple[float, float]], list[
                    tuple[tuple[float, float], tuple[float, float]]]] | None) -> None:
 
@@ -253,7 +253,7 @@ class Core:
             else:
                 self.motor = [MOTOR_SPEED, MOTOR_SPEED]
 
-    def get_output(self) -> ...:
+    def get_output(self) -> bytes:
         output = (
                 [
                     128,

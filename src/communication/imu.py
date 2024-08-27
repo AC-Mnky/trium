@@ -12,23 +12,22 @@ class IMU:
         Initializes the IMU class with the port and baud rate.
         Current IMU retrieval rate: 200Hz.
         """
-        self.port = "COM6"  # PC
-        # self.port = "/dev/ttyAMA5"  # Pi 4B
+        # self.port = "COM6"  # PC
+        self.port = "/dev/ttyAMA5"  # Pi 4B
         self.baud = 115200
 
-    def get_imu_input(self) -> None:
+    def get_imu_input(self) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
         """
         Reads IMU data from a serial port.
         """
         ser = serial.Serial(self.port, self.baud, timeout=0.5)
-        print(ser.is_open)
+        # print(ser.is_open)
 
-        # A test demo. May be modified later.
-        for _ in range(1):
-            datahex = ser.read(33)
-            self._process_input_data(datahex)
 
-    def _extract_acceleration(self, datahex: bytes) -> list:
+        datahex = ser.read(33)
+        return self._process_input_data(datahex)
+
+    def _extract_acceleration(self, datahex: bytes) -> tuple[float, float, float]:
         """
         Calculates the acceleration values from the given hexadecimal data.
 
@@ -58,10 +57,9 @@ class IMU:
         if acc_z >= k_acc:
             acc_z -= 2 * k_acc
 
-        acc = [acc_x, acc_y, acc_z]
-        return acc
+        return acc_x, acc_y, acc_z
 
-    def _extract_angular_velocity(self, datahex: bytes) -> list:
+    def _extract_angular_velocity(self, datahex: bytes) -> tuple[float, float, float]:
         """
         Calculates the angular velocity from the given hexadecimal data.
 
@@ -91,10 +89,9 @@ class IMU:
         if gyro_z >= k_gyro:
             gyro_z -= 2 * k_gyro
 
-        gyro = [gyro_x, gyro_y, gyro_z]
-        return gyro
+        return gyro_x, gyro_y, gyro_z
 
-    def _extract_angle(self, datahex: bytes) -> list:
+    def _extract_angle(self, datahex: bytes) ->  tuple[float, float, float]:
         """
         Calculates the angles from the given hexadecimal data.
 
@@ -124,10 +121,9 @@ class IMU:
         if angle_z >= k_angle:
             angle_z -= 2 * k_angle
 
-        angle = [angle_x, angle_y, angle_z]
-        return angle
+        return angle_x, angle_y, angle_z
 
-    def _process_input_data(self, inputdata: bytes) -> None:
+    def _process_input_data(self, inputdata: bytes) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
         """
         Process the input data and extract acceleration, angular velocity, and angle information.
 
@@ -151,6 +147,7 @@ class IMU:
         acceleration = [0.0] * 3
         angular_velocity = [0.0] * 3
         Angle = [0.0] * 3
+        
         for data in inputdata:  # 在输入的数据进行遍历
             if FrameState == 0:  # 当未确定状态的时候，进入以下判断
                 if (
@@ -206,13 +203,15 @@ class IMU:
                 else:
                     if data == (CheckSum & 0xFF):
                         Angle = self._extract_angle(AngleData)
-                        print("Acceleration(g):", acceleration)
-                        print("Angular_Velocity(deg/s):", angular_velocity)
-                        print("Angle(deg):", Angle)
-                        print("\n")
+                        return acceleration, angular_velocity, Angle
+                        # print("Acceleration(g):", acceleration)
+                        # print("Angular_Velocity(deg/s):", angular_velocity)
+                        # print("Angle(deg):", Angle)
+                        # print("\n")
                     CheckSum = 0
                     Bytenum = 0
                     FrameState = 0
+        return None
 
 
 if __name__ == "__main__":
@@ -221,3 +220,4 @@ if __name__ == "__main__":
     imu.get_imu_input()
     ed = time.time()
     print("Time:", ed - st)
+    
