@@ -103,8 +103,10 @@ class Core:
         self.motor_PID = [[15, 10, 40, 10, 0, 10, 5, 0], [15, 10, 40, 10, 0, 10, 5, 0]]
 
         self.stm_input = bytes((0,) * 96)
+        self.imu_input = None
+        self.camera_input = None
 
-    # There is no reset function. When you want to reset the core, just create a new object.
+    # There is no reset function. When you want to reset the _core, just create a new object.
 
     def get_closest_item(self) -> tuple[float, float] or None:
         closest = None
@@ -172,11 +174,16 @@ class Core:
 
         if stm32_input is not None:
             self.stm_input = stm32_input
+        if imu_input is not None:
+            self.imu_input = imu_input
+        if camera_input is not None:
+            self.camera_input = camera_input
 
         # infer current relative movement from encoder
         encoder = unpack('<h', self.stm_input[68:70])[0], unpack('<h', self.stm_input[36:38])[0]
-        inferred_angular_speed = (encoder[0] - encoder[1]) / DISTANCE_BETWEEN_WHEELS
-        inferred_relative_velocity = ((encoder[0] + encoder[1]) / 2, -inferred_angular_speed * WHEEL_X_OFFSET)
+        inferred_angular_speed = (encoder[0] - encoder[1]) * DISTANCE_PER_ENCODER / DISTANCE_BETWEEN_WHEELS / dt
+        inferred_relative_velocity = (
+            (encoder[0] + encoder[1]) * DISTANCE_PER_ENCODER / 2 / dt, -inferred_angular_speed * WHEEL_X_OFFSET)
 
         # predict current position
         self.predicted_angle += dt * inferred_angular_speed
@@ -191,11 +198,11 @@ class Core:
                 self.infer_position_from_walls(camera_walls)
 
             for red in camera_reds:
-                cords = red.rotated(self.predicted_angle) + self.predicted_cords
+                cords = vec_add(rotated(red, self.predicted_angle), self.predicted_cords)
                 if ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
                     self.predicted_items[cords] = [self.predicted_items.get(cords, (0, 0))[0] + 2, 0, 0]
             for yellow in camera_yellows:
-                cords = yellow.rotated(self.predicted_angle) + self.predicted_cords
+                cords = vec_add(rotated(yellow, self.predicted_angle), self.predicted_cords)
                 if ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
                     self.predicted_items[cords] = [self.predicted_items.get(cords, (0, 1))[0] + 3, 1, 0]
 
@@ -269,8 +276,16 @@ def get_angle(vec: tuple[float, float]) -> float:
     return np.arctan2(vec[1], vec[0])
 
 
+def vec_add(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+    return vec1[0] + vec2[0], vec1[1] + vec2[1]
+
+
 def vec_subtract(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
     return vec1[0] - vec2[0], vec1[1] - vec2[1]
+
+
+def vec_multiply(vec: tuple[float, float], k: float) -> tuple[float, float]:
+    return vec[0] * k, vec[1] * k
 
 
 def angle_subtract(angle1: float, angle2: float) -> float:

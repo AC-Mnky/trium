@@ -68,8 +68,8 @@ main.c
 >
 >
 
-一、树莓派须传乎STM32之信者，起始码一，右轮速（PWM），左轮速（与output列表相反），刷一，盖一，PID参数左右各六。
-一、所传之信凡十七位，校验一位，诸轮各据一，刷一，盖一，右轮PID参数据位五，六，七，八，九，十，左轮PID参数据位十一，十二，十三，十四，十五，十六。参数历为Kp_mul, Kp_frac, Ki_mul, Ki_frac, Kd_mul, Kd_frac。（此为调试之信）
+一、树莓派须传乎STM32之信者，起始码一，状态码一，右轮速（PWM），左轮速（与output列表相反），刷一，盖一，空二，PID参数左右各八。
+一、所传之信凡二十四位，校验一位，诸轮各据一，刷一，盖一，右轮PID参数据位五，六，七，八，九，十，左轮PID参数据位十一，十二，十三，十四，十五，十六。参数历为Kp_mul, Kp_frac, Ki_mul, Ki_frac, Kd_mul, Kd_frac。（此为调试之信）
 
 ## 树莓派
 
@@ -79,17 +79,17 @@ main.c
 main_control.py
 ├── 调用 stm_communication.py 和 imu.py 建立连接
 ├── 调用 camera.py 启动相机
-└── 调用 core.py 创建算法对象
+└── 调用 _core.py 创建算法对象
 ```
 
 循环：
 
 ```bash
-​main_control.py
+main_control.py
 ├── 从 stm_communication.py 和 imu.py 读取编码器、超声传感器、IMU输入
 ├── 从 camera.py 读取图片，用 vision.py 转化为信息
-├── 用相机信息、编码器、超声传感器、IMU输入更新 core.py
-└── 调用 stm_communication.py 传递 core.py 得到的电机转速与舵机角度
+├── 用相机信息、编码器、超声传感器、IMU输入更新 _core.py
+└── 调用 stm_communication.py 传递 _core.py 得到的电机转速与舵机角度
 ```
 
 ### 关于树莓派接收的信息的格式
@@ -110,7 +110,7 @@ main_control.py
 
 启动时与stm32建立串口通讯，开始由外部进程将收到的信息存入缓冲区。被主进程调用`get_encoder_and_ultrasonic_input()`时，返回所有新的信息。被主进程调用`send_output()`时，将需要发送的信息存入输出缓冲区，随后由外部进程发送。（由于收发都是由外部进程进行的，因此这个函数不应当占用主进程的过多市场。期望每次调用函数执行时间不超过2ms。）
 
-`imu.py`(Auto Completed)
+`imu.py`(Veritas负责)
 
 与`stm_communication.py`类似，但不存在缓冲区，主进程调用`get_imu_input()`通过串口向IMU发出请求并等待回复。如果IMU在一定时间内（如5ms）没有回复，则请求超时并退出，返回None。更准确地讲，IMU模块始终在输出六轴信息，主进程只是在需要时向IMU发出请求，IMU在收到请求后立即回复（或进行一段时间采样后一并回复）。
 

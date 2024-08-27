@@ -2,14 +2,18 @@ import time
 
 ENABLE_STM_INPUT = False  # True
 ENABLE_IMU = False  # True
-ENABLE_CAMERA = False  # True
+ENABLE_CAMERA = True  # True
 ENABLE_CORE = True  # True
+ENABLE_STM_OUTPUT = False  # True
+
 ENABLE_DUMMY = True  # False
 USE_DUMMY = False  # False
-ENABLE_STM_OUTPUT = False  # True
+ENABLE_CORE_VISUALIZER = False  # False
 
 CAMERA_COOLDOWN = 0.5
 CYCLE_MIN_TIME = 0.02
+
+FORCE_STOP_MESSAGE = bytes((128, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0))
 
 if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT:
     from communication import stm_communication as stm
@@ -21,7 +25,12 @@ if ENABLE_CAMERA:
 if ENABLE_CORE:
     from algorithm import core
 if ENABLE_DUMMY:
+    if ENABLE_CORE_VISUALIZER:
+        ENABLE_CORE_VISUALIZER = False
+        print('Visualizer disabled by dummy.')
     import dummy
+if ENABLE_CORE_VISUALIZER:
+    from algorithm import core_visualizer
 
 
 def real_time() -> float:
@@ -67,7 +76,11 @@ if __name__ == '__main__':
 
     dummy = dummy.Dummy(USE_DUMMY) if ENABLE_DUMMY else None
     if dummy is not None:
-        print('Dummy started, used time:', next(module_time))
+        print('Dummy plugged in, used time:', next(module_time))
+
+    visualizer = core_visualizer.Visualizer(core) if ENABLE_CORE_VISUALIZER else None
+    if visualizer is not None:
+        print('Visualizer initialized, used time:', next(module_time))
 
     cycle_count = 0
 
@@ -99,7 +112,7 @@ if __name__ == '__main__':
         if ENABLE_CORE:
             core.update(real_time(), stm32_input, imu_input, camera_input)
             output = core.get_output()
-            print('Got core output:', output.hex(' '))
+            print('Got _core output:', output.hex(' '))
             print('Used time:', next(module_time))
 
         if ENABLE_DUMMY:
@@ -107,9 +120,15 @@ if __name__ == '__main__':
             if USE_DUMMY:
                 output = dummy_output
             if dummy.force_stop:
-                output = dummy.FORCE_STOP_MESSAGE
+                output = FORCE_STOP_MESSAGE
             print('Got dummy output:', dummy_output.hex(' '))
             print('Used time:', next(module_time))
+
+        if ENABLE_CORE_VISUALIZER:
+            visualizer.update()
+            if visualizer.force_stop:
+                output = FORCE_STOP_MESSAGE
+            print('Visualization used time:', next(module_time))
 
         if ENABLE_STM_OUTPUT:
             stm.send_message(output)
