@@ -1,4 +1,5 @@
 import serial
+import time
 
 
 class IMU:
@@ -9,9 +10,10 @@ class IMU:
     def __init__(self):
         """
         Initializes the IMU class with the port and baud rate.
+        Current IMU retrieval rate: 200Hz.
         """
-        # self.port = "COM6"  # PC
-        self.port = "/dev/ttyAMA5"  # Pi 4B
+        self.port = "COM6"  # PC
+        # self.port = "/dev/ttyAMA5"  # Pi 4B
         self.baud = 115200
 
     def get_imu_input(self) -> None:
@@ -215,4 +217,7 @@ class IMU:
 
 if __name__ == "__main__":
     imu = IMU()
+    st = time.time()
     imu.get_imu_input()
+    ed = time.time()
+    print("Time:", ed - st)
