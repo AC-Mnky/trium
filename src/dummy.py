@@ -30,8 +30,6 @@ SPEED_CONTROL = 0.9
 
 
 class Dummy:
-    FORCE_STOP_MESSAGE = bytes((128, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0))
-
     def __init__(self, enabled: bool):
         self.force_stop = False
         self.enabled = enabled
@@ -186,46 +184,7 @@ class Dummy:
         if self.right_lock:
             self.motor[1] = motor_prev[1]
 
-        self.screen.fill(BACK)
-
-        self.drawn_rect(
-            1.5 * UNIT, unpack("<i", self.stm_input[48:52])[0] / 256 / 100, OUTPUT
-        )
-        self.drawn_rect(
-            1.5 * UNIT, unpack("<i", self.stm_input[40:44])[0] / 256 / 100, ACTUAL
-        )
-        self.drawn_rect(
-            1.5 * UNIT, unpack("<i", self.stm_input[44:48])[0] / 256 / 100, TARGET
-        )
-        if self.enabled:
-            self.left_rect = self.drawn_rect(
-                1.5 * UNIT, self.motor[0], LOCK if self.left_lock else FRONT
-            )
-
-        self.drawn_rect(
-            2.5 * UNIT, unpack("<i", self.stm_input[80:84])[0] / 256 / 100, OUTPUT
-        )
-        self.drawn_rect(
-            2.5 * UNIT, unpack("<i", self.stm_input[72:76])[0] / 256 / 100, ACTUAL
-        )
-        self.drawn_rect(
-            2.5 * UNIT, unpack("<i", self.stm_input[76:80])[0] / 256 / 100, TARGET
-        )
-        if self.enabled:
-            self.right_rect = self.drawn_rect(
-                2.5 * UNIT, self.motor[1], LOCK if self.right_lock else FRONT
-            )
-
-        if self.enabled:
-            self.top_rect = self.drawn_rect(2 * UNIT, 1, FRONT, 0 if self.brush else WIDTH)
-            self.bottom_rect = self.drawn_rect(2 * UNIT, -1, FRONT, 0 if self.back_open else WIDTH)
-        else:
-            self.drawn_rect(2 * UNIT, 1, TARGET, 0 if int(self.stm_input[8]) == 1 else WIDTH)
-            self.drawn_rect(2 * UNIT, -1, TARGET, 0 if int(self.stm_input[9]) == 1 else WIDTH)
-
-        self.draw_text()
-
-        pygame.display.flip()
+        self.draw()
 
         output = (
                 [
@@ -255,7 +214,7 @@ class Dummy:
         pygame.draw.rect(self.screen, color, rect, width)
         return rect
 
-    def draw_text(self):
+    def draw_text(self) -> None:
         def j_offset(_j):
             return 1.7 * UNIT if _j == 3 else UNIT + 0.5 * UNIT * j
 
@@ -319,3 +278,45 @@ class Dummy:
                 1.3 * UNIT - rect.centery,
             )
             self.screen.blit(text, offset)
+
+    def draw(self) -> None:
+        self.screen.fill(BACK)
+
+        self.drawn_rect(
+            1.5 * UNIT, unpack("<i", self.stm_input[48:52])[0] / 256 / 100, OUTPUT
+        )
+        self.drawn_rect(
+            1.5 * UNIT, unpack("<i", self.stm_input[40:44])[0] / 256 / 100, ACTUAL
+        )
+        self.drawn_rect(
+            1.5 * UNIT, unpack("<i", self.stm_input[44:48])[0] / 256 / 100, TARGET
+        )
+        if self.enabled:
+            self.left_rect = self.drawn_rect(
+                1.5 * UNIT, self.motor[0], LOCK if self.left_lock else FRONT
+            )
+
+        self.drawn_rect(
+            2.5 * UNIT, unpack("<i", self.stm_input[80:84])[0] / 256 / 100, OUTPUT
+        )
+        self.drawn_rect(
+            2.5 * UNIT, unpack("<i", self.stm_input[72:76])[0] / 256 / 100, ACTUAL
+        )
+        self.drawn_rect(
+            2.5 * UNIT, unpack("<i", self.stm_input[76:80])[0] / 256 / 100, TARGET
+        )
+        if self.enabled:
+            self.right_rect = self.drawn_rect(
+                2.5 * UNIT, self.motor[1], LOCK if self.right_lock else FRONT
+            )
+
+        if self.enabled:
+            self.top_rect = self.drawn_rect(2 * UNIT, 1, FRONT, 0 if self.brush else WIDTH)
+            self.bottom_rect = self.drawn_rect(2 * UNIT, -1, FRONT, 0 if self.back_open else WIDTH)
+        else:
+            self.drawn_rect(2 * UNIT, 1, TARGET, 0 if int(self.stm_input[8]) == 1 else WIDTH)
+            self.drawn_rect(2 * UNIT, -1, TARGET, 0 if int(self.stm_input[9]) == 1 else WIDTH)
+
+        self.draw_text()
+
+        pygame.display.flip()
