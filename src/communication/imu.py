@@ -219,10 +219,11 @@ class IMU:
 
                     if data == (check_sum & 0xFF):
                         angle = self._extract_angle(angle_data)
-                        print("Acceleration(g):", acceleration)
-                        print("Angular_Velocity(deg/s):", angular_velocity)
-                        print("Angle(deg):", angle)
-                        print("\n")
+                        return acceleration, angular_velocity, angle
+                        # print("Acceleration(g):", acceleration)
+                        # print("Angular_Velocity(deg/s):", angular_velocity)
+                        # print("Angle(deg):", angle)
+                        # print("\n")
                     check_sum = 0
                     byte_num = 0
                     frame_state = 0
