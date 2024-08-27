@@ -161,9 +161,4 @@ class IMU:
 
 if __name__ == "__main__":
     imu = IMU()
-    ser = serial.Serial(imu.port, imu.baud, timeout=0.5)
-
-    print(ser.is_open)
-    while 1:
-        datahex = ser.read(33)
-        imu.due_data(datahex)
+    imu.get_imu_input()
