@@ -33,7 +33,7 @@ MERGE_RADIUS = 75
 CONTACT_CENTER_TO_BACK = 180
 CONTACT_RADIUS = 40
 SEEN_ITEMS_DECAY_EXPONENTIAL = 0.5
-ALL_ITEMS_DECAY_EXPONENTIAL = 0.999
+ALL_ITEMS_DECAY_EXPONENTIAL = 1
 DELETE_VALUE = 0.2
 INTEREST_ADDITION = 5
 INTEREST_MAXIMUM = 30
@@ -90,8 +90,8 @@ def merge_item_prediction(dictionary):
 
 class Core:
     def __init__(self, time: float):
-        
-        self.last_update_time = time        
+
+        self.last_update_time = time
 
         self.status_code = 1
         self.motor = [0.0, 0.0].copy()
@@ -102,15 +102,16 @@ class Core:
         self.stm_input = bytes((0,) * 96)
         self.imu_input = None
         self.camera_input = None
-        
+
         self.predicted_cords = (INITIAL_CORD_X, INITIAL_CORD_Y)
         self.predicted_angle = INITIAL_ANGLE
-        
-        self.predicted_vertices = [[(0, 0), (0, 0)], [(0, 0), (0, 0)]].copy()
-        
-        self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
 
-    # There is no reset function. When you want to reset the _core, just create a new object.
+        self.predicted_vertices = [[(0.0, 0.0), (0.0, 0.0)], [(0.0, 0.0), (0.0, 0.0)]].copy()
+
+        self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
+        self.walls: list[tuple[tuple[float, float], tuple[float, float]]] = []
+
+        # There is no reset function. When you want to reset the _core, just create a new object.
 
     def get_closest_item(self) -> tuple[float, float] | None:
         closest = None
@@ -122,10 +123,10 @@ class Core:
                 closest_distance = x_distance
         return closest
 
-    def infer_position_from_walls(self, walls):
+    def infer_position_from_walls(self):
         vote_x_angle = []
         vote_y_angle = []
-        for w in walls:
+        for w in self.walls:
             point_1, point_2 = (w[0][0], w[0][1]), (w[1][0], w[1][1])
             line = vec_subtract(point_2, point_1)
             line_length = get_length(line)
@@ -171,7 +172,8 @@ class Core:
                time: float,
                stm32_input: bytes,
                imu_input: ...,
-               camera_input: tuple[float, list, list, list] | None) -> None:
+               camera_input: tuple[float, list[tuple[float, float]], list[tuple[float, float]], list[
+                   tuple[tuple[float, float], tuple[float, float]]]] | None) -> None:
 
         dt = time - self.last_update_time
         self.last_update_time = time
@@ -182,7 +184,7 @@ class Core:
             self.imu_input = imu_input
         if camera_input is not None:
             self.camera_input = camera_input
-            
+
         if self.status_code > 0:
             self.status_code = 0
 
@@ -196,18 +198,21 @@ class Core:
         self.predicted_angle += dt * inferred_angular_speed
         inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
         self.predicted_cords = vec_add(vec_multiply(inferred_velocity, dt), self.predicted_cords)
-        
+
         # calculate vertices
         for i in 0, 1:
             for j in 0, 1:
-                self.predicted_vertices[i][j] = vec_add(rotated((i * LENGTH - COM_TO_CAR_BACK, (j - 0.5) * WIDTH), self.predicted_angle), self.predicted_cords)
+                self.predicted_vertices[i][j] = vec_add(
+                    rotated((i * LENGTH - COM_TO_CAR_BACK, (j - 0.5) * WIDTH), self.predicted_angle),
+                    self.predicted_cords)
 
         # analyze camera input
         if camera_input is not None:
             camera_time, camera_reds, camera_yellows, camera_walls = camera_input
 
+            self.walls = camera_walls
             if ENABLE_INFER_POSITION_FROM_WALLS:
-                self.infer_position_from_walls(camera_walls)
+                self.infer_position_from_walls()
 
             for red in camera_reds:
                 cords = vec_add(rotated(red, self.predicted_angle), self.predicted_cords)
@@ -223,8 +228,8 @@ class Core:
             # TODO: seen items decay
 
         # decay all items and delete items with low value
-        contact_center = vec_add(self.predicted_cords, rotated((1, 0), self.predicted_angle)) * (
-                CONTACT_CENTER_TO_BACK - COM_TO_CAR_BACK)
+        contact_center = vec_multiply(vec_add(self.predicted_cords, rotated((1, 0), self.predicted_angle)), (
+                CONTACT_CENTER_TO_BACK - COM_TO_CAR_BACK))
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL

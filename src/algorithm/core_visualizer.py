@@ -37,12 +37,14 @@ class Visualizer:
         self.font = pygame.font.SysFont("Cambria", FONT_SIZE)
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
 
+        self.mouse_pos = 0
+
         self.core = _core
-        
+
         ...
 
     def update(self, time: float) -> core.Core:
-        
+
         self.mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if (
@@ -53,7 +55,10 @@ class Visualizer:
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 cords = window2real(self.mouse_pos)
-                self.core.predicted_items[cords] = [self.core.predicted_items.get(cords, (0, 0))[0] + 2, 0, 0]
+                if event.button == 1:  # left-click
+                    self.core.predicted_items[cords] = [self.core.predicted_items.get(cords, (0, 0))[0] + 2, 0, 0]
+                elif event.button == 3:  # right-click
+                    self.core.predicted_items[cords] = [self.core.predicted_items.get(cords, (0, 0))[0] + 3, 1, 0]
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
                     self.control = not self.control
@@ -62,13 +67,13 @@ class Visualizer:
                         self.core.brush = not self.core.brush
                     elif event.key == pygame.K_o:
                         self.core.back_open = not self.core.back_open
-                
+
         keys = pygame.key.get_pressed()
 
         self.force_stop = keys[pygame.K_s]
         if keys[pygame.K_r]:
             self.core = core.Core(time)
-        
+
         if self.control:
             self.core.motor = [0, 0]
             if keys[pygame.K_UP]:
@@ -89,9 +94,8 @@ class Visualizer:
                 self.core.motor = [-1, 1]
             elif keys[pygame.K_RIGHT]:
                 self.core.motor = [1, -1]
-                
+
             self.core.motor = [self.core.motor[0] * SPEED_CONTROL, self.core.motor[1] * SPEED_CONTROL]
-        
 
         self.draw()
 
@@ -110,20 +114,23 @@ class Visualizer:
 
         for item, v in self.core.predicted_items.items():
             draw_alpha.circle(self.screen, (
-                255, 255 if v[1] == 1 else 0, 0, int(16 * min(v[0], 8))), real2window(item), core.MERGE_RADIUS / UNIT)
+                255, 255 if v[1] == 1 else 0, 0, min(v[0] * 32, 255)), real2window(item), core.MERGE_RADIUS / UNIT)
             if v[2] > 0:
                 draw_alpha.circle(self.screen, (255, 255, 255, 128), real2window(item), core.MERGE_RADIUS / UNIT)
 
-        draw_alpha.polygon(self.screen, CAR, [real2window(v) for v in self.core.predicted_vertices[0] + self.core.predicted_vertices[1][::-1]])
+        for wall in self.core.walls:
+            draw_alpha.line(self.screen, (255, 255, 255, 128), wall[0], wall[1], 1)
+
+        draw_alpha.polygon(self.screen, CAR, [real2window(v) for v in
+                                              self.core.predicted_vertices[0] + self.core.predicted_vertices[1][::-1]])
         draw_alpha.circle(self.screen, WHITE, real2window(self.core.predicted_cords), 5)
-        
-        
 
         pygame.display.flip()
 
 
 def real2window(vec: tuple[float, float]) -> tuple[float, float]:
     return core.vec_add(VEC_MARGIN, core.vec_multiply(vec, 1 / UNIT))
+
 
 def window2real(vec: tuple[float, float]) -> tuple[float, float]:
     return core.vec_multiply(core.vec_subtract(vec, VEC_MARGIN), UNIT)

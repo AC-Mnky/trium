@@ -1,10 +1,10 @@
 import time
 
-ENABLE_STM_INPUT = True  # True
+ENABLE_STM_INPUT = False  # True
 ENABLE_IMU = False  # True
 ENABLE_CAMERA = False  # True
 ENABLE_CORE = True  # True
-ENABLE_STM_OUTPUT = True  # True
+ENABLE_STM_OUTPUT = False  # True
 
 ENABLE_DUMMY = False  # False
 DUMMY_CONTROL = False  # False

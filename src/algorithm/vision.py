@@ -1,11 +1,11 @@
-from algorithm.vision2 import find_color
-from algorithm.vision2 import camera_convert
+from vision2 import find_color
+from vision2 import camera_convert
 
 CAMERA_STATE = camera_convert.CameraState((309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480))
 
 
-def process(time: float, image) -> tuple[float, list, list, list] | None:
-
+def process(time: float, image) -> tuple[float, list[tuple[float, float]], list[tuple[float, float]], list[
+        tuple[tuple[float, float], tuple[float, float]]]] | None:
     if image is None:
         return None
 
