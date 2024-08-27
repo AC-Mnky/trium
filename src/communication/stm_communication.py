@@ -58,7 +58,9 @@ class STM:
 
         return velocity_1, velocity_2, ultrasonic_1, ultrasonic_2
 
-    def send_message(self, message):
+    def send_message(self, message: bytes, max_length: int):
+
+        message = message[:max_length]
 
         if not self.ser.is_open:
             self.ser.open()

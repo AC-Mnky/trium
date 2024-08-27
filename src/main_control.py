@@ -1,19 +1,21 @@
 import time
 
-ENABLE_STM_INPUT = False  # True
+ENABLE_STM_INPUT = True  # True
 ENABLE_IMU = False  # True
 ENABLE_CAMERA = False  # True
 ENABLE_CORE = True  # True
-ENABLE_STM_OUTPUT = False  # True
+ENABLE_STM_OUTPUT = True  # True
 
 ENABLE_DUMMY = False  # False
-USE_DUMMY = False  # False
+DUMMY_CONTROL = False  # False
 ENABLE_CORE_VISUALIZER = True  # False
+VISUALIZER_CONTROL = True  # False
 
-CAMERA_COOLDOWN = 0.5
+CAMERA_COOLDOWN = 5
 CYCLE_MIN_TIME = 0.02
 
 FORCE_STOP_MESSAGE = bytes((128, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0))
+MAX_MESSAGE_LENGTH = 8
 
 if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT:
     from communication import stm_communication as stm
@@ -74,11 +76,11 @@ if __name__ == '__main__':
     if core is not None:
         print('Core initialized, used time:', next(module_time))
 
-    dummy = dummy.Dummy(USE_DUMMY) if ENABLE_DUMMY else None
+    dummy = dummy.Dummy(DUMMY_CONTROL) if ENABLE_DUMMY else None
     if dummy is not None:
         print('Dummy plugged in, used time:', next(module_time))
 
-    visualizer = core_visualizer.Visualizer(core) if ENABLE_CORE_VISUALIZER else None
+    visualizer = core_visualizer.Visualizer(core, VISUALIZER_CONTROL) if ENABLE_CORE_VISUALIZER else None
     if visualizer is not None:
         print('Visualizer initialized, used time:', next(module_time))
 
@@ -117,7 +119,7 @@ if __name__ == '__main__':
 
         if ENABLE_DUMMY:
             dummy_output = dummy.get_output(stm32_input)
-            if USE_DUMMY:
+            if DUMMY_CONTROL:
                 output = dummy_output
             if dummy.force_stop:
                 output = FORCE_STOP_MESSAGE
@@ -125,13 +127,14 @@ if __name__ == '__main__':
             print('Used time:', next(module_time))
 
         if ENABLE_CORE_VISUALIZER:
-            visualizer.update()
+            core = visualizer.update(real_time())
+            output = core.get_output()
             if visualizer.force_stop:
                 output = FORCE_STOP_MESSAGE
             print('Visualization used time:', next(module_time))
 
         if ENABLE_STM_OUTPUT:
-            stm.send_message(output)
+            stm.send_message(output, MAX_MESSAGE_LENGTH)
             print('Sent out output to STM32, used time:', next(module_time))
 
         sleep_time = max(0.0, cycle_start_time + CYCLE_MIN_TIME - real_time())

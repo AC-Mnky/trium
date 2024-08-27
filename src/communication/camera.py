@@ -11,7 +11,7 @@ class Camera:
         self.cam = cv2.VideoCapture(1)
         # self.cam.start()
         self.start_time = time.time()
-
+        
     def get_image_bgr(self) -> cv2.UMat | None:
         if time.time() - self.start_time < START_WAIT_TIME:
             return None
