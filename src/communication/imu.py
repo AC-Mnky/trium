@@ -1,5 +1,5 @@
 import serial
-import time
+# import time
 
 
 class IMU:
@@ -217,7 +217,7 @@ class IMU:
 
 if __name__ == "__main__":
     imu = IMU()
-    st = time.time()
+    # st = time.time()
     imu.get_imu_input()
-    ed = time.time()
-    print("Time:", ed - st)
+    # ed = time.time()
+    # print("Time:", ed - st)
