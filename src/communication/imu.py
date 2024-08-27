@@ -2,7 +2,14 @@ import serial
 
 
 class IMU:
+    """
+    Class of the IMU sensor, which reads data through a serial port under USART protocol.
+    """
+
     def __init__(self):
+        """
+        Initializes the IMU class with the port and baud rate.
+        """
         self.port = "COM6"
         self.baud = 115200
 
