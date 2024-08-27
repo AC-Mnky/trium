@@ -16,17 +16,21 @@ class IMU:
         self.port = "/dev/ttyAMA5"  # Pi 4B
         self.baud = 115200
 
-    def get_imu_input(self) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
+    def get_imu_input(
+        self,
+    ) -> (
+        tuple[
+            tuple[float, float, float],
+            tuple[float, float, float],
+            tuple[float, float, float],
+        ]
+        | None
+    ):
         """
         Reads IMU data from a serial port.
         """
         ser = serial.Serial(self.port, self.baud, timeout=0.5)
-#         print(ser.is_open)
-
-        # A test demo. May be modified later.
-#         for _ in range(1):
-#             datahex = ser.read(33)
-#             self._process_input_data(datahex)
+        # print(ser.is_open)
 
         datahex = ser.read(33)
         return self._process_input_data(datahex)
@@ -95,7 +99,7 @@ class IMU:
 
         return gyro_x, gyro_y, gyro_z
 
-    def _extract_angle(self, datahex: bytes) ->  tuple[float, float, float]:
+    def _extract_angle(self, datahex: bytes) -> tuple[float, float, float]:
         """
         Calculates the angles from the given hexadecimal data.
 
@@ -127,7 +131,14 @@ class IMU:
 
         return angle_x, angle_y, angle_z
 
-    def _process_input_data(self, inputdata: bytes) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
+    def _process_input_data(self, inputdata: bytes) -> (
+        tuple[
+            tuple[float, float, float],
+            tuple[float, float, float],
+            tuple[float, float, float],
+        ]
+        | None
+    ):
         """
         Process the input data and extract acceleration, angular velocity, and angle information.
 
@@ -138,9 +149,9 @@ class IMU:
             None
 
         Prints:
-            Acceleration (g): The acceleration values in g-force.
-            Angular_Velocity (deg/s): The angular velocity values in degrees per second.
-            Angle (deg): The angle values in degrees.
+            acceleration (g): The acceleration values in g-force.
+            angular_Velocity (deg/s): The angular velocity values in degrees per second.
+            angle (deg): The angle values in degrees.
         """
         add_data = [0.0] * 8
         gyro_data = [0.0] * 8
@@ -205,7 +216,7 @@ class IMU:
                     check_sum += data
                     byte_num += 1
                 else:
-                  
+
                     if data == (check_sum & 0xFF):
                         angle = self._extract_angle(angle_data)
                         print("Acceleration(g):", acceleration)
