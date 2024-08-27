@@ -17,11 +17,13 @@ echo Here is a simple tutorial to help you quickly get started with this reposit
 echo.
 echo Please choose your operation (enter letter in square brackets):
 echo [A] Browse the global README.md  [B] Review SoftwareDesign.md  [C] Start Git Operations  [D] Exit
+echo [R] Beta Test 
 set /p var=
 if %var%==A goto browse_readme
 if %var%==B goto software_design
 if %var%==C goto choose_git
 if %var%==D exit
+if %var%==R goto test
 else echo Invalid input, please try again.
 goto choose_intro
 
@@ -114,3 +116,11 @@ if %var_exit%==n (
 else echo Invalid input, please try again.
 pause
 goto choose_exit
+
+:test
+echo.
+echo Play Music!
+start %cd%\assets\music_test\10th_symphony_type-MOON.mp3
+echo.
+pause
+goto choose_intro
