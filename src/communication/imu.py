@@ -24,9 +24,9 @@ class IMU:
         print(ser.is_open)
 
         # A test demo. May be modified later.
-        for _ in range(1):
-            datahex = ser.read(33)
-            self._process_input_data(datahex)
+        # for _ in range(1):
+        #     datahex = ser.read(33)
+        #     self._process_input_data(datahex)
 
     def _extract_acceleration(self, datahex: bytes) -> list:
         """
