@@ -16,13 +16,21 @@ class IMU:
         self.port = "/dev/ttyAMA5"  # Pi 4B
         self.baud = 115200
 
-    def get_imu_input(self) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
+    def get_imu_input(
+        self,
+    ) -> (
+        tuple[
+            tuple[float, float, float],
+            tuple[float, float, float],
+            tuple[float, float, float],
+        ]
+        | None
+    ):
         """
         Reads IMU data from a serial port.
         """
         ser = serial.Serial(self.port, self.baud, timeout=0.5)
         # print(ser.is_open)
-
 
         datahex = ser.read(33)
         return self._process_input_data(datahex)
@@ -91,7 +99,7 @@ class IMU:
 
         return gyro_x, gyro_y, gyro_z
 
-    def _extract_angle(self, datahex: bytes) ->  tuple[float, float, float]:
+    def _extract_angle(self, datahex: bytes) -> tuple[float, float, float]:
         """
         Calculates the angles from the given hexadecimal data.
 
@@ -123,7 +131,14 @@ class IMU:
 
         return angle_x, angle_y, angle_z
 
-    def _process_input_data(self, inputdata: bytes) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
+    def _process_input_data(self, inputdata: bytes) -> (
+        tuple[
+            tuple[float, float, float],
+            tuple[float, float, float],
+            tuple[float, float, float],
+        ]
+        | None
+    ):
         """
         Process the input data and extract acceleration, angular velocity, and angle information.
 
@@ -134,83 +149,85 @@ class IMU:
             None
 
         Prints:
-            Acceleration (g): The acceleration values in g-force.
-            Angular_Velocity (deg/s): The angular velocity values in degrees per second.
-            Angle (deg): The angle values in degrees.
+            acceleration (g): The acceleration values in g-force.
+            angular_Velocity (deg/s): The angular velocity values in degrees per second.
+            angle (deg): The angle values in degrees.
         """
-        ACCData = [0.0] * 8
-        GYROData = [0.0] * 8
-        AngleData = [0.0] * 8
-        FrameState = 0  # 通过0x后面的值判断属于哪一种情况
-        Bytenum = 0  # 读取到这一段的第几位
-        CheckSum = 0  # 求和校验位
+        add_data = [0.0] * 8
+        gyro_data = [0.0] * 8
+        angle_data = [0.0] * 8
+        frame_state = 0  # 通过0x后面的值判断属于哪一种情况
+        byte_num = 0  # 读取到这一段的第几位
+        check_sum = 0  # 求和校验位
         acceleration = [0.0] * 3
         angular_velocity = [0.0] * 3
-        Angle = [0.0] * 3
-        
+        angle = [0.0] * 3
+
         for data in inputdata:  # 在输入的数据进行遍历
-            if FrameState == 0:  # 当未确定状态的时候，进入以下判断
+            if frame_state == 0:  # 当未确定状态的时候，进入以下判断
                 if (
-                    data == 0x55 and Bytenum == 0
+                    data == 0x55 and byte_num == 0
                 ):  # 0x55位于第一位时候，开始读取数据，增大bytenum
-                    CheckSum = data
-                    Bytenum = 1
+                    check_sum = data
+                    byte_num = 1
                     continue
                 elif (
-                    data == 0x51 and Bytenum == 1
+                    data == 0x51 and byte_num == 1
                 ):  # 在byte不为0 且 识别到 0x51 的时候，改变frame
-                    CheckSum += data
-                    FrameState = 1
-                    Bytenum = 2
-                elif data == 0x52 and Bytenum == 1:  # 同理
-                    CheckSum += data
-                    FrameState = 2
-                    Bytenum = 2
-                elif data == 0x53 and Bytenum == 1:
-                    CheckSum += data
-                    FrameState = 3
-                    Bytenum = 2
-            elif FrameState == 1:  # acc    #已确定数据代表加速度
+                    check_sum += data
+                    frame_state = 1
+                    byte_num = 2
+                elif data == 0x52 and byte_num == 1:  # 同理
+                    check_sum += data
+                    frame_state = 2
+                    byte_num = 2
+                elif data == 0x53 and byte_num == 1:
+                    check_sum += data
+                    frame_state = 3
+                    byte_num = 2
+            elif frame_state == 1:  # acc    # 已确定数据代表加速度
 
-                if Bytenum < 10:  # 读取8个数据
-                    ACCData[Bytenum - 2] = data  # 从0开始
-                    CheckSum += data
-                    Bytenum += 1
+                if byte_num < 10:  # 读取8个数据
+                    add_data[byte_num - 2] = data  # 从0开始
+                    check_sum += data
+                    byte_num += 1
                 else:
-                    if data == (CheckSum & 0xFF):  # 假如校验位正确
-                        acceleration = self._extract_acceleration(ACCData)
-                    CheckSum = 0  # 各数据归零，进行新的循环判断
-                    Bytenum = 0
-                    FrameState = 0
-            elif FrameState == 2:  # gyro
+                    if data == (check_sum & 0xFF):  # 假如校验位正确
+                        acceleration = self._extract_acceleration(add_data)
+                    check_sum = 0  # 各数据归零，进行新的循环判断
+                    byte_num = 0
+                    frame_state = 0
+            elif frame_state == 2:  # gyro
 
-                if Bytenum < 10:
-                    GYROData[Bytenum - 2] = data
-                    CheckSum += data
-                    Bytenum += 1
+                if byte_num < 10:
+                    gyro_data[byte_num - 2] = data
+                    check_sum += data
+                    byte_num += 1
                 else:
-                    if data == (CheckSum & 0xFF):
-                        angular_velocity = self._extract_angular_velocity(GYROData)
-                    CheckSum = 0
-                    Bytenum = 0
-                    FrameState = 0
-            elif FrameState == 3:  # angle
+                    if data == (check_sum & 0xFF):
+                        angular_velocity = self._extract_angular_velocity(gyro_data)
+                    check_sum = 0
+                    byte_num = 0
+                    frame_state = 0
+            elif frame_state == 3:  # angle
 
-                if Bytenum < 10:
-                    AngleData[Bytenum - 2] = data
-                    CheckSum += data
-                    Bytenum += 1
+                if byte_num < 10:
+                    angle_data[byte_num - 2] = data
+                    check_sum += data
+                    byte_num += 1
                 else:
-                    if data == (CheckSum & 0xFF):
-                        Angle = self._extract_angle(AngleData)
-                        return acceleration, angular_velocity, Angle
+
+                    if data == (check_sum & 0xFF):
+                        angle = self._extract_angle(angle_data)
+                        return acceleration, angular_velocity, angle
                         # print("Acceleration(g):", acceleration)
                         # print("Angular_Velocity(deg/s):", angular_velocity)
-                        # print("Angle(deg):", Angle)
+                        # print("Angle(deg):", angle)
                         # print("\n")
-                    CheckSum = 0
-                    Bytenum = 0
-                    FrameState = 0
+                    check_sum = 0
+                    byte_num = 0
+                    frame_state = 0
+
         return None
 
 
@@ -220,4 +237,3 @@ if __name__ == "__main__":
     imu.get_imu_input()
     ed = time.time()
     print("Time:", ed - st)
-    
