@@ -15,9 +15,9 @@ class IMU:
 
         for _ in range(5):
             datahex = ser.read(33)
-            self.due_data(datahex)
+            self._process_input_data(datahex)
 
-    def get_acc(self, datahex: bytes) -> list:
+    def _extract_acceleration(self, datahex: bytes) -> list:
         """
         Calculates the acceleration values from the given hexadecimal data.
 
@@ -50,7 +50,7 @@ class IMU:
         acc = [acc_x, acc_y, acc_z]
         return acc
 
-    def get_gyro(self, datahex: bytes) -> list:
+    def _extract_angular_velocity(self, datahex: bytes) -> list:
         """
         Calculates the angular velocity from the given hexadecimal data.
 
@@ -83,7 +83,7 @@ class IMU:
         gyro = [gyro_x, gyro_y, gyro_z]
         return gyro
 
-    def get_angle(self, datahex: bytes) -> list:
+    def _extract_angle(self, datahex: bytes) -> list:
         """
         Calculates the angles from the given hexadecimal data.
 
@@ -116,7 +116,21 @@ class IMU:
         angle = [angle_x, angle_y, angle_z]
         return angle
 
-    def due_data(self, inputdata):
+    def _process_input_data(self, inputdata: bytes) -> None:
+        """
+        Process the input data and extract acceleration, angular velocity, and angle information.
+
+        Args:
+            inputdata (bytes): The input data to be processed.
+
+        Returns:
+            None
+
+        Prints:
+            Acceleration (g): The acceleration values in g-force.
+            Angular_Velocity (deg/s): The angular velocity values in degrees per second.
+            Angle (deg): The angle values in degrees.
+        """
         ACCData = [0.0] * 8
         GYROData = [0.0] * 8
         AngleData = [0.0] * 8
@@ -156,7 +170,7 @@ class IMU:
                     Bytenum += 1
                 else:
                     if data == (CheckSum & 0xFF):  # 假如校验位正确
-                        acceleration = self.get_acc(ACCData)
+                        acceleration = self._extract_acceleration(ACCData)
                     CheckSum = 0  # 各数据归零，进行新的循环判断
                     Bytenum = 0
                     FrameState = 0
@@ -168,7 +182,7 @@ class IMU:
                     Bytenum += 1
                 else:
                     if data == (CheckSum & 0xFF):
-                        angular_velocity = self.get_gyro(GYROData)
+                        angular_velocity = self._extract_angular_velocity(GYROData)
                     CheckSum = 0
                     Bytenum = 0
                     FrameState = 0
@@ -180,14 +194,9 @@ class IMU:
                     Bytenum += 1
                 else:
                     if data == (CheckSum & 0xFF):
-                        Angle = self.get_angle(AngleData)
-                        # d = a + w + Angle
-                        # print(
-                        #     "a(g):%10.3f %10.3f %10.3f w(deg/s):%10.3f %10.3f %10.3f Angle(deg):%10.3f %10.3f %10.3f"
-                        #     % d
-                        # )
+                        Angle = self._extract_angle(AngleData)
                         print("Acceleration(g):", acceleration)
-                        print("Angular Velocity(deg/s):", angular_velocity)
+                        print("Angular_Velocity(deg/s):", angular_velocity)
                         print("Angle(deg):", Angle)
                         print("\n")
                     CheckSum = 0
