@@ -6,7 +6,12 @@ class IMU:
         self.port = "COM6"
         self.baud = 115200
 
-    def get_imu_input(self) -> ...: ...  # TODO
+    def get_imu_input(self):
+        ser = serial.Serial(self.port, self.baud, timeout=0.5)
+        print(ser.is_open)
+        for _ in range(5):
+            datahex = ser.read(33)
+            self.due_data(datahex)
 
     def get_acc(self, datahex):
         axl = datahex[0]
