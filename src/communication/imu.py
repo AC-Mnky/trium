@@ -6,14 +6,27 @@ class IMU:
         self.port = "COM6"
         self.baud = 115200
 
-    def get_imu_input(self):
+    def get_imu_input(self) -> None:
+        """
+        Reads IMU data from a serial port.
+        """
         ser = serial.Serial(self.port, self.baud, timeout=0.5)
         print(ser.is_open)
+
         for _ in range(5):
             datahex = ser.read(33)
             self.due_data(datahex)
 
-    def get_acc(self, datahex):
+    def get_acc(self, datahex: bytes) -> list:
+        """
+        Calculates the acceleration values from the given hexadecimal data.
+
+        Args:
+            datahex (bytes): The input data in hexadecimal format.
+
+        Returns:
+            acc (list): A list containing the acceleration values [acc_x, acc_y, acc_z].
+        """
         axl = datahex[0]
         axh = datahex[1]
         ayl = datahex[2]
@@ -26,6 +39,7 @@ class IMU:
         acc_x = (axh << 8 | axl) / 32768.0 * k_acc
         acc_y = (ayh << 8 | ayl) / 32768.0 * k_acc
         acc_z = (azh << 8 | azl) / 32768.0 * k_acc
+
         if acc_x >= k_acc:
             acc_x -= 2 * k_acc
         if acc_y >= k_acc:
@@ -36,18 +50,29 @@ class IMU:
         acc = [acc_x, acc_y, acc_z]
         return acc
 
-    def get_gyro(self, datahex):
+    def get_gyro(self, datahex: bytes) -> list:
+        """
+        Calculates the angular velocity from the given hexadecimal data.
+
+        Args:
+            datahex (bytes): The input data in hexadecimal format.
+
+        Returns:
+            gyro (list): A list containing the angular velocity values [gyro_x, gyro_y, gyro_z].
+        """
         wxl = datahex[0]
         wxh = datahex[1]
         wyl = datahex[2]
         wyh = datahex[3]
         wzl = datahex[4]
         wzh = datahex[5]
+
         k_gyro = 2000.0
 
         gyro_x = (wxh << 8 | wxl) / 32768.0 * k_gyro
         gyro_y = (wyh << 8 | wyl) / 32768.0 * k_gyro
         gyro_z = (wzh << 8 | wzl) / 32768.0 * k_gyro
+
         if gyro_x >= k_gyro:
             gyro_x -= 2 * k_gyro
         if gyro_y >= k_gyro:
@@ -58,18 +83,29 @@ class IMU:
         gyro = [gyro_x, gyro_y, gyro_z]
         return gyro
 
-    def get_angle(self, datahex):
+    def get_angle(self, datahex: bytes) -> list:
+        """
+        Calculates the angles from the given hexadecimal data.
+
+        Args:
+            datahex (bytes): The input data in hexadecimal format.
+
+        Returns:
+            angle (list): A list containing the calculated angles [angle_x, angle_y, angle_z].
+        """
         rxl = datahex[0]
         rxh = datahex[1]
         ryl = datahex[2]
         ryh = datahex[3]
         rzl = datahex[4]
         rzh = datahex[5]
+
         k_angle = 180.0
 
         angle_x = (rxh << 8 | rxl) / 32768.0 * k_angle
         angle_y = (ryh << 8 | ryl) / 32768.0 * k_angle
         angle_z = (rzh << 8 | rzl) / 32768.0 * k_angle
+
         if angle_x >= k_angle:
             angle_x -= 2 * k_angle
         if angle_y >= k_angle:
