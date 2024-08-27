@@ -1,8 +1,9 @@
 import time
 
 ENABLE_STM_INPUT = False  # True
-ENABLE_IMU = False  # True
+ENABLE_IMU = True  # True
 ENABLE_CAMERA = False  # True
+ENABLE_VISION = False # True
 ENABLE_CORE = True  # True
 ENABLE_STM_OUTPUT = False  # True
 
@@ -23,6 +24,7 @@ if ENABLE_IMU:
     from communication import imu
 if ENABLE_CAMERA:
     from communication import camera
+if ENABLE_VISION:
     from algorithm import vision
 if ENABLE_CORE:
     from algorithm import core
@@ -108,8 +110,9 @@ if __name__ == '__main__':
             camera_last_used_time = real_time()
             camera_image = camera.get_image_bgr()
             print('Got camera input, used time:', next(module_time))
-            camera_input = vision.process(camera_last_used_time, camera_image)
-            print('Processed camera input, used time:', next(module_time))
+            if ENABLE_VISION:
+                camera_input = vision.process(camera_last_used_time, camera_image)
+                print('Processed camera input, used time:', next(module_time))
 
         if ENABLE_CORE:
             core.update(real_time(), stm32_input, imu_input, camera_input)
