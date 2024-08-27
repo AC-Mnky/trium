@@ -3,10 +3,8 @@ import serial
 
 class IMU:
     def __init__(self):
-
-        self.a = [0.0] * 3
-        self.w = [0.0] * 3
-        self.Angle = [0.0] * 3
+        self.port = "COM6"
+        self.baud = 115200
 
     def get_imu_input(self) -> ...: ...  # TODO
 
@@ -51,7 +49,7 @@ class IMU:
             gyro_y -= 2 * k_gyro
         if gyro_z >= k_gyro:
             gyro_z -= 2 * k_gyro
-            
+
         gyro = [gyro_x, gyro_y, gyro_z]
         return gyro
 
@@ -84,9 +82,9 @@ class IMU:
         FrameState = 0  # 通过0x后面的值判断属于哪一种情况
         Bytenum = 0  # 读取到这一段的第几位
         CheckSum = 0  # 求和校验位
-        acceleration = self.a
-        angular_velocity = self.w
-        Angle = self.Angle
+        acceleration = [0.0] * 3
+        angular_velocity = [0.0] * 3
+        Angle = [0.0] * 3
         for data in inputdata:  # 在输入的数据进行遍历
             if FrameState == 0:  # 当未确定状态的时候，进入以下判断
                 if (
@@ -157,10 +155,9 @@ class IMU:
 
 
 if __name__ == "__main__":
-    port = "COM6"
-    baud = 9600
-    ser = serial.Serial(port, baud, timeout=0.5)
     imu = IMU()
+    ser = serial.Serial(imu.port, imu.baud, timeout=0.5)
+
     print(ser.is_open)
     while 1:
         datahex = ser.read(33)
