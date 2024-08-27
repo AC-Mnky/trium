@@ -20,6 +20,7 @@ class IMU:
         ser = serial.Serial(self.port, self.baud, timeout=0.5)
         print(ser.is_open)
 
+        # A test demo. May be modified later.
         for _ in range(5):
             datahex = ser.read(33)
             self._process_input_data(datahex)
