@@ -21,8 +21,8 @@
   - [simulation/](src/simulation/) -- 基于pymunk的路径规划与避障算法。
   - [simulation2/](src/simulation2/) -- 基于pymunk的路径规划与避障算法第二代。真实性++，收集效果--
   - [vision/](src/vision/) -- 基于树莓派OpenCV的图像识别算法。
-  - [vision3/](src/vision3/) -- 基于树莓派OpenCV的图像识别算法第三代。
-  - [vision2/](src/vision2/) -- 基于树莓派OpenCV的图像识别算法第二代（但是比第三代更新，编号问题）。
+  <!-- - [vision3/](src/vision3/) -- 基于树莓派OpenCV的图像识别算法第三代。
+  - [vision2/](src/vision2/) -- 基于树莓派OpenCV的图像识别算法第二代（但是比第三代更新，编号问题）。 -->
   - [main_prog](src/main_prog) -- STM32主程序。由于STM32工程的代码相对较为繁杂，此处存放的又为完整工程文件，因此CubeIDE端的同步请手动进行操作。在CubeIDE中进行更改后，请将完整工程文件夹拷贝至此处替换。
 
 ## Mnky
