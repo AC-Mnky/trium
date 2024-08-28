@@ -195,7 +195,9 @@ class Core:
         infer current relative movement from encoder.
         "inferred_angular_speed" = speed of rotating around the center of the car
         "inferred_relative_velocity" = speed of the center of the car
+        
         paras have to be modified: WHEEL_X_OFFSET
+        angular_speed can use data from imu directly
         """
         
         encoder = unpack('<h', self.stm_input[68:70])[0], unpack('<h', self.stm_input[36:38])[0]
