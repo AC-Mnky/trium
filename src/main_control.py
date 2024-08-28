@@ -7,8 +7,8 @@ ENABLE_VISION = True # True
 ENABLE_CORE = True  # True
 ENABLE_STM_OUTPUT = True  # True
 
-ENABLE_DUMMY = False  # False
-DUMMY_CONTROL = False  # False
+ENABLE_DUMMY = True  # False
+DUMMY_CONTROL = True  # False
 ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
 
