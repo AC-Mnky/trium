@@ -111,7 +111,7 @@ class Core:
         """Keys are the items' coords. 
         First element of the list is the decay term,  
         second is the tag to identify red/yellow blocks
-        third is the , and let the second element be 1"""
+        third is the """
         self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
 
         # pairs of walls' endpoints
