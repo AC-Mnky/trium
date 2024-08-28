@@ -11,7 +11,7 @@ class CameraState:
         camera_rotation: tuple[float, float, float],
         fov: tuple[float, float],
         resolution: tuple[int, int],
-    ):
+    ) -> None:
         """
         Initializes the CameraState object.
 
