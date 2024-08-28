@@ -56,7 +56,7 @@ def calc_weight(cord_difference: float, angle_difference: float, distance_to_wal
         weight *= seen_wall_length / GOOD_SEEN_WALL_LENGTH
     return weight
 
- # k = key, v = value
+# k = key, v = value
 def merge_item_prediction(dictionary) -> None:
     while True:
         substitution = None
