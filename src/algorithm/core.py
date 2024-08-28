@@ -56,7 +56,7 @@ def calc_weight(cord_difference: float, angle_difference: float, distance_to_wal
         weight *= seen_wall_length / GOOD_SEEN_WALL_LENGTH
     return weight
 
-
+ # k = key, v = value
 def merge_item_prediction(dictionary) -> None:
     while True:
         substitution = None
@@ -108,7 +108,9 @@ class Core:
 
         self.predicted_vertices = [[(0.0, 0.0), (0.0, 0.0)], [(0.0, 0.0), (0.0, 0.0)]].copy()
 
+        # Keys are the items' coords. But what do these three elements of values mean?
         self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
+        # pairs of walls' endpoints
         self.walls: list[tuple[tuple[float, float], tuple[float, float]]] = []
 
         # There is no reset function. When you want to reset the _core, just create a new object.
@@ -219,6 +221,10 @@ class Core:
 
         # analyze camera input
         if camera_input is not None:
+
+            """ "camera_reds", "camera_yellows" are coords of red blocks and yellow blocks;
+            "camera_walls" are pairs of coords of the walls' end points """
+
             camera_time, camera_reds, camera_yellows, camera_walls = camera_input
 
             self.walls = camera_walls
@@ -226,15 +232,18 @@ class Core:
                 self.infer_position_from_walls()
 
             for red in camera_reds:
-                cords = vec_add(rotated(red, self.predicted_angle), self.predicted_cords)
+                cords = vec_add(rotated(red, self.predicted_angle), self.predicted_cords) # position of red block
                 if ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
-                    self.predicted_items[cords] = [self.predicted_items.get(cords, (0, 0))[0] + 2, 0, 0]
+                    self.predicted_items[cords] = [self.predicted_items.get(cords, (0, 0))[0] + 2, 0, 0] # let the first element of the value add 2, and let the second element be 0
+
             for yellow in camera_yellows:
-                cords = vec_add(rotated(yellow, self.predicted_angle), self.predicted_cords)
+                cords = vec_add(rotated(yellow, self.predicted_angle), self.predicted_cords) # position of yellow block
                 if ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
-                    self.predicted_items[cords] = [self.predicted_items.get(cords, (0, 1))[0] + 3, 1, 0]
+                    self.predicted_items[cords] = [self.predicted_items.get(cords, (0, 1))[0] + 3, 1, 0] # let the first element of the value add 3, and let the second element be 1
 
             merge_item_prediction(self.predicted_items)
+
+
 
             # TODO: seen items decay
 
