@@ -1,7 +1,11 @@
 import pygame
 
 
-def rectangle(surface: pygame.Surface, color: tuple, rect: tuple) -> None:
+def rectangle(
+    surface: pygame.Surface,
+    color: tuple[Literal[255], Literal[255], Literal[255], Literal[255]],
+    rect: tuple,
+) -> None:
     """
     Draw a rectangle on the given surface with the specified color and alpha.
 
@@ -18,7 +22,26 @@ def rectangle(surface: pygame.Surface, color: tuple, rect: tuple) -> None:
     surface.blit(shape_surf, rect)
 
 
-def line(surface, color, start_pos, end_pos, width):
+def line(
+    surface: pygame.Surface,
+    color: tuple,
+    start_pos: tuple,
+    end_pos: tuple,
+    width: float,
+) -> None:
+    """
+    Draw a line on the given surface.
+
+    Args:
+        surface (pygame.Surface): The surface to draw the line on.
+        color (tuple): The color of the line in RGB format.
+        start_pos (tuple): The starting position of the line.
+        end_pos (tuple): The ending position of the line.
+        width (float): The width of the line.
+
+    Returns:
+        None
+    """
     lx, ly = (start_pos[0], end_pos[0]), (start_pos[1], end_pos[1])
     min_x, min_y, max_x, max_y = min(lx), min(ly), max(lx), max(ly)
     target_rect = pygame.Rect(min_x, min_y, max_x - min_x, max_y - min_y).inflate(
