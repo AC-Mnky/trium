@@ -276,8 +276,13 @@ class Core:
             else:
                 self.motor = [MOTOR_SPEED, MOTOR_SPEED]
 
-    # send commands to STM32
     def get_output(self) -> bytes:
+        """
+        Returns the message to be sent to STM32 as a bytes object.
+
+        Returns:
+            bytes: The output as a bytes object.
+        """
         output = (
                 [
                     128,
