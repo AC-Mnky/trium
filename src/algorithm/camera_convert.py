@@ -173,7 +173,8 @@ def space2img(
     Returns:
         tuple[bool, int, int]: A tuple containing the following:
             - can_be_seen (bool): True if the point can be seen in the camera's view.
-            - int(i), int(j): The corresponding image coordinates (i, j).
+            - i (int): The corresponding image x-coordinates (forced cast to int).
+            - j (int): The corresponding image j-coordinates (forced cast to int).
     """
     c = camera_state
 
