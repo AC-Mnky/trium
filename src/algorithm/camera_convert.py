@@ -64,7 +64,31 @@ class CameraState:
             self.img_to_relative_cords_mapping
         )
 
-    def update(self):
+    def update(self) -> None:
+        """
+        Update the camera conversion matrices and mappings.
+        This method updates the camera conversion matrices and mappings based on the current values of phi, theta, omega,
+        half_fov_h, half_fov_v, and resolution.
+
+        The camera conversion matrices are calculated as follows:
+        - trans_phi: Rotation matrix around the z-axis (phi angle).
+        - trans_theta: Rotation matrix around the y-axis (theta angle).
+        - trans_omega: Rotation matrix around the x-axis (omega angle).
+        - trans: Combined transformation matrix obtained by multiplying trans_phi, trans_theta, and trans_omega.
+
+        The mappings between image coordinates and relative coordinates are calculated as follows:
+        - img_to_relative_cords_mapping: Transformation matrix from image coordinates to relative coordinates.
+        - relative_cords_to_img_mapping: Inverse of img_to_relative_cords_mapping.
+
+        Note:
+            The matrices and mappings are stored as attributes of the CameraConvert object.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         self.trans_phi = np.array(
             (
                 (np.cos(self.phi), np.sin(self.phi), 0),
