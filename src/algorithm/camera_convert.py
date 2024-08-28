@@ -197,6 +197,7 @@ def space2img(
 
 
 if __name__ == "__main__":
+    # Example usage
     example_camera_state = CameraState(
         (100, 0, -200), (70, 0, 0), (100, 80), (640, 480)
     )
