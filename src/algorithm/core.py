@@ -273,7 +273,7 @@ class Core:
             else:
                 self.motor = [MOTOR_SPEED, MOTOR_SPEED]
 
-    #Give commands to the STM32
+    # Give commands to the STM32
     def get_output(self) -> bytes:
         output = (
                 [
