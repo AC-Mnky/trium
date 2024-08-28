@@ -352,20 +352,60 @@ def vec_add(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float
 
 
 def vec_subtract(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+    """
+    Subtract two vectors.
+
+    Args:
+        vec1 (tuple[float, float]): The first vector.
+        vec2 (tuple[float, float]): The second vector.
+
+    Returns:
+        tuple[float, float]: The result of subtracting vec2 from vec1.
+    """
     return vec1[0] - vec2[0], vec1[1] - vec2[1]
 
 
 def vec_multiply(vec: tuple[float, float], k: float) -> tuple[float, float]:
+    """
+    Multiply a 2D vector by a scalar.
+
+    Args:
+        vec (tuple[float, float]): The 2D vector to be multiplied.
+        k (float): The scalar value to multiply the vector by.
+
+    Returns:
+        tuple[float, float]: The resulting 2D vector after multiplication.
+    """
     return vec[0] * k, vec[1] * k
 
 
 def angle_subtract(angle1: float, angle2: float) -> float:
+    """
+    Calculates the difference between two angles.
+
+    Args:
+        angle1 (float): The first angle in radians.
+        angle2 (float): The second angle in radians.
+
+    Returns:
+        float: The difference between the two angles in radians.
+    """
     diff = angle1 - angle2
     diff -= round(diff / np.tau) * np.tau
     return diff
 
 
 def projection(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+    """
+    Calculates the projection of vec1 onto vec2.
+
+    Args:
+        vec1 (tuple[float, float]): The first vector.
+        vec2 (tuple[float, float]): The second vector.
+
+    Returns:
+        tuple[float, float]: The projection of vec1 onto vec2.
+    """
     length_square = vec2[0] * vec2[0] + vec2[1] * vec2[1]
     if length_square == 0.0:
         return 0, 0
@@ -375,6 +415,16 @@ def projection(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[fl
 
 
 def rotated(vec: tuple[float, float], angle_radians: float) -> tuple[float, float]:
+    """
+    Rotates a 2D vector by a given angle in radians.
+
+    Args:
+        vec (tuple[float, float]): The 2D vector to be rotated.
+        angle_radians (float): The angle in radians by which to rotate the vector.
+
+    Returns:
+        tuple[float, float]: The rotated 2D vector.
+    """
     cos = np.cos(angle_radians)
     sin = np.sin(angle_radians)
     x = vec[0] * cos - vec[1] * sin
