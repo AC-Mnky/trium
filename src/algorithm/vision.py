@@ -1,11 +1,20 @@
 from vision2 import find_color
 from vision2 import camera_convert
 
-CAMERA_STATE = camera_convert.CameraState((309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480))
+CAMERA_STATE = camera_convert.CameraState(
+    (309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480)
+)
 
 
-def process(time: float, image) -> tuple[float, list[tuple[float, float]], list[tuple[float, float]], list[
-        tuple[tuple[float, float], tuple[float, float]]]] | None:
+def process(time: float, image) -> (
+    tuple[
+        float,
+        list[tuple[float, float]],
+        list[tuple[float, float]],
+        list[tuple[tuple[float, float], tuple[float, float]]],
+    ]
+    | None
+):
     if image is None:
         return None
 
@@ -28,8 +37,12 @@ def process(time: float, image) -> tuple[float, list[tuple[float, float]], list[
             yellows.append((x, y))
 
     if walls_in_image is not None:
-        walls = [(camera_convert.img2space(CAMERA_STATE, wall[0][0], wall[0][1])[1:],
-                  camera_convert.img2space(CAMERA_STATE, wall[0][2], wall[0][3])[1:]
-                  ) for wall in walls_in_image]
+        walls = [
+            (
+                camera_convert.img2space(CAMERA_STATE, wall[0][0], wall[0][1])[1:],
+                camera_convert.img2space(CAMERA_STATE, wall[0][2], wall[0][3])[1:],
+            )
+            for wall in walls_in_image
+        ]
 
     return time, reds, yellows, walls
