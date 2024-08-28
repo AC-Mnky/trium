@@ -9,10 +9,10 @@ PWM_PERIOD = 100
 DISTANCE_PER_ENCODER = 33 * np.tau / 44 / 20.4
 WIDTH = 154
 LENGTH = 205
-COM_TO_CAR_BACK = 87  # center of mass to car back
+CM_TO_CAR_BACK = 87  # center of mass to car back
 WIDTH_WITH_WHEELS = 208
 # hole_width = 68
-WHEEL_X_OFFSET = -COM_TO_CAR_BACK + 98
+WHEEL_X_OFFSET = -CM_TO_CAR_BACK + 98
 DISTANCE_BETWEEN_WHEELS = 178.3
 LEFT_WHEEL = (WHEEL_X_OFFSET, -DISTANCE_BETWEEN_WHEELS / 2)
 RIGHT_WHEEL = (WHEEL_X_OFFSET, DISTANCE_BETWEEN_WHEELS / 2)
@@ -212,7 +212,7 @@ class Core:
         for i in 0, 1:
             for j in 0, 1:
                 self.predicted_vertices[i][j] = vec_add(
-                    rotated((i * LENGTH - COM_TO_CAR_BACK, (j - 0.5) * WIDTH), self.predicted_angle),
+                    rotated((i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH), self.predicted_angle),
                     self.predicted_cords)
 
         # analyze camera input
@@ -238,7 +238,7 @@ class Core:
 
         # decay all items and delete items with low value
         contact_center = vec_multiply(vec_add(self.predicted_cords, rotated((1, 0), self.predicted_angle)), (
-                CONTACT_CENTER_TO_BACK - COM_TO_CAR_BACK))
+                CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK))
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
