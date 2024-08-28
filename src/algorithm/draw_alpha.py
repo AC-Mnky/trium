@@ -59,7 +59,7 @@ def line(
     surface.blit(shape_surf, target_rect)
 
 
-def circle(surface: pygame.Surface, color:tuple, center:tuple, radius: float) -> None:
+def circle(surface: pygame.Surface, color: tuple, center: tuple, radius: float) -> None:
     """
     Draw a circle on the given surface with the specified color and alpha.
 
