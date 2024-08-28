@@ -1,9 +1,9 @@
-import os.path
 import csv
+import os.path
 
 from encoder import get_omega
-from pwm import set_u
 from nnn import decide_u
+from pwm import set_u
 
 write_version = 'test'
 

@@ -11,7 +11,7 @@ class CameraState:
         camera_rotation: tuple[float, float, float],
         fov: tuple[float, float],
         resolution: tuple[int, int],
-    ):
+    ) -> None:
         """
         Initializes the CameraState object.
 
@@ -64,7 +64,31 @@ class CameraState:
             self.img_to_relative_cords_mapping
         )
 
-    def update(self):
+    def update(self) -> None:
+        """
+        Update the camera conversion matrices and mappings.
+        This method updates the camera conversion matrices and mappings based on the current values of phi, theta, omega,
+        half_fov_h, half_fov_v, and resolution.
+
+        The camera conversion matrices are calculated as follows:
+        - trans_phi: Rotation matrix around the z-axis (phi angle).
+        - trans_theta: Rotation matrix around the y-axis (theta angle).
+        - trans_omega: Rotation matrix around the x-axis (omega angle).
+        - trans: Combined transformation matrix obtained by multiplying trans_phi, trans_theta, and trans_omega.
+
+        The mappings between image coordinates and relative coordinates are calculated as follows:
+        - img_to_relative_cords_mapping: Transformation matrix from image coordinates to relative coordinates.
+        - relative_cords_to_img_mapping: Inverse of img_to_relative_cords_mapping.
+
+        Note:
+            The matrices and mappings are stored as attributes of the CameraConvert object.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         self.trans_phi = np.array(
             (
                 (np.cos(self.phi), np.sin(self.phi), 0),
@@ -104,6 +128,21 @@ class CameraState:
 def img2space(
     camera_state: CameraState, i: int, j: int, target_z: float = 0
 ) -> tuple[bool, float, float]:
+    """
+    Converts image coordinates to 3D space coordinates.
+
+    Args:
+        camera_state (CameraState): The camera state object.
+        i (int): The image x-coordinate.
+        j (int): The image y-coordinate.
+        target_z (float, optional): The target z-coordinate. Defaults to 0.
+
+    Returns:
+        tuple (tuple[bool, float, float]): A tuple containing the following:
+            - on_the_ground (bool): True if the point is on the ground, False otherwise.
+            - x (float): The x-coordinate in 3D space.
+            - y (float): The y-coordinate in 3D space.
+    """
     c = camera_state
 
     relative_cords = np.dot(c.img_to_relative_cords_mapping, (1, i, j))
@@ -122,6 +161,21 @@ def img2space(
 def space2img(
     camera_state: CameraState, x: float, y: float, z: float = 0
 ) -> tuple[bool, int, int]:
+    """
+    Converts 3D coordinates in space to image coordinates based on the camera state.
+
+    Args:
+        camera_state (CameraState): The state of the camera.
+        x (float): The x-coordinate in space.
+        y (float): The y-coordinate in space.
+        z (float, optional): The z-coordinate in space. Defaults to 0.
+
+    Returns:
+        tuple (tuple[bool, int, int]): A tuple containing the following:
+            - can_be_seen (bool): True if the point can be seen in the camera's view.
+            - i (int(i)): The corresponding image x-coordinates (forced cast to int).
+            - j (int(j)): The corresponding image j-coordinates (forced cast to int).
+    """
     c = camera_state
 
     can_be_seen = True
@@ -143,6 +197,7 @@ def space2img(
 
 
 if __name__ == "__main__":
+    # Example usage
     example_camera_state = CameraState(
         (100, 0, -200), (70, 0, 0), (100, 80), (640, 480)
     )

@@ -1,5 +1,6 @@
-import serial
 import math
+
+import serial
 
 ENCODER_PULSE_EACH_ROUND = 22
 ENCODER_READ_FREQUENCY = 500

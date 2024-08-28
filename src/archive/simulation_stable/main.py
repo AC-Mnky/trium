@@ -1,15 +1,15 @@
 # 关于仿真的基本方法论：
 # 尽可能用简单的方法模拟现实情况，从而使得写出好的算法更为方便。最终在现实中测试时所使用的算法相较于仿真中使用的算法，只需要做一些参数的调整，不需要增加新的代码。
 
-import numpy as np
 import time
-import pygame
-import draw_alpha
 
-from room import Room
+import draw_alpha
+import numpy as np
+import pygame
+from camera_convert import CameraState
 from car import Car
 from collectables import Red, Yellow
-from camera_convert import CameraState
+from room import Room
 
 from algorithm import merge_radius
 
