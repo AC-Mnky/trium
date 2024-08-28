@@ -168,6 +168,7 @@ class Core:
         self.predicted_cords += x_diff_average, y_diff_average
         self.predicted_angle += angle_diff_average
 
+    #Get realtime data from other modules
     def update(self,
                time: float,
                stm32_input: bytes,
@@ -253,6 +254,7 @@ class Core:
             else:
                 self.motor = [MOTOR_SPEED, MOTOR_SPEED]
 
+    #Give commands to the STM32
     def get_output(self) -> bytes:
         output = (
                 [
