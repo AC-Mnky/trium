@@ -191,10 +191,12 @@ class Core:
         if self.status_code > 0:
             self.status_code = 0
 
-        """ infer current relative movement from encoder.
+        """
+        infer current relative movement from encoder.
         "inferred_angular_speed" = speed of rotating around the center of the car
         "inferred_relative_velocity" = speed of the center of the car
-        paras have to be modified: WHEEL_X_OFFSET """
+        paras have to be modified: WHEEL_X_OFFSET
+        """
         
         encoder = unpack('<h', self.stm_input[68:70])[0], unpack('<h', self.stm_input[36:38])[0]
         inferred_angular_speed = (encoder[1] - encoder[0]) * DISTANCE_PER_ENCODER / DISTANCE_BETWEEN_WHEELS / dt
