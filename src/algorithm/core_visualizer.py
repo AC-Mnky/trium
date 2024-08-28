@@ -48,17 +48,25 @@ class Visualizer:
         self.mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if (
-                    event.type == pygame.QUIT
-                    or event.type == pygame.KEYDOWN
-                    and (event.key in [pygame.K_ESCAPE, pygame.K_q])
+                event.type == pygame.QUIT
+                or event.type == pygame.KEYDOWN
+                and (event.key in [pygame.K_ESCAPE, pygame.K_q])
             ):
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 cords = window2real(self.mouse_pos)
                 if event.button == 1:  # left-click
-                    self.core.predicted_items[cords] = [self.core.predicted_items.get(cords, (0, 0))[0] + 2, 0, 0]
+                    self.core.predicted_items[cords] = [
+                        self.core.predicted_items.get(cords, (0, 0))[0] + 2,
+                        0,
+                        0,
+                    ]
                 elif event.button == 3:  # right-click
-                    self.core.predicted_items[cords] = [self.core.predicted_items.get(cords, (0, 0))[0] + 3, 1, 0]
+                    self.core.predicted_items[cords] = [
+                        self.core.predicted_items.get(cords, (0, 0))[0] + 3,
+                        1,
+                        0,
+                    ]
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
                     self.control = not self.control
@@ -95,7 +103,10 @@ class Visualizer:
             elif keys[pygame.K_RIGHT]:
                 self.core.motor = [1, -1]
 
-            self.core.motor = [self.core.motor[0] * SPEED_CONTROL, self.core.motor[1] * SPEED_CONTROL]
+            self.core.motor = [
+                self.core.motor[0] * SPEED_CONTROL,
+                self.core.motor[1] * SPEED_CONTROL,
+            ]
 
         self.draw()
 
@@ -105,26 +116,58 @@ class Visualizer:
 
         self.screen.fill(BACK)
 
-        draw_alpha.line(self.screen, WHITE, (MARGIN, MARGIN), (MARGIN + ROOM_SIZE[0], MARGIN), 2)
-        draw_alpha.line(self.screen, WHITE, (MARGIN, MARGIN + ROOM_SIZE[1]),
-                        (MARGIN + ROOM_SIZE[0], MARGIN + ROOM_SIZE[1]), 2)
-        draw_alpha.line(self.screen, WHITE, (MARGIN, MARGIN), (MARGIN, MARGIN + ROOM_SIZE[1]), 2)
-        draw_alpha.line(self.screen, WHITE, (MARGIN + ROOM_SIZE[0], MARGIN),
-                        (MARGIN + ROOM_SIZE[0], MARGIN + ROOM_SIZE[1]), 2)
+        draw_alpha.line(
+            self.screen, WHITE, (MARGIN, MARGIN), (MARGIN + ROOM_SIZE[0], MARGIN), 2
+        )
+        draw_alpha.line(
+            self.screen,
+            WHITE,
+            (MARGIN, MARGIN + ROOM_SIZE[1]),
+            (MARGIN + ROOM_SIZE[0], MARGIN + ROOM_SIZE[1]),
+            2,
+        )
+        draw_alpha.line(
+            self.screen, WHITE, (MARGIN, MARGIN), (MARGIN, MARGIN + ROOM_SIZE[1]), 2
+        )
+        draw_alpha.line(
+            self.screen,
+            WHITE,
+            (MARGIN + ROOM_SIZE[0], MARGIN),
+            (MARGIN + ROOM_SIZE[0], MARGIN + ROOM_SIZE[1]),
+            2,
+        )
 
         for item, v in self.core.predicted_items.items():
-            draw_alpha.circle(self.screen, (
-                255, 255 if v[1] == 1 else 0, 0, min(v[0] * 32, 255)), real2window(item), core.MERGE_RADIUS / UNIT)
+            draw_alpha.circle(
+                self.screen,
+                (255, 255 if v[1] == 1 else 0, 0, min(v[0] * 32, 255)),
+                real2window(item),
+                core.MERGE_RADIUS / UNIT,
+            )
             if v[2] > 0:
-                draw_alpha.circle(self.screen, (255, 255, 255, 128), real2window(item), core.MERGE_RADIUS / UNIT)
+                draw_alpha.circle(
+                    self.screen,
+                    (255, 255, 255, 128),
+                    real2window(item),
+                    core.MERGE_RADIUS / UNIT,
+                )
 
         for wall in self.core.walls:
             draw_alpha.line(self.screen, (255, 255, 255, 128), wall[0], wall[1], 1)
 
-        draw_alpha.polygon(self.screen, CAR, [real2window(v) for v in
-                                              self.core.predicted_vertices[0] + self.core.predicted_vertices[1][::-1]])
+        draw_alpha.polygon(
+            self.screen,
+            CAR,
+            [
+                real2window(v)
+                for v in self.core.predicted_vertices[0]
+                + self.core.predicted_vertices[1][::-1]
+            ],
+        )
         draw_alpha.circle(self.screen, WHITE, real2window(self.core.predicted_cords), 5)
-        draw_alpha.circle(self.screen, (0, 0, 255, 128), real2window(self.core.contact_center), 5)
+        draw_alpha.circle(
+            self.screen, (0, 0, 255, 128), real2window(self.core.contact_center), 5
+        )
 
         pygame.display.flip()
 
