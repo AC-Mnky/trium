@@ -139,6 +139,12 @@ class Core:
         # There is no reset function. When you want to reset the _core, just create a new object.
 
     def get_closest_item(self) -> tuple[float, float] | None:
+        """
+        Finds the closest item to the predicted coordinates.
+
+        Returns:
+            tuple (tuple[float, float] | None): The coordinates of the closest item, or None if no items are found.
+        """
         closest = None
         closest_distance = np.inf
         for x, v in self.predicted_items.items():
