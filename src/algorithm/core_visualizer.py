@@ -45,12 +45,13 @@ class Visualizer:
     def update(self, time: float) -> core.Core:
         """
         Update the visualizer based on user input and time.
+
         Args:
             time (float): The current time.
+
         Returns:
             core.Core: The updated core object.
         """
-
         self.mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if (
