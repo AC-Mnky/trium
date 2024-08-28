@@ -13,7 +13,7 @@ class CameraState:
         resolution: tuple[int, int],
     ):
         """
-        Initializes the CameraConvert object.
+        Initializes the CameraState object.
         Args:
             camera_xyz (tuple[float, float, float]): The XYZ coordinates of the camera.
             camera_rotation (tuple[float, float, float]): The rotation angles of the camera in degrees.
