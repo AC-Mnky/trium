@@ -189,8 +189,26 @@ class Visualizer:
 
 
 def real2window(vec: tuple[float, float]) -> tuple[float, float]:
+    """
+    Converts a real coordinate to a window coordinate.
+
+    Args:
+        vec (tuple[float, float]): The real coordinate to be converted.
+
+    Returns:
+        tuple (tuple[float, float]): The converted window coordinate.
+    """
     return core.vec_add(VEC_MARGIN, core.vec_multiply(vec, 1 / UNIT))
 
 
 def window2real(vec: tuple[float, float]) -> tuple[float, float]:
+    """
+    Converts a vector from window coordinates to real coordinates.
+
+    Args:
+        vec (tuple[float, float]): The vector in window coordinates.
+
+    Returns:
+        tuple (tuple[float, float]): The vector in real coordinates.
+    """
     return core.vec_multiply(core.vec_subtract(vec, VEC_MARGIN), UNIT)
