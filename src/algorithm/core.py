@@ -127,10 +127,12 @@ class Core:
         ].copy()
         self.contact_center = (0, 0)
 
-        """Keys are the items' coords. 
+        """
+        Keys are the items' coords. 
         First element of the list is the decay term,  
         second is the tag to identify red/yellow blocks
-        third is the interest of an item"""
+        third is the interest of an item
+        """
         self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
 
         # pairs of walls' endpoints
@@ -139,6 +141,12 @@ class Core:
         # There is no reset function. When you want to reset the _core, just create a new object.
 
     def get_closest_item(self) -> tuple[float, float] | None:
+        """
+        Finds the closest item to the predicted coordinates.
+
+        Returns:
+            tuple (tuple[float, float] | None): The coordinates of the closest item, or None if no items are found.
+        """
         closest = None
         closest_distance = np.inf
         for x, v in self.predicted_items.items():
@@ -449,7 +457,7 @@ def vec_add(
         vec2 (tuple[float, float]): The second vector.
 
     Returns:
-        tuple[float, float]: The sum of the two vectors.
+        tuple (tuple[float, float]): The sum of the two vectors.
     """
     return vec1[0] + vec2[0], vec1[1] + vec2[1]
 
@@ -465,7 +473,7 @@ def vec_subtract(
         vec2 (tuple[float, float]): The second vector.
 
     Returns:
-        tuple[float, float]: The result of subtracting vec2 from vec1.
+        tuple (tuple[float, float]): The result of subtracting vec2 from vec1.
     """
     return vec1[0] - vec2[0], vec1[1] - vec2[1]
 
@@ -479,7 +487,7 @@ def vec_multiply(vec: tuple[float, float], k: float) -> tuple[float, float]:
         k (float): The scalar value to multiply the vector by.
 
     Returns:
-        tuple[float, float]: The resulting 2D vector after multiplication.
+        tuple (tuple[float, float]): The resulting 2D vector after multiplication.
     """
     return vec[0] * k, vec[1] * k
 
@@ -511,7 +519,7 @@ def projection(
         vec2 (tuple[float, float]): The second vector.
 
     Returns:
-        tuple[float, float]: The projection of vec1 onto vec2.
+        tuple (tuple[float, float]): The projection of vec1 onto vec2.
     """
     length_square = vec2[0] * vec2[0] + vec2[1] * vec2[1]
     if length_square == 0.0:
@@ -530,7 +538,7 @@ def rotated(vec: tuple[float, float], angle_radians: float) -> tuple[float, floa
         angle_radians (float): The angle in radians by which to rotate the vector.
 
     Returns:
-        tuple[float, float]: The rotated 2D vector.
+        tuple (tuple[float, float]): The rotated 2D vector.
     """
     cos = np.cos(angle_radians)
     sin = np.sin(angle_radians)

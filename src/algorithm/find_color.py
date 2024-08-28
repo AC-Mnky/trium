@@ -114,8 +114,8 @@ def find_wall_bottom(image: np.ndarray, show: bool = False):
 
     # print(lines)
     if SHOW_LINE and lines is not None:
-        for l in lines:
-            rho, theta = l[0]
+        for line in lines:
+            rho, theta = line[0]
             a = np.cos(theta)
             b = np.sin(theta)
             x0 = a * rho
@@ -169,8 +169,8 @@ def find_wall_bottom_p(image: np.ndarray, show: bool = False):
     )
     # print(lines)
     if SHOW_LINE and lines is not None:
-        for l in lines:
-            x1, y1, x2, y2 = l[0]
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
             cv2.line(draw, (x1, y1), (x2, y2), (255, 0, 0), 1)
 
     if show:
