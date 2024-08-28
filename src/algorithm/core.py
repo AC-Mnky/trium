@@ -168,7 +168,7 @@ class Core:
         self.predicted_cords += x_diff_average, y_diff_average
         self.predicted_angle += angle_diff_average
 
-    #Get realtime data from other modules
+    # Get realtime data from other modules
     def update(self,
                time: float,
                stm32_input: bytes,
@@ -176,11 +176,11 @@ class Core:
                camera_input: tuple[float, list[tuple[float, float]], list[tuple[float, float]], list[
                    tuple[tuple[float, float], tuple[float, float]]]] | None) -> None:
 
-        #calculate the time interval between two updates
+        # calculate the time interval between two updates
         dt = time - self.last_update_time
         self.last_update_time = time
 
-        #update all the input data
+        # update all the input data
         if stm32_input is not None:
             self.stm_input = stm32_input
         if imu_input is not None:
