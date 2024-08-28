@@ -256,7 +256,7 @@ class Core:
         for item in items_to_delete:
             self.predicted_items.pop(item)
 
-        # go toward the closest item
+        # go towards the closest item
         item = self.get_closest_item()
         if item is None:
             self.motor = [0.25 * MOTOR_SPEED, -0.25 * MOTOR_SPEED]
@@ -271,7 +271,7 @@ class Core:
             else:
                 self.motor = [MOTOR_SPEED, MOTOR_SPEED]
 
-    # Give commands to the STM32
+    # send commands to STM32
     def get_output(self) -> bytes:
         output = (
                 [
