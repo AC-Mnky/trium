@@ -37,7 +37,7 @@ ALL_ITEMS_DECAY_EXPONENTIAL = 1
 DELETE_VALUE = 0.2
 INTEREST_ADDITION = 5
 INTEREST_MAXIMUM = 30
-AIM_ANGLE = 0.2
+AIM_ANGLE = 0.4
 ROOM_MARGIN = 200
 
 MOTOR_SPEED = 0.5
@@ -108,8 +108,12 @@ class Core:
 
         self.predicted_vertices = [[(0.0, 0.0), (0.0, 0.0)], [(0.0, 0.0), (0.0, 0.0)]].copy()
 
-        # Keys are the items' coords. But what do these three elements of values mean?
+        """Keys are the items' coords. 
+        First element of the list is the decay term,  
+        second is the tag to identify red/yellow blocks
+        third is the , and let the second element be 1"""
         self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
+
         # pairs of walls' endpoints
         self.walls: list[tuple[tuple[float, float], tuple[float, float]]] = []
 
@@ -266,6 +270,7 @@ class Core:
             self.predicted_items[item][2] = min(self.predicted_items[item][2] + INTEREST_ADDITION,
                                                 INTEREST_MAXIMUM)
             item_angle = angle_subtract(get_angle(vec_subtract(item, self.predicted_cords)), self.predicted_angle)
+
             if item_angle > AIM_ANGLE:
                 self.motor = [MOTOR_SPEED, -MOTOR_SPEED]
             elif item_angle < -AIM_ANGLE:
