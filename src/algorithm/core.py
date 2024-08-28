@@ -208,7 +208,7 @@ class Core:
         inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
         self.predicted_cords = vec_add(vec_multiply(inferred_velocity, dt), self.predicted_cords)
 
-        # calculate vertices
+        # calculate vertices after displacement
         for i in 0, 1:
             for j in 0, 1:
                 self.predicted_vertices[i][j] = vec_add(
