@@ -296,20 +296,58 @@ class Core:
 
 
 def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> float:
+    """
+    Calculate the distance between two points in a two-dimensional space.
+
+    Args:
+        point1 (tuple[float, float]): The coordinates of the first point.
+        point2 (tuple[float, float]): The coordinates of the second point.
+
+    Returns:
+        float: The distance between the two points.
+    """
     return get_length(vec_subtract(point1, point2))
 
 
 def get_length(vec: tuple[float, float]) -> float:
+    """
+    Calculate the length of a 2D vector.
+
+    Args:
+        vec (tuple[float, float]): The 2D vector represented as a tuple of floats.
+
+    Returns:
+        float: The length of the vector.
+    """
     return np.sqrt(vec[0] * vec[0] + vec[1] * vec[1])
 
 
 def get_angle(vec: tuple[float, float]) -> float:
+    """
+    Calculate the angle (in radians) of a vector.
+
+    Args:
+    vec (tuple[float, float]): The vector represented as a tuple of two floats.
+
+    Returns:
+    float: The angle (in radians) of the vector.
+    """
     if vec[0] == 0 and vec[1] == 0:
         return 0
     return np.arctan2(vec[1], vec[0])
 
 
 def vec_add(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+    """
+    Adds two vectors together.
+
+    Args:
+        vec1 (tuple[float, float]): The first vector.
+        vec2 (tuple[float, float]): The second vector.
+
+    Returns:
+        tuple[float, float]: The sum of the two vectors.
+    """
     return vec1[0] + vec2[0], vec1[1] + vec2[1]
 
 
