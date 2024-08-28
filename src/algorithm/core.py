@@ -129,7 +129,7 @@ class Core:
                 closest_distance = x_distance
         return closest
 
-    #correct the predicted coords by observe the wall
+    # correct the predicted coordinates by observing the walls
     def infer_position_from_walls(self) -> None:
         vote_x_angle = []
         vote_y_angle = []
