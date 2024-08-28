@@ -129,8 +129,16 @@ class Core:
                 closest_distance = x_distance
         return closest
 
-    # correct the predicted coordinates by observing the walls
     def infer_position_from_walls(self) -> None:
+        """
+        Infers the position of an object based on the walls in the environment.
+
+        This method modifies the predicted position of the car by analyzing the walls in the environment.
+        It uses the distances and angles between thecar and the walls to modify predictions.
+
+        Returns:
+            None
+        """
         vote_x_angle = []
         vote_y_angle = []
         for w in self.walls:
@@ -142,7 +150,7 @@ class Core:
             angle = get_angle(perpendicular)
             vote_x_angle.append((ROOM_X - distance, -angle, distance, line_length))
             vote_x_angle.append((distance, np.pi - angle, distance, line_length))
-            vote_y_angle.append((ROOM_Y - distance, np.pi / 2 - angle, distance, line_length))
+            vote_y_angle.append((ROOM_Y - distance, np.pi / 2 - angle, distance, line_length)) # why use the same distance to deal with y?
             vote_y_angle.append((distance, 3 * np.pi / 2 - angle, distance, line_length))
 
         x_weight_sum = y_weight_sum = angle_weight_sum = 1
