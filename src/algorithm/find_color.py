@@ -74,18 +74,56 @@ def find_color(
 
 
 def find_red(image: np.ndarray, show: bool = False) -> list[(int, int)]:
+    """
+    Find the coordinates of red pixels in the given image.
+
+    Args:
+        image (np.ndarray): The image to search for red pixels.
+        show (bool, optional): Whether to display the image with red pixels highlighted. Default is False.
+
+    Returns:
+        list (list[(int, int)]): A list of coordinates (row, column) of red pixels in the image.
+    """
     return find_color(image, RED, show, "red")
 
 
 def find_yellow(image: np.ndarray, show: bool = False) -> list[(int, int)]:
+    """
+    Find the coordinates of yellow pixels in the given image.
+
+    Args:
+        image (np.ndarray): The image to search for yellow pixels.
+        show (bool, optional): Whether to display the image with yellow pixels highlighted. Default is False.
+
+    Returns:
+        list (list[(int, int)]): A list of coordinates (row, column) of yellow pixels in the image.
+    """
     return find_color(image, YELLOW, show, "yellow")
 
 
 def show_blue(image: np.ndarray) -> None:
+    """
+    Show the blue color in the given image.
+
+    Args:
+        image (np.ndarray): the image to display.
+
+    Returns:
+        None
+    """
     get_color_mask(image, BLUE, True, "blue")
 
 
 def show_white(image: np.ndarray) -> None:
+    """
+    Show the white color in the given image.
+
+    Args:
+        image (np.ndarray): The image to process.
+
+    Returns:
+        None
+    """
     get_color_mask(image, WHITE, True, "white")
 
 
