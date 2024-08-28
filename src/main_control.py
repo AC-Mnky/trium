@@ -3,7 +3,7 @@ import time
 ENABLE_STM_INPUT = True  # True
 ENABLE_IMU = False  # True
 ENABLE_CAMERA = True  # True
-ENABLE_VISION = False # True
+ENABLE_VISION = True # True
 ENABLE_CORE = True  # True
 ENABLE_STM_OUTPUT = True  # True
 
