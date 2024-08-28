@@ -43,7 +43,15 @@ class Visualizer:
         ...
 
     def update(self, time: float) -> core.Core:
+        """
+        Update the visualizer based on user input and time.
 
+        Args:
+            time (float): The current time.
+
+        Returns:
+            core.Core: The updated core object.
+        """
         self.mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if (
@@ -112,7 +120,16 @@ class Visualizer:
         return self.core
 
     def draw(self) -> None:
+        """
+        Draws the visualization of the algorithm on the screen.
 
+        - This method fills the screen with a background color and then draws various shapes and
+        lines to represent the algorithm's predicted items, walls, and other elements.
+        - The visualization includes circles, lines, and polygons.
+
+        Returns:
+            None
+        """
         self.screen.fill(BACK)
 
         draw_alpha.line(
@@ -172,8 +189,26 @@ class Visualizer:
 
 
 def real2window(vec: tuple[float, float]) -> tuple[float, float]:
+    """
+    Converts a real coordinate to a window coordinate.
+
+    Args:
+        vec (tuple[float, float]): The real coordinate to be converted.
+
+    Returns:
+        tuple (tuple[float, float]): The converted window coordinate.
+    """
     return core.vec_add(VEC_MARGIN, core.vec_multiply(vec, 1 / UNIT))
 
 
 def window2real(vec: tuple[float, float]) -> tuple[float, float]:
+    """
+    Converts a vector from window coordinates to real coordinates.
+
+    Args:
+        vec (tuple[float, float]): The vector in window coordinates.
+
+    Returns:
+        tuple (tuple[float, float]): The vector in real coordinates.
+    """
     return core.vec_multiply(core.vec_subtract(vec, VEC_MARGIN), UNIT)

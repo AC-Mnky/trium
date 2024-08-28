@@ -44,8 +44,12 @@ ROOM_MARGIN = 200
 MOTOR_SPEED = 0.5
 
 
-def calc_weight(cord_difference: float, angle_difference: float, distance_to_wall: float,
-                seen_wall_length: float) -> float:
+def calc_weight(
+    cord_difference: float,
+    angle_difference: float,
+    distance_to_wall: float,
+    seen_wall_length: float,
+) -> float:
     weight = 0.5
     if np.abs(cord_difference) > MAX_CORD_DIFFERENCE:
         return 0
@@ -56,6 +60,7 @@ def calc_weight(cord_difference: float, angle_difference: float, distance_to_wal
     if seen_wall_length < GOOD_SEEN_WALL_LENGTH:
         weight *= seen_wall_length / GOOD_SEEN_WALL_LENGTH
     return weight
+
 
 # k = key, v = value
 def merge_item_prediction(dictionary) -> None:
@@ -78,7 +83,13 @@ def merge_item_prediction(dictionary) -> None:
                     value_sum += v2[0]
                     interest_max = max(interest_max, v2[2])
                 pos_avg = (pos_sum[0] / value_sum, pos_sum[1] / value_sum)
-                substitution = (neighbour_of_k1, pos_avg, value_sum, v1[1], interest_max)
+                substitution = (
+                    neighbour_of_k1,
+                    pos_avg,
+                    value_sum,
+                    v1[1],
+                    interest_max,
+                )
                 break
 
         if substitution is None:
@@ -98,7 +109,10 @@ class Core:
         self.motor = [0.0, 0.0].copy()
         self.brush = False
         self.back_open = False
-        self.motor_PID = [[15, 10, 40, 10, 0, 10, 5, 0], [15, 10, 40, 10, 0, 10, 5, 0]].copy()
+        self.motor_PID = [
+            [15, 10, 40, 10, 0, 10, 5, 0],
+            [15, 10, 40, 10, 0, 10, 5, 0],
+        ].copy()
 
         self.stm_input = bytes((0,) * 96)
         self.imu_input = None
@@ -107,7 +121,10 @@ class Core:
         self.predicted_cords = (INITIAL_CORD_X, INITIAL_CORD_Y)
         self.predicted_angle = INITIAL_ANGLE
 
-        self.predicted_vertices = [[(0.0, 0.0), (0.0, 0.0)], [(0.0, 0.0), (0.0, 0.0)]].copy()
+        self.predicted_vertices = [
+            [(0.0, 0.0), (0.0, 0.0)],
+            [(0.0, 0.0), (0.0, 0.0)],
+        ].copy()
         self.contact_center = (0, 0)
 
         """Keys are the items' coords. 
@@ -152,8 +169,12 @@ class Core:
             angle = get_angle(perpendicular)
             vote_x_angle.append((ROOM_X - distance, -angle, distance, line_length))
             vote_x_angle.append((distance, np.pi - angle, distance, line_length))
-            vote_y_angle.append((ROOM_Y - distance, np.pi / 2 - angle, distance, line_length)) # why use the same distance to deal with y?
-            vote_y_angle.append((distance, 3 * np.pi / 2 - angle, distance, line_length))
+            vote_y_angle.append(
+                (ROOM_Y - distance, np.pi / 2 - angle, distance, line_length)
+            )  # why use the same distance to deal with y?
+            vote_y_angle.append(
+                (distance, 3 * np.pi / 2 - angle, distance, line_length)
+            )
 
         x_weight_sum = y_weight_sum = angle_weight_sum = 1
         x_diff_sum = y_diff_sum = angle_diff_sum = 0
@@ -186,12 +207,28 @@ class Core:
         self.predicted_angle += angle_diff_average
 
     # Get realtime data from other modules
-    def update(self,
-               time: float,
-               stm32_input: bytes,
-               imu_input: tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None,
-               camera_input: tuple[float, list[tuple[float, float]], list[tuple[float, float]], list[
-                   tuple[tuple[float, float], tuple[float, float]]]] | None) -> None:
+    def update(
+        self,
+        time: float,
+        stm32_input: bytes,
+        imu_input: (
+            tuple[
+                tuple[float, float, float],
+                tuple[float, float, float],
+                tuple[float, float, float],
+            ]
+            | None
+        ),
+        camera_input: (
+            tuple[
+                float,
+                list[tuple[float, float]],
+                list[tuple[float, float]],
+                list[tuple[tuple[float, float], tuple[float, float]]],
+            ]
+            | None
+        ),
+    ) -> None:
 
         # calculate the time interval between two updates
         dt = time - self.last_update_time
@@ -216,23 +253,39 @@ class Core:
         paras have to be modified: WHEEL_X_OFFSET
         angular_speed can use data from imu directly
         """
-        
-        encoder = unpack('<h', self.stm_input[68:70])[0], unpack('<h', self.stm_input[36:38])[0]
-        inferred_angular_speed = (encoder[1] - encoder[0]) * DISTANCE_PER_ENCODER / DISTANCE_BETWEEN_WHEELS / dt
+
+        encoder = (
+            unpack("<h", self.stm_input[68:70])[0],
+            unpack("<h", self.stm_input[36:38])[0],
+        )
+        inferred_angular_speed = (
+            (encoder[1] - encoder[0])
+            * DISTANCE_PER_ENCODER
+            / DISTANCE_BETWEEN_WHEELS
+            / dt
+        )
         inferred_relative_velocity = (
-            (encoder[0] + encoder[1]) * DISTANCE_PER_ENCODER / 2 / dt, -inferred_angular_speed * WHEEL_X_OFFSET)
+            (encoder[0] + encoder[1]) * DISTANCE_PER_ENCODER / 2 / dt,
+            -inferred_angular_speed * WHEEL_X_OFFSET,
+        )
 
         # predict current position
         self.predicted_angle += dt * inferred_angular_speed
         inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
-        self.predicted_cords = vec_add(vec_multiply(inferred_velocity, dt), self.predicted_cords)
+        self.predicted_cords = vec_add(
+            vec_multiply(inferred_velocity, dt), self.predicted_cords
+        )
 
         # calculate vertices after displacement
         for i in 0, 1:
             for j in 0, 1:
                 self.predicted_vertices[i][j] = vec_add(
-                    rotated((i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH), self.predicted_angle),
-                    self.predicted_cords)
+                    rotated(
+                        (i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH),
+                        self.predicted_angle,
+                    ),
+                    self.predicted_cords,
+                )
 
         # analyze camera input
         if camera_input is not None:
@@ -247,26 +300,49 @@ class Core:
                 self.infer_position_from_walls()
 
             for red in camera_reds:
-                cords = vec_add(rotated(red, self.predicted_angle), self.predicted_cords) # position of red block
-                if ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
-                    self.predicted_items[cords] = [self.predicted_items.get(cords, (0, 0))[0] + 2, 0, 0] # let the first element of the value add 2, and let the second element be 0
+                cords = vec_add(
+                    rotated(red, self.predicted_angle), self.predicted_cords
+                )  # position of red block
+                if (
+                    ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
+                    and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
+                ):
+                    self.predicted_items[cords] = [
+                        self.predicted_items.get(cords, (0, 0))[0] + 2,
+                        0,
+                        0,
+                    ]  # let the first element of the value add 2, and let the second element be 0
 
             for yellow in camera_yellows:
-                cords = vec_add(rotated(yellow, self.predicted_angle), self.predicted_cords) # position of yellow block
-                if ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
-                    self.predicted_items[cords] = [self.predicted_items.get(cords, (0, 1))[0] + 3, 1, 0] # let the first element of the value add 3, and let the second element be 1
+                cords = vec_add(
+                    rotated(yellow, self.predicted_angle), self.predicted_cords
+                )  # position of yellow block
+                if (
+                    ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
+                    and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
+                ):
+                    self.predicted_items[cords] = [
+                        self.predicted_items.get(cords, (0, 1))[0] + 3,
+                        1,
+                        0,
+                    ]  # let the first element of the value add 3, and let the second element be 1
 
             merge_item_prediction(self.predicted_items)
 
             # TODO: seen items decay
 
         # decay all items and delete items with low value
-        self.contact_center = vec_multiply(vec_add(self.predicted_cords, rotated((1, 0), self.predicted_angle)), (
-                CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK))
+        self.contact_center = vec_multiply(
+            vec_add(self.predicted_cords, rotated((1, 0), self.predicted_angle)),
+            (CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK),
+        )
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
-            if get_distance(item, self.contact_center) < CONTACT_RADIUS or self.predicted_items[item][0] < DELETE_VALUE:
+            if (
+                get_distance(item, self.contact_center) < CONTACT_RADIUS
+                or self.predicted_items[item][0] < DELETE_VALUE
+            ):
                 items_to_delete.append(item)
         for item in items_to_delete:
             self.predicted_items.pop(item)
@@ -276,9 +352,13 @@ class Core:
         if item is None:
             self.motor = [0.25 * MOTOR_SPEED, -0.25 * MOTOR_SPEED]
         else:
-            self.predicted_items[item][2] = min(self.predicted_items[item][2] + INTEREST_ADDITION,
-                                                INTEREST_MAXIMUM)
-            item_angle = angle_subtract(get_angle(vec_subtract(item, self.predicted_cords)), self.predicted_angle)
+            self.predicted_items[item][2] = min(
+                self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
+            )
+            item_angle = angle_subtract(
+                get_angle(vec_subtract(item, self.predicted_cords)),
+                self.predicted_angle,
+            )
 
             if item_angle > AIM_ANGLE:
                 self.motor = [MOTOR_SPEED, -MOTOR_SPEED]
@@ -295,18 +375,18 @@ class Core:
             bytes: The output as a bytes object.
         """
         output = (
-                [
-                    128,
-                    self.status_code,
-                    int(self.motor[1] * PWM_PERIOD),
-                    int(self.motor[0] * PWM_PERIOD),
-                    int(self.brush),
-                    int(self.back_open),
-                    0,
-                    0,
-                ]
-                + self.motor_PID[1]
-                + self.motor_PID[0]
+            [
+                128,
+                self.status_code,
+                int(self.motor[1] * PWM_PERIOD),
+                int(self.motor[0] * PWM_PERIOD),
+                int(self.brush),
+                int(self.back_open),
+                0,
+                0,
+            ]
+            + self.motor_PID[1]
+            + self.motor_PID[0]
         )
 
         for i in range(len(output)):
@@ -358,7 +438,9 @@ def get_angle(vec: tuple[float, float]) -> float:
     return np.arctan2(vec[1], vec[0])
 
 
-def vec_add(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+def vec_add(
+    vec1: tuple[float, float], vec2: tuple[float, float]
+) -> tuple[float, float]:
     """
     Adds two vectors together.
 
@@ -372,7 +454,9 @@ def vec_add(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float
     return vec1[0] + vec2[0], vec1[1] + vec2[1]
 
 
-def vec_subtract(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+def vec_subtract(
+    vec1: tuple[float, float], vec2: tuple[float, float]
+) -> tuple[float, float]:
     """
     Subtract two vectors.
 
@@ -416,7 +500,9 @@ def angle_subtract(angle1: float, angle2: float) -> float:
     return diff
 
 
-def projection(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+def projection(
+    vec1: tuple[float, float], vec2: tuple[float, float]
+) -> tuple[float, float]:
     """
     Calculates the projection of vec1 onto vec2.
 

@@ -29,10 +29,14 @@ if __name__ == "__main__":
     room = Room(time.time(), pygame.Rect(50, 50, 600, 400))
     room.make_walls(2, 0.5, 1)
 
-    Car(room,
+    Car(
+        room,
         (255, 128, 0, 255),
-        200, 200, np.pi * 1.25,
-        CameraState((205 / 5, 0, -170 / 5), (70, 0), (62.2, 48.8), (640, 480)))
+        200,
+        200,
+        np.pi * 1.25,
+        CameraState((205 / 5, 0, -170 / 5), (70, 0), (62.2, 48.8), (640, 480)),
+    )
     # Car(room,
     #     (0, 0, 255, 255),
     #     500, 300, np.pi * 0.25,
@@ -46,24 +50,33 @@ if __name__ == "__main__":
     #     500, 200, np.pi * 1.75,
     #     CameraState((205 / 5, 0, -170 / 5), (70, 0), (62.2, 48.8), (640, 480)))
     for i in range(5):
-        Red(room,
+        Red(
+            room,
             room.rand.randint(room.rect.left + 2, room.rect.right - 2),
-            room.rand.randint(room.rect.top + 2, room.rect.bottom - 2), )
-        Yellow(room,
-               room.rand.randint(room.rect.left + 3, room.rect.right - 3),
-               room.rand.randint(room.rect.top + 3, room.rect.bottom - 3), )
+            room.rand.randint(room.rect.top + 2, room.rect.bottom - 2),
+        )
+        Yellow(
+            room,
+            room.rand.randint(room.rect.left + 3, room.rect.right - 3),
+            room.rand.randint(room.rect.top + 3, room.rect.bottom - 3),
+        )
 
     while running:
         for event in pygame.event.get():
             if (
-                    event.type == pygame.QUIT
-                    or event.type == pygame.KEYDOWN
-                    and (event.key in [pygame.K_ESCAPE, pygame.K_q])
+                event.type == pygame.QUIT
+                or event.type == pygame.KEYDOWN
+                and (event.key in [pygame.K_ESCAPE, pygame.K_q])
             ):
                 running = False
 
         for c in room.cars:
-            c.algorithm.update(c.camera.get_input(), c.encoder.get_input(), c.imu.get_input(), c.ultrasonic.get_input())
+            c.algorithm.update(
+                c.camera.get_input(),
+                c.encoder.get_input(),
+                c.imu.get_input(),
+                c.ultrasonic.get_input(),
+            )
 
         # player control
         keys = pygame.key.get_pressed()
@@ -136,40 +149,98 @@ if __name__ == "__main__":
         screen.fill(pygame.Color("black"))
         if display_camera_and_brush:
             for c in room.cars:
-                draw_alpha.polygon(screen, (255, 255, 255, 128) if c.camera_capturing else (255, 255, 255, 32),
-                                   [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
-                                    c.camera_range.get_vertices()])
-                draw_alpha.polygon(screen, (255, 255, 255, 64),
-                                   [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in c.brush.get_vertices()])
+                draw_alpha.polygon(
+                    screen,
+                    (255, 255, 255, 128) if c.camera_capturing else (255, 255, 255, 32),
+                    [
+                        (v.rotated(c.body.angle) + c.body.position).int_tuple
+                        for v in c.camera_range.get_vertices()
+                    ],
+                )
+                draw_alpha.polygon(
+                    screen,
+                    (255, 255, 255, 64),
+                    [
+                        (v.rotated(c.body.angle) + c.body.position).int_tuple
+                        for v in c.brush.get_vertices()
+                    ],
+                )
 
         if display_algorithm:
             for x, v in room.cars[0].algorithm.predicted_collectables.items():
-                draw_alpha.circle(screen, (
-                    255, 255 if v[1] == 1 else 0, 0, 16 * np.minimum(v[0], 8)), x, merge_radius)
+                draw_alpha.circle(
+                    screen,
+                    (255, 255 if v[1] == 1 else 0, 0, 16 * np.minimum(v[0], 8)),
+                    x,
+                    merge_radius,
+                )
                 if v[2] > 0:
                     draw_alpha.circle(screen, (255, 255, 255, 128), x, merge_radius)
 
         for c in room.cars:
             for s in c.shapes:
-                draw_alpha.polygon(screen, s.color, [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in
-                                                     s.get_vertices()])
+                draw_alpha.polygon(
+                    screen,
+                    s.color,
+                    [
+                        (v.rotated(c.body.angle) + c.body.position).int_tuple
+                        for v in s.get_vertices()
+                    ],
+                )
         for r in room.reds:
             if r is not None:
-                draw_alpha.polygon(screen, (255, 0, 0, 255),
-                                   [(v.rotated(r.body.angle) + r.body.position).int_tuple for v in
-                                    r.shape.get_vertices()])
+                draw_alpha.polygon(
+                    screen,
+                    (255, 0, 0, 255),
+                    [
+                        (v.rotated(r.body.angle) + r.body.position).int_tuple
+                        for v in r.shape.get_vertices()
+                    ],
+                )
         for y in room.yellows:
             if y is not None:
                 draw_alpha.circle(screen, (255, 255, 0, 255), y.body.position, 3)
 
-        draw_alpha.rectangle(screen, (255, 255, 255, 255),
-                             (room.rect.left - 1, room.rect.top - 1, 2, room.rect.bottom - room.rect.top + 2))
-        draw_alpha.rectangle(screen, (255, 255, 255, 255),
-                             (room.rect.left - 1, room.rect.top - 1, room.rect.right - room.rect.left + 2, 2))
-        draw_alpha.rectangle(screen, (255, 255, 255, 255),
-                             (room.rect.right - 1, room.rect.top - 1, 2, room.rect.bottom - room.rect.top + 2))
-        draw_alpha.rectangle(screen, (255, 255, 255, 255),
-                             (room.rect.left - 1, room.rect.bottom - 1, room.rect.right - room.rect.left + 2, 2))
+        draw_alpha.rectangle(
+            screen,
+            (255, 255, 255, 255),
+            (
+                room.rect.left - 1,
+                room.rect.top - 1,
+                2,
+                room.rect.bottom - room.rect.top + 2,
+            ),
+        )
+        draw_alpha.rectangle(
+            screen,
+            (255, 255, 255, 255),
+            (
+                room.rect.left - 1,
+                room.rect.top - 1,
+                room.rect.right - room.rect.left + 2,
+                2,
+            ),
+        )
+        draw_alpha.rectangle(
+            screen,
+            (255, 255, 255, 255),
+            (
+                room.rect.right - 1,
+                room.rect.top - 1,
+                2,
+                room.rect.bottom - room.rect.top + 2,
+            ),
+        )
+        draw_alpha.rectangle(
+            screen,
+            (255, 255, 255, 255),
+            (
+                room.rect.left - 1,
+                room.rect.bottom - 1,
+                room.rect.right - room.rect.left + 2,
+                2,
+            ),
+        )
 
         pygame.display.flip()
 
