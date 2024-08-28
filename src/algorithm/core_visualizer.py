@@ -124,6 +124,7 @@ class Visualizer:
         draw_alpha.polygon(self.screen, CAR, [real2window(v) for v in
                                               self.core.predicted_vertices[0] + self.core.predicted_vertices[1][::-1]])
         draw_alpha.circle(self.screen, WHITE, real2window(self.core.predicted_cords), 5)
+        draw_alpha.circle(self.screen, (0, 0, 255, 128), real2window(self.core.contact_center), 5)
 
         pygame.display.flip()
 

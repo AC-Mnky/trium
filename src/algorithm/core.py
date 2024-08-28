@@ -107,6 +107,7 @@ class Core:
         self.predicted_angle = INITIAL_ANGLE
 
         self.predicted_vertices = [[(0.0, 0.0), (0.0, 0.0)], [(0.0, 0.0), (0.0, 0.0)]].copy()
+        self.contact_center = (0, 0)
 
         """Keys are the items' coords. 
         First element of the list is the decay term,  
@@ -259,12 +260,12 @@ class Core:
             # TODO: seen items decay
 
         # decay all items and delete items with low value
-        contact_center = vec_multiply(vec_add(self.predicted_cords, rotated((1, 0), self.predicted_angle)), (
+        self.contact_center = vec_multiply(vec_add(self.predicted_cords, rotated((1, 0), self.predicted_angle)), (
                 CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK))
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
-            if get_distance(item, contact_center) < CONTACT_RADIUS or self.predicted_items[item][0] < DELETE_VALUE:
+            if get_distance(item, self.contact_center) < CONTACT_RADIUS or self.predicted_items[item][0] < DELETE_VALUE:
                 items_to_delete.append(item)
         for item in items_to_delete:
             self.predicted_items.pop(item)
