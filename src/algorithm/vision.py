@@ -1,5 +1,11 @@
-from vision2 import find_color
-from vision2 import camera_convert
+import os
+import sys
+
+work_path = os.getcwd()
+sys.path.append(f"{work_path}/algorithm")
+
+import find_color
+import camera_convert
 
 CAMERA_STATE = camera_convert.CameraState(
     (309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480)
