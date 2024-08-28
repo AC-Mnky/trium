@@ -1,4 +1,5 @@
 from struct import unpack
+
 import numpy as np
 
 ENABLE_INFER_POSITION_FROM_WALLS = False  # True

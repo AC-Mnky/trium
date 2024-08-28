@@ -1,11 +1,17 @@
-import os
-import sys
+try:
+    import camera_convert
+    import find_color
+except ModuleNotFoundError:
+    import os
+    import sys
 
-work_path = os.getcwd()
-sys.path.append(f"{work_path}/algorithm")
+    work_path = os.getcwd()
+    sys.path.append(f"{work_path}/algorithm")
+    import camera_convert
+    import find_color
+else:
+    ...
 
-import find_color
-import camera_convert
 
 CAMERA_STATE = camera_convert.CameraState(
     (309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480)

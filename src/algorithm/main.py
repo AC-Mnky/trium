@@ -1,10 +1,10 @@
-import cv2
-import numpy as np
 import os.path
 import time
 
-import find_color
 import camera_convert
+import cv2
+import find_color
+import numpy as np
 
 MODE = 'file'
 # MODE = 'adjust'

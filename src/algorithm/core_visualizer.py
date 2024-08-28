@@ -1,8 +1,7 @@
 import pygame
 
 try:
-    from algorithm import core
-    from algorithm import draw_alpha
+    from algorithm import core, draw_alpha
 except ModuleNotFoundError:
     import core
     import draw_alpha

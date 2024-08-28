@@ -1,6 +1,7 @@
 
-import serial
 import time
+
+import serial
 
 if __name__ == '__main__':
     ser = serial.Serial("/dev/ttyAMA0", "115200")
