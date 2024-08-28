@@ -245,8 +245,6 @@ class Core:
 
             merge_item_prediction(self.predicted_items)
 
-
-
             # TODO: seen items decay
 
         # decay all items and delete items with low value
