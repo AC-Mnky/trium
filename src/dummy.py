@@ -184,8 +184,6 @@ class Dummy:
         if self.right_lock:
             self.motor[1] = motor_prev[1]
 
-        self.draw()
-
         output = (
                 [
                     128,
@@ -204,8 +202,12 @@ class Dummy:
         for i in range(len(output)):
             if output[i] < 0:
                 output[i] += 256
+                
+        bytes_output = bytes(output)
+        
+        self.draw()
 
-        return bytes(output)
+        return bytes_output
 
     def drawn_rect(self, x, y_normalized, color, width=0) -> pygame.Rect:
         rect = pygame.Rect(
@@ -278,6 +280,10 @@ class Dummy:
                 1.3 * UNIT - rect.centery,
             )
             self.screen.blit(text, offset)
+        
+        text = self.font.render(bytes_output.hex(' '), True, FRONT)
+
+        self.screen.blit(text, (0.2 * UNIT, 0.2 * UNIT))
 
     def draw(self) -> None:
         self.screen.fill(BACK)
