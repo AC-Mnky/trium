@@ -2,8 +2,8 @@ import time
 
 ENABLE_STM_INPUT = True  # True
 ENABLE_IMU = False  # True
-ENABLE_CAMERA = False  # True
-ENABLE_VISION = False # True
+ENABLE_CAMERA = True  # True
+ENABLE_VISION = True # True
 ENABLE_CORE = True  # True
 ENABLE_STM_OUTPUT = True  # True
 
@@ -12,7 +12,7 @@ DUMMY_CONTROL = False  # False
 ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
 
-CAMERA_COOLDOWN = 5
+CAMERA_COOLDOWN = 0
 CYCLE_MIN_TIME = 0.02
 
 FORCE_STOP_MESSAGE = bytes((128, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0))
