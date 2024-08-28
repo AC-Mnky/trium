@@ -128,6 +128,21 @@ class CameraState:
 def img2space(
     camera_state: CameraState, i: int, j: int, target_z: float = 0
 ) -> tuple[bool, float, float]:
+    """
+    Converts image coordinates to 3D space coordinates.
+
+    Args:
+        camera_state (CameraState): The camera state object.
+        i (int): The image x-coordinate.
+        j (int): The image y-coordinate.
+        target_z (float, optional): The target z-coordinate. Defaults to 0.
+
+    Returns:
+        tuple[bool, float, float]: A tuple containing the following:
+            - on_the_ground (bool): True if the point is on the ground, False otherwise.
+            - x (float): The x-coordinate in 3D space.
+            - y (float): The y-coordinate in 3D space.
+    """
     c = camera_state
 
     relative_cords = np.dot(c.img_to_relative_cords_mapping, (1, i, j))
