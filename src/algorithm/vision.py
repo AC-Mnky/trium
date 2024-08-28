@@ -1,6 +1,7 @@
 try:
     import camera_convert
     import find_color
+    import cv2
 except ModuleNotFoundError:
     import os
     import sys
@@ -18,7 +19,7 @@ CAMERA_STATE = camera_convert.CameraState(
 )
 
 
-def process(time: float, image) -> (
+def process(time: float, image: cv2.UMat) -> (
     tuple[
         float,
         list[tuple[float, float]],
@@ -27,6 +28,20 @@ def process(time: float, image) -> (
     ]
     | None
 ):
+    """
+    Process the given image to extract relevant information.
+    Args:
+        time (float): The time associated with the image.
+        image (cv2.UMat): The image to be processed.
+    Returns:
+        tuple[float, list[tuple[float, float]], list[tuple[float, float]], list[tuple[tuple[float, float], tuple[float, float]]]] or None:
+            A tuple containing the following information:
+            - The time associated with the image.
+            - A list of red points found in the image.
+            - A list of yellow points found in the image.
+            - A list of wall segments found in the image.
+            If the image is None, None is returned.
+    """
     if image is None:
         return None
 

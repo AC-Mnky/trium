@@ -18,7 +18,7 @@ class Camera:
         Retrieves the BGR image from the camera.
 
         Returns:
-            cv2.UMat | None: The BGR image if available, None otherwise.
+            camera_image (cv2.UMat | None): The BGR image if available, None otherwise.
         """
         if time.time() - self.start_time < START_WAIT_TIME:
             return None
