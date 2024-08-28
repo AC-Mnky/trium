@@ -103,7 +103,8 @@ if __name__ == '__main__':
             print('Got STM32 input, used time:', next(module_time))
         if ENABLE_IMU:
             imu_input = imu.get_imu_input()
-            print('Got IMU input, used time:', next(module_time))
+            print('Got IMU input:', imu_input)
+            print('used time:', next(module_time))
 
         if ENABLE_CAMERA and real_time() - camera_last_used_time > CAMERA_COOLDOWN:
             camera_last_used_time = real_time()

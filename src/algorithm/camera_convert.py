@@ -14,11 +14,13 @@ class CameraState:
     ):
         """
         Initializes the CameraState object.
+
         Args:
             camera_xyz (tuple[float, float, float]): The XYZ coordinates of the camera.
             camera_rotation (tuple[float, float, float]): The rotation angles of the camera in degrees.
             fov (tuple[float, float]): The field of view angles of the camera in degrees.
             resolution (tuple[int, int]): The resolution of the camera image.
+
         Returns:
             None
         """

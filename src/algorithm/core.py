@@ -107,11 +107,12 @@ class Core:
         self.predicted_angle = INITIAL_ANGLE
 
         self.predicted_vertices = [[(0.0, 0.0), (0.0, 0.0)], [(0.0, 0.0), (0.0, 0.0)]].copy()
+        self.contact_center = (0, 0)
 
         """Keys are the items' coords. 
         First element of the list is the decay term,  
         second is the tag to identify red/yellow blocks
-        third is the , and let the second element be 1"""
+        third is the interest of an item"""
         self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
 
         # pairs of walls' endpoints
@@ -130,6 +131,15 @@ class Core:
         return closest
 
     def infer_position_from_walls(self) -> None:
+        """
+        Infers the position of an object based on the walls in the environment.
+
+        This method modifies the predicted position of the car by analyzing the walls in the environment.
+        It uses the distances and angles between thecar and the walls to modify predictions.
+
+        Returns:
+            None
+        """
         vote_x_angle = []
         vote_y_angle = []
         for w in self.walls:
@@ -141,7 +151,7 @@ class Core:
             angle = get_angle(perpendicular)
             vote_x_angle.append((ROOM_X - distance, -angle, distance, line_length))
             vote_x_angle.append((distance, np.pi - angle, distance, line_length))
-            vote_y_angle.append((ROOM_Y - distance, np.pi / 2 - angle, distance, line_length))
+            vote_y_angle.append((ROOM_Y - distance, np.pi / 2 - angle, distance, line_length)) # why use the same distance to deal with y?
             vote_y_angle.append((distance, 3 * np.pi / 2 - angle, distance, line_length))
 
         x_weight_sum = y_weight_sum = angle_weight_sum = 1
@@ -250,12 +260,12 @@ class Core:
             # TODO: seen items decay
 
         # decay all items and delete items with low value
-        contact_center = vec_multiply(vec_add(self.predicted_cords, rotated((1, 0), self.predicted_angle)), (
+        self.contact_center = vec_multiply(vec_add(self.predicted_cords, rotated((1, 0), self.predicted_angle)), (
                 CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK))
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
-            if get_distance(item, contact_center) < CONTACT_RADIUS or self.predicted_items[item][0] < DELETE_VALUE:
+            if get_distance(item, self.contact_center) < CONTACT_RADIUS or self.predicted_items[item][0] < DELETE_VALUE:
                 items_to_delete.append(item)
         for item in items_to_delete:
             self.predicted_items.pop(item)
@@ -276,8 +286,13 @@ class Core:
             else:
                 self.motor = [MOTOR_SPEED, MOTOR_SPEED]
 
-    # send commands to STM32
     def get_output(self) -> bytes:
+        """
+        Returns the message to be sent to STM32 as a bytes object.
+
+        Returns:
+            bytes: The output as a bytes object.
+        """
         output = (
                 [
                     128,
