@@ -122,7 +122,10 @@ class Visualizer:
     def draw(self) -> None:
         """
         Draws the visualization of the algorithm on the screen.
-        This method fills the screen with a background color and then draws various shapes and lines to represent the algorithm's predicted items, walls, and other elements. The visualization includes circles, lines, and polygons.
+
+        - This method fills the screen with a background color and then draws various shapes and
+        lines to represent the algorithm's predicted items, walls, and other elements.
+        - The visualization includes circles, lines, and polygons.
 
         Returns:
             None
