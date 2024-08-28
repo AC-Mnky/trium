@@ -222,8 +222,10 @@ class Core:
         # analyze camera input
         if camera_input is not None:
 
-            """ "camera_reds", "camera_yellows" are coords of red blocks and yellow blocks;
-            "camera_walls" are pairs of coords of the walls' end points """
+            """
+            "camera_reds", "camera_yellows" are coords of red blocks and yellow blocks
+            "camera_walls" are pairs of coords of the walls' end points
+            """
 
             camera_time, camera_reds, camera_yellows, camera_walls = camera_input
 
