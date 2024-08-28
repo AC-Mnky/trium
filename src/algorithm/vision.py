@@ -19,7 +19,7 @@ CAMERA_STATE = camera_convert.CameraState(
 )
 
 
-def process(time: float, image: cv2.UMat) -> (
+def process(time: float, image: cv2.UMat | None) -> (
     tuple[
         float,
         list[tuple[float, float]],
@@ -30,17 +30,18 @@ def process(time: float, image: cv2.UMat) -> (
 ):
     """
     Process the given image to extract relevant information.
+
     Args:
         time (float): The time associated with the image.
         image (cv2.UMat): The image to be processed.
+
     Returns:
-        tuple[float, list[tuple[float, float]], list[tuple[float, float]], list[tuple[tuple[float, float], tuple[float, float]]]] or None:
-            A tuple containing the following information:
-            - The time associated with the image.
-            - A list of red points found in the image.
-            - A list of yellow points found in the image.
-            - A list of wall segments found in the image.
-            If the image is None, None is returned.
+        tuple: A tuple containing the following information or None:
+            - time (float): The time associated with the image.
+            - reds (list): A list of red points found in the image.
+            - yellows (list): A list of yellow points found in the image.
+            - walls (list): A list of wall segments found in the image.
+            - If the image is None, None is returned.
     """
     if image is None:
         return None
