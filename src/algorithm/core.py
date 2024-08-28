@@ -1,5 +1,5 @@
-import numpy as np
 from struct import unpack
+import numpy as np
 
 ENABLE_INFER_POSITION_FROM_WALLS = False  # True
 
@@ -56,7 +56,7 @@ def calc_weight(cord_difference: float, angle_difference: float, distance_to_wal
         weight *= seen_wall_length / GOOD_SEEN_WALL_LENGTH
     return weight
 
- # k = key, v = value
+# k = key, v = value
 def merge_item_prediction(dictionary) -> None:
     while True:
         substitution = None
@@ -225,10 +225,10 @@ class Core:
 
         # analyze camera input
         if camera_input is not None:
-
-            """ "camera_reds", "camera_yellows" are coords of red blocks and yellow blocks;
-            "camera_walls" are pairs of coords of the walls' end points """
-
+            """
+            "camera_reds", "camera_yellows" are coords of red blocks and yellow blocks
+            "camera_walls" are pairs of coords of the walls' end points
+            """
             camera_time, camera_reds, camera_yellows, camera_walls = camera_input
 
             self.walls = camera_walls
@@ -247,8 +247,6 @@ class Core:
 
             merge_item_prediction(self.predicted_items)
 
-
-
             # TODO: seen items decay
 
         # decay all items and delete items with low value
@@ -262,7 +260,7 @@ class Core:
         for item in items_to_delete:
             self.predicted_items.pop(item)
 
-        # go toward the closest item
+        # go towards the closest item
         item = self.get_closest_item()
         if item is None:
             self.motor = [0.25 * MOTOR_SPEED, -0.25 * MOTOR_SPEED]
@@ -278,7 +276,7 @@ class Core:
             else:
                 self.motor = [MOTOR_SPEED, MOTOR_SPEED]
 
-    #Give commands to the STM32
+    # send commands to STM32
     def get_output(self) -> bytes:
         output = (
                 [
@@ -303,38 +301,116 @@ class Core:
 
 
 def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> float:
+    """
+    Calculate the distance between two points in a two-dimensional space.
+
+    Args:
+        point1 (tuple[float, float]): The coordinates of the first point.
+        point2 (tuple[float, float]): The coordinates of the second point.
+
+    Returns:
+        float: The distance between the two points.
+    """
     return get_length(vec_subtract(point1, point2))
 
 
 def get_length(vec: tuple[float, float]) -> float:
+    """
+    Calculate the length of a 2D vector.
+
+    Args:
+        vec (tuple[float, float]): The 2D vector represented as a tuple of floats.
+
+    Returns:
+        float: The length of the vector.
+    """
     return np.sqrt(vec[0] * vec[0] + vec[1] * vec[1])
 
 
 def get_angle(vec: tuple[float, float]) -> float:
+    """
+    Calculate the angle (in radians) of a vector.
+
+    Args:
+    vec (tuple[float, float]): The vector represented as a tuple of two floats.
+
+    Returns:
+    float: The angle (in radians) of the vector.
+    """
     if vec[0] == 0 and vec[1] == 0:
         return 0
     return np.arctan2(vec[1], vec[0])
 
 
 def vec_add(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+    """
+    Adds two vectors together.
+
+    Args:
+        vec1 (tuple[float, float]): The first vector.
+        vec2 (tuple[float, float]): The second vector.
+
+    Returns:
+        tuple[float, float]: The sum of the two vectors.
+    """
     return vec1[0] + vec2[0], vec1[1] + vec2[1]
 
 
 def vec_subtract(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+    """
+    Subtract two vectors.
+
+    Args:
+        vec1 (tuple[float, float]): The first vector.
+        vec2 (tuple[float, float]): The second vector.
+
+    Returns:
+        tuple[float, float]: The result of subtracting vec2 from vec1.
+    """
     return vec1[0] - vec2[0], vec1[1] - vec2[1]
 
 
 def vec_multiply(vec: tuple[float, float], k: float) -> tuple[float, float]:
+    """
+    Multiply a 2D vector by a scalar.
+
+    Args:
+        vec (tuple[float, float]): The 2D vector to be multiplied.
+        k (float): The scalar value to multiply the vector by.
+
+    Returns:
+        tuple[float, float]: The resulting 2D vector after multiplication.
+    """
     return vec[0] * k, vec[1] * k
 
 
 def angle_subtract(angle1: float, angle2: float) -> float:
+    """
+    Calculates the difference between two angles.
+
+    Args:
+        angle1 (float): The first angle in radians.
+        angle2 (float): The second angle in radians.
+
+    Returns:
+        float: The difference between the two angles in radians.
+    """
     diff = angle1 - angle2
     diff -= round(diff / np.tau) * np.tau
     return diff
 
 
 def projection(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
+    """
+    Calculates the projection of vec1 onto vec2.
+
+    Args:
+        vec1 (tuple[float, float]): The first vector.
+        vec2 (tuple[float, float]): The second vector.
+
+    Returns:
+        tuple[float, float]: The projection of vec1 onto vec2.
+    """
     length_square = vec2[0] * vec2[0] + vec2[1] * vec2[1]
     if length_square == 0.0:
         return 0, 0
@@ -344,6 +420,16 @@ def projection(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[fl
 
 
 def rotated(vec: tuple[float, float], angle_radians: float) -> tuple[float, float]:
+    """
+    Rotates a 2D vector by a given angle in radians.
+
+    Args:
+        vec (tuple[float, float]): The 2D vector to be rotated.
+        angle_radians (float): The angle in radians by which to rotate the vector.
+
+    Returns:
+        tuple[float, float]: The rotated 2D vector.
+    """
     cos = np.cos(angle_radians)
     sin = np.sin(angle_radians)
     x = vec[0] * cos - vec[1] * sin
