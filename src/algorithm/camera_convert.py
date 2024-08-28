@@ -161,6 +161,20 @@ def img2space(
 def space2img(
     camera_state: CameraState, x: float, y: float, z: float = 0
 ) -> tuple[bool, int, int]:
+    """
+    Converts 3D coordinates in space to image coordinates based on the camera state.
+
+    Args:
+        camera_state (CameraState): The state of the camera.
+        x (float): The x-coordinate in space.
+        y (float): The y-coordinate in space.
+        z (float, optional): The z-coordinate in space. Defaults to 0.
+
+    Returns:
+        tuple[bool, int, int]: A tuple containing the following:
+            - can_be_seen (bool): True if the point can be seen in the camera's view.
+            - int(i), int(j): The corresponding image coordinates (i, j).
+    """
     c = camera_state
 
     can_be_seen = True
