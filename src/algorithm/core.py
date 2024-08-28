@@ -176,9 +176,11 @@ class Core:
                camera_input: tuple[float, list[tuple[float, float]], list[tuple[float, float]], list[
                    tuple[tuple[float, float], tuple[float, float]]]] | None) -> None:
 
+        #calculate the time interval between two updates
         dt = time - self.last_update_time
         self.last_update_time = time
 
+        #update all the input data
         if stm32_input is not None:
             self.stm_input = stm32_input
         if imu_input is not None:
