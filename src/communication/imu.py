@@ -233,6 +233,7 @@ class IMU:
 
 
 if __name__ == "__main__":
+    # Test the IMU class
     imu = IMU()
     st = time.time()
     imu.get_imu_input()
