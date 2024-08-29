@@ -21,7 +21,7 @@ class STM:
             self.ser.open()
         self.stm_time = time.time()
             
-    def reset_time() -> None:
+    def reset_time(self) -> None:
         self.stm_time = time.time()
 
     def get_message(self) -> bytes:
