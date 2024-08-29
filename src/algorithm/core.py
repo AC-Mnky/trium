@@ -115,8 +115,7 @@ class Core:
             [15, 10, 40, 10, 0, 10, 5, 0],
             [15, 10, 40, 10, 0, 10, 5, 0],
         ].copy()
-
-        self.stm_input = bytes((0,) * 96)
+        self.stm_input = bytes((0,) * 96) if input_protocol == 128 else bytes((0,) * 13)
         self.imu_input = None
         self.camera_input = None
 
@@ -260,10 +259,20 @@ class Core:
         angular_speed can use data from imu directly
         """
 
-        encoder = (
-            unpack("<h", self.stm_input[68:70])[0],
-            unpack("<h", self.stm_input[36:38])[0],
-        )
+        if self.protocol == 128:
+            encoder = (
+                unpack("<h", self.stm_input[68:70])[0],
+                unpack("<h", self.stm_input[36:38])[0],
+            )
+        elif self.protocol == 127:
+            encoder = (
+                unpack("<h", self.stm_input[11:13])[0],
+                unpack("<h", self.stm_input[5:7])[0],
+            )
+            tick = (
+                unpack("<I", self.stm_input[7:11])[0],
+                unpack("<I", self.stm_input[1:5])[0],
+            )
         inferred_angular_speed = (
                 (encoder[1] - encoder[0])
                 * DISTANCE_PER_ENCODER

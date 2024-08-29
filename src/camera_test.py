@@ -96,6 +96,7 @@ def process(img, show: bool = False):
 
     if show:
         cv2.imshow("image", img)
+        print('no shit')
 
 
 def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
@@ -206,8 +207,12 @@ if __name__ == "__main__":
 
     if MODE == "camera":
         target_dir = repository_path + "/assets/openCV_pic/" + WRITE_DIR + "/"
-        os.path.isdir(target_dir)
-        os.mkdir(target_dir)
+        if os.path.isdir(target_dir):
+            if not FORCE_OVERWRITE:
+                print('Directory', target_dir, 'exists. Consider enabling FORCE_OVERWRITE.')
+                exit(0)
+        else:
+            os.mkdir(target_dir)
         c = Camera()
         time_last_capture = time.time() + 1.5
         for image_index in range(100):
@@ -220,6 +225,11 @@ if __name__ == "__main__":
                 + str(image_index)
                 + ".jpg"
             )
-            cv2.imwrite(filename, image)
-            process(image, GLOBAL_SHOW)
-            # cv2.waitKey(500)
+            
+            if image != None:
+                cv2.imwrite(filename, image)
+                process(image, GLOBAL_SHOW)
+                
+            else:
+                print("shit")
+            cv2.waitKey(500)
