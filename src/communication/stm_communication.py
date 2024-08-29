@@ -11,12 +11,12 @@ STANDARD_SPEED = 280 / 60 * math.tau * WHEEL_RADIUS
 
 
 class STM:
-    def __init__(self):
+    def __init__(self, protocol: int):
         self.port = "/dev/ttyAMA0"
         self.baud = "115200"
         self.ser = serial.Serial(self.port, self.baud, parity=serial.PARITY_NONE)
-        self.message_length = 96
-        self.message_head = bytes((128,) * 4)
+        self.message_length = 96 if protocol == 128 else 13
+        self.message_head = bytes((128, ) * 4) if protocol == 128 else bytes((127, ))
         if not self.ser.is_open:
             self.ser.open()
 

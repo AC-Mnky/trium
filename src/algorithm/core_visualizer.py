@@ -158,14 +158,14 @@ class Visualizer:
                 self.screen,
                 (255, 255 if v[1] == 1 else 0, 0, min(v[0] * 32, 255)),
                 real2window(item),
-                core.MERGE_RADIUS / UNIT,
+                core.MERGE_RADIUS / UNIT / 2,
             )
             if v[2] > 0:
                 draw_alpha.circle(
                     self.screen,
                     (255, 255, 255, 128),
                     real2window(item),
-                    core.MERGE_RADIUS / UNIT,
+                    core.MERGE_RADIUS / UNIT / 2,
                 )
 
         for wall in self.core.walls:
@@ -180,9 +180,9 @@ class Visualizer:
                 + self.core.predicted_vertices[1][::-1]
             ],
         )
-        draw_alpha.circle(self.screen, WHITE, real2window(self.core.predicted_cords), 5)
+        draw_alpha.circle(self.screen, WHITE, real2window(self.core.predicted_cords), 2)
         draw_alpha.circle(
-            self.screen, (0, 0, 255, 128), real2window(self.core.contact_center), 5
+            self.screen, (0, 0, 255, 64), real2window(self.core.contact_center), core.CONTACT_RADIUS / UNIT
         )
 
         pygame.display.flip()

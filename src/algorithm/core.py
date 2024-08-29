@@ -39,6 +39,7 @@ DELETE_VALUE = 0.2
 INTEREST_ADDITION = 5
 INTEREST_MAXIMUM = 30
 AIM_ANGLE = 0.4
+UNAIM_ANGLE = 0.2
 ROOM_MARGIN = 200
 
 MOTOR_SPEED = 0.5
@@ -336,10 +337,7 @@ class Core:
             # TODO: seen items decay
 
         # decay all items and delete items with low value
-        self.contact_center = vec_multiply(
-            vec_add(self.predicted_cords, rotated((1, 0), self.predicted_angle)),
-            (CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK),
-        )
+        self.contact_center = vec_add(self.predicted_cords, rotated((CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK, 0), self.predicted_angle))
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
@@ -354,7 +352,7 @@ class Core:
         # go towards the closest item
         item = self.get_closest_item()
         if item is None:
-            self.motor = [0.25 * MOTOR_SPEED, -0.25 * MOTOR_SPEED]
+            self.motor = [0.5 * MOTOR_SPEED, -0.5 * MOTOR_SPEED]
         else:
             self.predicted_items[item][2] = min(
                 self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
@@ -364,9 +362,9 @@ class Core:
                 self.predicted_angle,
             )
 
-            if item_angle > AIM_ANGLE:
+            if item_angle > AIM_ANGLE or item_angle > UNAIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
                 self.motor = [MOTOR_SPEED, -MOTOR_SPEED]
-            elif item_angle < -AIM_ANGLE:
+            elif item_angle < -AIM_ANGLE or item_angle < -UNAIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
                 self.motor = [-MOTOR_SPEED, MOTOR_SPEED]
             else:
                 self.motor = [MOTOR_SPEED, MOTOR_SPEED]
