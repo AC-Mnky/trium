@@ -15,7 +15,7 @@ except ModuleNotFoundError:
     sys.path.append(f"{work_path}/algorithm")
     import camera_convert
 
-ENABLE_INFER_POSITION_FROM_WALLS = False  # True
+ENABLE_INFER_POSITION_FROM_WALLS = True  # True
 
 np.tau = 2 * np.pi
 
@@ -60,8 +60,8 @@ MOTOR_SPEED = 0.5
 RED = 0
 YELLOW = 1
 
-CAMERA_MARGIN_H = 80
-CAMERA_MARGIN_V = 60
+CAMERA_MARGIN_H = 40  # 80
+CAMERA_MARGIN_V = 30  # 60
 
 def calc_weight(
         cord_difference: float,
@@ -98,7 +98,7 @@ def merge_item_prediction(dictionary) -> None:
                 value_sum = 0
                 interest_max = 0
                 for k2, v2 in neighbour_of_k1.items():
-                    pos_sum = vec_add(pos_sum, vec_multiply(k2, v2[0]))
+                    pos_sum = vec_add(pos_sum, vec_mul(k2, v2[0]))
                     value_sum += v2[0]
                     interest_max = max(interest_max, v2[2])
                 pos_avg = (pos_sum[0] / value_sum, pos_sum[1] / value_sum)
@@ -249,9 +249,9 @@ class Core:
         vote_y_angle = []
         for w in self.walls:
             point_1, point_2 = (w[0][0], w[0][1]), (w[1][0], w[1][1])
-            line = vec_subtract(point_2, point_1)
+            line = vec_sub(point_2, point_1)
             line_length = get_length(line)
-            perpendicular = vec_subtract(point_1, projection(point_1, line))
+            perpendicular = vec_sub(point_1, projection(point_1, line))
             distance = get_length(perpendicular)
             angle = get_angle(perpendicular)
             vote_x_angle.append((ROOM_X - distance, -angle, distance, line_length))
@@ -354,19 +354,14 @@ class Core:
             print([math.radians(x) for x in self.imu_angle_deg], 'yee')
         inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
         self.predicted_cords = vec_add(
-            vec_multiply(inferred_velocity, dt), self.predicted_cords
+            vec_mul(inferred_velocity, dt), self.predicted_cords
         )
 
         # calculate vertices after displacement
         for i in 0, 1:
             for j in 0, 1:
-                self.predicted_vertices[i][j] = vec_add(
-                    rotated(
-                        (i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH),
-                        self.predicted_angle,
-                    ),
-                    self.predicted_cords,
-                )
+                self.predicted_vertices[i][j] = self.relative2absolute((i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH))
+
         for i, camera_point in ((0, (0, 0)),
                                 (1, (0, vision.CAMERA_STATE.res_v)),
                                 (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
@@ -376,13 +371,7 @@ class Core:
                                 (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
                                 (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
                                 ):
-            self.predicted_camera_vertices[i] = vec_add(
-                    rotated(
-                        camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3],
-                        self.predicted_angle,
-                    ),
-                    self.predicted_cords,
-                )
+            self.predicted_camera_vertices[i] = self.relative2absolute(camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3])
 
         # analyze camera input
         if camera_input is not None:
@@ -397,9 +386,7 @@ class Core:
                 self.infer_position_from_walls()
 
             for red in camera_reds:
-                cords = vec_add(
-                    rotated(red, self.predicted_angle), self.predicted_cords
-                )  # position of red block
+                cords = self.relative2absolute(red)  # position of red block
                 if (
                         ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
                         and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
@@ -411,9 +398,7 @@ class Core:
                     ]  # let the first element of the value add 2, and let the second element be 0
 
             for yellow in camera_yellows:
-                cords = vec_add(
-                    rotated(yellow, self.predicted_angle), self.predicted_cords
-                )  # position of yellow block
+                cords = self.relative2absolute(yellow)  # position of yellow block
                 if (
                         ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
                         and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
@@ -428,15 +413,14 @@ class Core:
 
             # decay seen items
             for item, v in self.predicted_items.items():
-                relative_cords = rotated(vec_subtract(item, self.predicted_cords), -self.predicted_angle)
+                relative_cords = self.absolute2relative(item)
                 _, i, j =  camera_convert.space2img(vision.CAMERA_STATE, relative_cords[0], relative_cords[1], -12.5 if v[1] == RED else -15)
                 if 0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H \
                     and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V:
                     v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
 
         # decay all items and delete items with low value
-        self.contact_center = vec_add(self.predicted_cords,
-            rotated((CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK, 0), self.predicted_angle))
+        self.contact_center = self.relative2absolute((CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK, 0))
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
@@ -456,17 +440,35 @@ class Core:
             self.predicted_items[item][2] = min(
                 self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
             )
-            item_angle = angle_subtract(
-                get_angle(vec_subtract(item, self.predicted_cords)),
-                self.predicted_angle,
-            )
-
-            if item_angle > AIM_ANGLE or item_angle > UNAIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
-                self.motor = [MOTOR_SPEED, -MOTOR_SPEED]
-            elif item_angle < -AIM_ANGLE or item_angle < -UNAIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
-                self.motor = [-MOTOR_SPEED, MOTOR_SPEED]
-            else:
-                self.motor = [MOTOR_SPEED, MOTOR_SPEED]
+            cords = self.absolute2relative(item)
+            item_angle = angle_subtract(get_angle(cords), 0)
+            
+            if cords[0] > -50 and -30 < cords[1] < 30:
+                self.motor = [0.5, 0.5]
+            elif get_length(cords) < 150:
+                self.perdicted_items.pop(item)  # to close. who knows where the thing goes?
+                self.motor = [0, 0]
+            elif 0 < item_angle < 0.2:
+                self.motor = [0.2, 0.5]
+            elif -0.2 < item_angle < 0:
+                self.motor = [0.5, 2]
+            elif 0 < item_angle < 1:
+                self.motor = [0.2, 0]
+            elif -1 < item_angle < 0:
+                self.motor = [0, 0.2]
+            elif 0 < item_angle:
+                self.motor = [0.5, -0.5]
+            elif item_angle < 0:
+                self.motor = [-0.5, 0.5]
+                
+                
+                
+            # if item_angle > AIM_ANGLE or item_angle > UNAIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
+            #     self.motor = [0.2, -0.2]
+            # elif item_angle < -AIM_ANGLE or item_angle < -UNAIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
+            #     self.motor = [-0.2, 0.2]
+            # else:
+            #     self.motor = [0.5, 0.5]
 
         self.brush = True
 
@@ -502,6 +504,12 @@ class Core:
         self.output = bytes(output)
 
         return self.output
+    
+    def absolute2relative(self, vec: tuple[float, float]) -> tuple[float, float]:
+        return rotated(vec_sub(vec, self.predicted_cords), -self.predicted_angle)
+    def relative2absolute(self, vec: tuple[float, float]) -> tuple[float, float]:
+        return vec_add(rotated(vec, self.predicted_angle), self.predicted_cords)
+    
 
 
 def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> float:
@@ -515,7 +523,7 @@ def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> fl
     Returns:
         float: The distance between the two points.
     """
-    return get_length(vec_subtract(point1, point2))
+    return get_length(vec_sub(point1, point2))
 
 
 def get_length(vec: tuple[float, float]) -> float:
@@ -562,7 +570,7 @@ def vec_add(
     return vec1[0] + vec2[0], vec1[1] + vec2[1]
 
 
-def vec_subtract(
+def vec_sub(
         vec1: tuple[float, float], vec2: tuple[float, float]
 ) -> tuple[float, float]:
     """
@@ -578,7 +586,7 @@ def vec_subtract(
     return vec1[0] - vec2[0], vec1[1] - vec2[1]
 
 
-def vec_multiply(vec: tuple[float, float], k: float) -> tuple[float, float]:
+def vec_mul(vec: tuple[float, float], k: float) -> tuple[float, float]:
     """
     Multiply a 2D vector by a scalar.
 

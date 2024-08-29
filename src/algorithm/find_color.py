@@ -13,7 +13,7 @@ BLUE = [np.array(((100, 100, 25), (125, 255, 255)))]
 WHITE = [np.array(((0, 0, 50), (180, 100, 255)))]
 
 SHIFT1_ONLY_UP_SHIFT = True
-WALL_SHIFT1 = 10
+WALL_SHIFT1 = 5  # 10
 ENABLE_WALL_SHIFT2 = True
 WALL_SHIFT2 = 1
 HOUGH_THRESHOLD = 180
@@ -65,7 +65,7 @@ def find_color(
     points = []
     for c in contours:
         m = cv2.moments(c)
-        if m["m00"] > 100:
+        if m["m00"] > 25:  # 100:
             cx = int(m["m10"] / m["m00"])
             cy = int(m["m01"] / m["m00"])
             points.append((cx, cy))
