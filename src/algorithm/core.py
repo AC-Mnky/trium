@@ -31,7 +31,7 @@ MAX_ANGLE_DIFFERENCE = 0.4
 GOOD_SEEN_WALL_LENGTH = 500
 
 MERGE_RADIUS = 75
-CONTACT_CENTER_TO_BACK = 180
+CONTACT_CENTER_TO_BACK = 50
 CONTACT_RADIUS = 40
 SEEN_ITEMS_DECAY_EXPONENTIAL = 0.5
 ALL_ITEMS_DECAY_EXPONENTIAL = 1
@@ -40,7 +40,7 @@ INTEREST_ADDITION = 5
 INTEREST_MAXIMUM = 30
 AIM_ANGLE = 0.4
 UNAIM_ANGLE = 0.2
-ROOM_MARGIN = 200
+ROOM_MARGIN = -1000000
 
 MOTOR_SPEED = 0.5
 
@@ -104,12 +104,13 @@ def merge_item_prediction(dictionary) -> None:
 class Core:
     def __init__(self, time: float, input_protocol: int):
 
+        self.start_time = time
         self.last_update_time = time
         self.protocol = input_protocol
 
         self.status_code = 1
         self.motor = [0.0, 0.0].copy()
-        self.brush = True
+        self.brush = False
         self.back_open = False
         self.motor_PID = [
             [15, 10, 40, 10, 0, 10, 5, 0],
@@ -364,7 +365,7 @@ class Core:
         # go towards the closest item
         item = self.get_closest_item()
         if item is None:
-            self.motor = [0.5 * MOTOR_SPEED, -0.5 * MOTOR_SPEED]
+            self.motor = [0.2, -0.2]
         else:
             self.predicted_items[item][2] = min(
                 self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
@@ -380,6 +381,11 @@ class Core:
                 self.motor = [-MOTOR_SPEED, MOTOR_SPEED]
             else:
                 self.motor = [MOTOR_SPEED, MOTOR_SPEED]
+                
+        self.brush = True
+        
+        if time - self.start_time < 3:
+            self.status_code = 1
 
     def get_output(self) -> bytes:
         """

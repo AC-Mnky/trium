@@ -45,10 +45,10 @@ class STM:
                 self.message_length - len(self.message_head)
             )
 
-            print("Message from STM32:", message.hex(" "))
+            # print("Message from STM32:", message.hex(" "))
             
             lag = (time.time() - self.stm_start_time) * 1000 - unpack('<I', message[13:17])[0]
-            print("Message lag:", lag)
+            # print("Message lag:", lag)
             if lag < 50:
                 break
             
@@ -90,7 +90,7 @@ class STM:
         if not self.ser.is_open:
             self.ser.open()
 
-        print("Message to STM32:", message.hex(" "))
+        # print("Message to STM32:", message.hex(" "))
 
         self.ser.write(message)
 

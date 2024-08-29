@@ -15,8 +15,9 @@ VISUALIZER_CONTROL = True  # False
 
 DEBUG_INFO = False
 CAMERA_DEBUG_INFO = True
+DEBUG_RESET = False
 
-CAMERA_COOLDOWN = 0.5
+CAMERA_COOLDOWN = 0.2
 CYCLE_MIN_TIME = 0.0
 
 FORCE_STOP_MESSAGE = bytes(
@@ -123,6 +124,7 @@ if __name__ == "__main__":
             if ENABLE_VISION:
                 camera_input = vision.process(camera_last_used_time, camera_image)
                 if DEBUG_INFO or CAMERA_DEBUG_INFO: print("Processed camera input, used time:", next(module_time))
+                print(camera_input)
 
         if ENABLE_CORE:
             core.update(real_time(), stm32_input, imu_input, camera_input)
@@ -149,7 +151,7 @@ if __name__ == "__main__":
         if ENABLE_STM_OUTPUT:
             if output[1] == 1:
                 stm.reset_time()
-                print("STM time reset.")
+                if DEBUG_RESET: print("STM time reset.")
             stm.send_message(output, MAX_MESSAGE_LENGTH)
             if DEBUG_INFO: print("Sent out output to STM32, used time:", next(module_time))
 

@@ -171,7 +171,10 @@ class Visualizer:
                 )
 
         for wall in self.core.walls:
-            draw_alpha.line(self.screen, (255, 255, 255, 128), wall[0], wall[1], 1)
+            draw_alpha.line(self.screen, (0, 128, 255, 128),
+                            real2window(self.core.predicted_cords + core.rotated(wall[0], self.core.predicted_angle)),
+                            real2window(self.core.predicted_cords + core.rotated(wall[1], self.core.predicted_angle)),
+                            1)
 
         draw_alpha.polygon(
             self.screen,

@@ -11,11 +11,11 @@ from communication.camera import Camera
 
 
 # MODE = "file"
-MODE = 'adjust'
-# MODE = 'camera'
+# MODE = 'adjust'
+MODE = 'camera'
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
-MASK_SHOW = False
+MASK_SHOW = True
 READ_DIR = "wall4"
 WRITE_DIR = "test4"
 
