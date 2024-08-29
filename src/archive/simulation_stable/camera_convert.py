@@ -6,9 +6,13 @@ class CameraState:
     # 座标架：车向前为x，车向右为y，向下为z，方向与z轴夹角为theta，右手螺旋向下相对x轴旋转为phi
     # 方向指摄像头中央对准的位置
     # 摄像头必须是竖直对准的
-    def __init__(self, camera_xyz: tuple[float, float, float], camera_rotation: tuple[float, float],
-                 fov: tuple[float, float],
-                 resolution: tuple[int, int]):
+    def __init__(
+        self,
+        camera_xyz: tuple[float, float, float],
+        camera_rotation: tuple[float, float],
+        fov: tuple[float, float],
+        resolution: tuple[int, int],
+    ):
         self.x, self.y, self.z = camera_xyz
         self.theta = np.radians(camera_rotation[0])
         self.phi = np.radians(camera_rotation[1])
@@ -16,13 +20,26 @@ class CameraState:
         self.half_fov_v = np.radians(fov[1]) / 2
         self.res_h, self.res_v = resolution
 
-        self.ax = np.array((
-            (np.cos(self.phi) * np.sin(self.theta), np.sin(self.phi) * np.sin(self.theta), np.cos(self.theta)),
-            (-np.sin(self.phi), np.cos(self.phi), 0),
-            (-np.cos(self.phi) * np.cos(self.theta), -np.sin(self.phi) * np.cos(self.theta), np.sin(self.theta))))
+        self.ax = np.array(
+            (
+                (
+                    np.cos(self.phi) * np.sin(self.theta),
+                    np.sin(self.phi) * np.sin(self.theta),
+                    np.cos(self.theta),
+                ),
+                (-np.sin(self.phi), np.cos(self.phi), 0),
+                (
+                    -np.cos(self.phi) * np.cos(self.theta),
+                    -np.sin(self.phi) * np.cos(self.theta),
+                    np.sin(self.theta),
+                ),
+            )
+        )
 
 
-def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) -> tuple[bool, float, float]:
+def img2space(
+    camera_state: CameraState, i: int, j: int, target_z: float = 0
+) -> tuple[bool, float, float]:
     c = camera_state
 
     h = (2 * i / c.res_h - 1) * np.tan(c.half_fov_h)
@@ -38,7 +55,9 @@ def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) ->
     return on_the_ground, x, y
 
 
-def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> tuple[bool, int, int]:
+def space2img(
+    camera_state: CameraState, x: float, y: float, z: float = 0
+) -> tuple[bool, int, int]:
     c = camera_state
 
     can_be_seen = True

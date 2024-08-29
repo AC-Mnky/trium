@@ -1,4 +1,3 @@
-
 def set_u(u: int) -> None:
     ...
     # TODO

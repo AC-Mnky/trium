@@ -1,18 +1,25 @@
-import os
-import sys
+try:
+    import camera_convert
+    import find_color
+    import cv2
+except ModuleNotFoundError:
+    import os
+    import sys
 
-work_path = os.getcwd()
-sys.path.append(f"{work_path}/algorithm")
+    work_path = os.getcwd()
+    sys.path.append(f"{work_path}/algorithm")
+    import camera_convert
+    import find_color
+else:
+    ...
 
-import find_color
-import camera_convert
 
 CAMERA_STATE = camera_convert.CameraState(
     (309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480)
 )
 
 
-def process(time: float, image) -> (
+def process(time: float, image: cv2.UMat | None) -> (
     tuple[
         float,
         list[tuple[float, float]],
@@ -21,6 +28,21 @@ def process(time: float, image) -> (
     ]
     | None
 ):
+    """
+    Process the given image to extract relevant information.
+
+    Args:
+        time (float): The time associated with the image.
+        image (cv2.UMat): The image to be processed.
+
+    Returns:
+        tuple: A tuple containing the following information or None:
+            - time (float): The time associated with the image.
+            - reds (list): A list of red points found in the image.
+            - yellows (list): A list of yellow points found in the image.
+            - walls (list): A list of wall segments found in the image.
+            - If the image is None, None is returned.
+    """
     if image is None:
         return None
 
