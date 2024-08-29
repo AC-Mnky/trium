@@ -1,6 +1,7 @@
 import math
 import time
 import serial
+from struct import unpack
 
 ENCODER_PULSE_EACH_ROUND = 22
 ENCODER_READ_FREQUENCY = 500
@@ -15,34 +16,41 @@ class STM:
         self.port = "/dev/ttyAMA0"
         self.baud = "115200"
         self.ser = serial.Serial(self.port, self.baud, parity=serial.PARITY_NONE)
-        self.message_length = 96 if protocol == 128 else 13
+        self.message_length = 96 if protocol == 128 else 17
         self.message_head = bytes((128, ) * 4) if protocol == 128 else bytes((127, ))
         if not self.ser.is_open:
             self.ser.open()
-        self.stm_time = time.time()
+        self.stm_start_time = time.time()
             
-    def reset_time() -> None:
-        self.stm_time = time.time()
+    def reset_time(self) -> None:
+        self.stm_start_time = time.time()
 
     def get_message(self) -> bytes:
 
         if not self.ser.is_open:
             self.ser.open()
-
+            
         while True:
-            flag_match = True
-            for b in self.message_head:
-                if self.ser.read(1)[0] != b:
-                    flag_match = False
+            
+            while True:
+                flag_match = True
+                for b in self.message_head:
+                    if self.ser.read(1)[0] != b:
+                        flag_match = False
+                        break
+                if flag_match:
                     break
-            if flag_match:
+
+            message = self.message_head + self.ser.read(
+                self.message_length - len(self.message_head)
+            )
+
+            print("Message from STM32:", message.hex(" "))
+            
+            lag = (time.time() - self.stm_start_time) * 1000 - unpack('<I', message[13:17])[0]
+            if lag < 50:
                 break
-
-        message = self.message_head + self.ser.read(
-            self.message_length - len(self.message_head)
-        )
-
-        print("Message from STM32:", message.hex(" "))
+            print("Message lag:", lag)
 
         # self.ser.close()
 

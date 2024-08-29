@@ -69,7 +69,7 @@ class Dummy:
         self.back_open = False
         self.motor_PID = [[15, 10, 40, 10, 0, 10, 5, 0], [15, 10, 40, 10, 0, 10, 5, 0]]
 
-        self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 13)
+        self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 17)
         self.output = bytes((0,) * 16)
 
     def get_output(self, stm_input: bytes) -> bytes:
