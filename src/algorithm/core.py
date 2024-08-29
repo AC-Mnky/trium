@@ -446,12 +446,12 @@ class Core:
             if cords[0] > -50 and -30 < cords[1] < 30:
                 self.motor = [0.5, 0.5]
             elif get_length(cords) < 150:
-                self.perdicted_items.pop(item)  # to close. who knows where the thing goes?
+                self.predicted_items.pop(item)  # to close. who knows where the thing goes?
                 self.motor = [0, 0]
             elif 0 < item_angle < 0.2:
-                self.motor = [0.2, 0.5]
+                self.motor = [0.5, 0.2]
             elif -0.2 < item_angle < 0:
-                self.motor = [0.5, 2]
+                self.motor = [0.2, 0.5]
             elif 0 < item_angle < 1:
                 self.motor = [0.2, 0]
             elif -1 < item_angle < 0:

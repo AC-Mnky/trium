@@ -1,12 +1,10 @@
 import os.path
 import time
 
-import numpy as np
 import cv2
+import numpy as np
 
-
-from algorithm import camera_convert
-from algorithm import find_color
+from algorithm import camera_convert, find_color
 from communication.camera import Camera
 from algorithm import vision
 
@@ -17,8 +15,8 @@ MODE = "file"
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
-READ_DIR = "test6"
-WRITE_DIR = "test7"
+READ_DIR = "test7"
+WRITE_DIR = "test8"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
