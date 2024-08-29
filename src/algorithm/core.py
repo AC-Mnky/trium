@@ -267,6 +267,7 @@ class Core:
                 unpack("<h", self.stm_input[68:70])[0],
                 unpack("<h", self.stm_input[36:38])[0],
             )
+            tick = ...  # TODO
         elif self.protocol == 127:
             encoder = (
                 unpack("<h", self.stm_input[11:13])[0],
@@ -276,14 +277,16 @@ class Core:
                 unpack("<I", self.stm_input[7:11])[0],
                 unpack("<I", self.stm_input[1:5])[0],
             )
+        
+        wheel_speed = (encoder[0] * DISTANCE_PER_ENCODER / tick[0] * 72000000,
+                       encoder[1] * DISTANCE_PER_ENCODER / tick[1] * 72000000)
+        
         inferred_angular_speed = (
-                (encoder[1] - encoder[0])
-                * DISTANCE_PER_ENCODER
+                (wheel_speed[1] - wheel_speed[0])
                 / DISTANCE_BETWEEN_WHEELS
-                / dt
         )
         inferred_relative_velocity = (
-            (encoder[0] + encoder[1]) * DISTANCE_PER_ENCODER / 2 / dt,
+            (wheel_speed[0] + wheel_speed[1]) / 2 ,
             -inferred_angular_speed * WHEEL_X_OFFSET,
         )
 

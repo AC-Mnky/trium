@@ -39,6 +39,9 @@ class Visualizer:
         self.mouse_pos = 0
 
         self.core = _core
+        
+        self.brush = False
+        self.back_open = False
 
         self.walls = []
 
@@ -81,9 +84,9 @@ class Visualizer:
                     self.control = not self.control
                 elif self.control:
                     if event.key == pygame.K_i:
-                        self.core.brush = not self.core.brush
+                        self.brush = not self.brush
                     elif event.key == pygame.K_o:
-                        self.core.back_open = not self.core.back_open
+                        self.back_open = not self.back_open
 
         keys = pygame.key.get_pressed()
 
@@ -118,6 +121,9 @@ class Visualizer:
                 self.core.motor[0] * SPEED_CONTROL,
                 self.core.motor[1] * SPEED_CONTROL,
             ]
+            
+            self.core.brush = self.brush
+            self.core.back_open = self.back_open
 
         self.draw()
 
@@ -177,8 +183,8 @@ class Visualizer:
 
         for wall in self.walls:
             draw_alpha.line(self.screen, (0, 128, 255, 128),
-                            real2window(self.core.predicted_cords + core.rotated(wall[0], self.core.predicted_angle)),
-                            real2window(self.core.predicted_cords + core.rotated(wall[1], self.core.predicted_angle)),
+                            real2window(core.vec_add(self.core.predicted_cords, core.rotated(wall[0], self.core.predicted_angle))),
+                            real2window(core.vec_add(self.core.predicted_cords, core.rotated(wall[1], self.core.predicted_angle))),
                             1)
 
         draw_alpha.polygon(
@@ -194,6 +200,8 @@ class Visualizer:
         draw_alpha.circle(
             self.screen, (0, 0, 255, 64), real2window(self.core.contact_center), core.CONTACT_RADIUS / UNIT
         )
+        
+        self.core.get_output()
         
         text = self.font.render(self.core.output.hex(' '), True, WHITE)
         self.screen.blit(text, (0, 0))
