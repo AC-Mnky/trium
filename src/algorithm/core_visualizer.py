@@ -72,13 +72,13 @@ class Visualizer:
                 if event.button == 1:  # left-click
                     self.core.predicted_items[cords] = [
                         self.core.predicted_items.get(cords, (0, 0))[0] + 2,
-                        0,
+                        core.RED,
                         0,
                     ]
                 elif event.button == 3:  # right-click
                     self.core.predicted_items[cords] = [
                         self.core.predicted_items.get(cords, (0, 0))[0] + 3,
-                        1,
+                        core.YELLOW,
                         0,
                     ]
             elif event.type == pygame.KEYDOWN:

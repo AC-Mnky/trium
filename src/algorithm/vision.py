@@ -8,8 +8,16 @@ except ModuleNotFoundError:
 
     work_path = os.getcwd()
     sys.path.append(f"{work_path}/algorithm")
-    import camera_convert
-    import find_color
+    try:
+        import camera_convert
+        import find_color
+    except ModuleNotFoundError:
+
+        work_path = os.getcwd()
+        sys.path.append(f"{work_path}/../algorithm")
+        import camera_convert
+        import find_color
+
 else:
     ...
 
@@ -19,7 +27,11 @@ CAMERA_STATE = camera_convert.CameraState(
     
     # (295, 12, -221), (57.7, 1.1, 0.3), (51.45, 51.09), (640, 480)
     
-    (295, 12, -221), (57.7, 1.1, 0.3), (51.45, 51.09), (640, 480)
+    # (295, 12, -221), (57.7, 1.1, 0.3), (51.45, 51.09), (640, 480)
+
+    # (84, 4, -243), (59.4, 1.1, -0.1), (51.45, 51.09), (640, 480)
+
+    (78, 13, -164), (69.4, 1., 0.5), (47.66, 33.90), (640, 480)
 )
 
 
