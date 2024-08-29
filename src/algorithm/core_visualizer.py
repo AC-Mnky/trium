@@ -22,6 +22,8 @@ FONT_SIZE = 20
 BACK = (0, 0, 0, 0)
 CAR = (255, 128, 0, 128)
 WHITE = (255, 255, 255, 255)
+CAMERA = (255, 255, 255, 32)
+CAMERA_SHOT = (255, 255, 255, 128)
 
 SPEED_CONTROL = 0.5
 
@@ -166,7 +168,7 @@ class Visualizer:
         for item, v in self.core.predicted_items.items():
             draw_alpha.circle(
                 self.screen,
-                (255, 255 if v[1] == 1 else 0, 0, min(v[0] * 32, 255)),
+                (255, 255 if v[1] == core.YELLOW else 0, 0, min(v[0] * 32, 255)),
                 real2window(item),
                 core.MERGE_RADIUS / UNIT / 2,
             )
@@ -194,6 +196,24 @@ class Visualizer:
                 real2window(v)
                 for v in self.core.predicted_vertices[0]
                 + self.core.predicted_vertices[1][::-1]
+            ],
+        )
+        
+        camera_color = CAMERA if self.core.camera_has_input else CAMERA_SHOT
+        draw_alpha.polygon(
+            self.screen,
+            camera_color,
+            [
+                real2window(v)
+                for v in self.core.predicted_camera_vertices[0:4]
+            ],
+        )
+        draw_alpha.polygon(
+            self.screen,
+            camera_color,
+            [
+                real2window(v)
+                for v in self.core.predicted_camera_vertices[4:8]
             ],
         )
         draw_alpha.circle(self.screen, WHITE, real2window(self.core.predicted_cords), 2)

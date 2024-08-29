@@ -10,9 +10,9 @@ from algorithm import find_color
 from communication.camera import Camera
 
 
-MODE = "file"
+# MODE = "file"
 # MODE = 'adjust'
-# MODE = 'camera'
+MODE = 'camera'
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
