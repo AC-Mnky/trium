@@ -1,12 +1,10 @@
 import os.path
 import time
 
-import numpy as np
 import cv2
+import numpy as np
 
-
-from algorithm import camera_convert
-from algorithm import find_color
+from algorithm import camera_convert, find_color
 from communication.camera import Camera
 from algorithm import vision
 
