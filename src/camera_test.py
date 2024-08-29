@@ -1,18 +1,22 @@
 import os.path
 import time
 
-import camera_convert
-import cv2
-import find_color
 import numpy as np
+import cv2
 
-MODE = "file"
+
+from algorithm import camera_convert
+from algorithm import find_color
+from communication.camera import Camera
+
+
+# MODE = "file"
 # MODE = 'adjust'
-# MODE = 'camera'
+MODE = 'camera'
 GLOBAL_SHOW = True
 MASK_SHOW = False
 READ_DIR = "wall4"
-WRITE_DIR = "test2"
+WRITE_DIR = "test3"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
@@ -27,8 +31,8 @@ DRAW_GRID = True
 
 USE_HOUGH_P = True
 
-if MODE == "camera":
-    from camera_ori import Camera
+# if MODE == "camera":
+#     # from camera_ori import Camera
 
 
 def process(img, show: bool = False):
@@ -139,7 +143,7 @@ def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
 
 if __name__ == "__main__":
 
-    repository_path = os.path.dirname(os.path.realpath(__file__)) + "/../../.."
+    repository_path = os.path.dirname(os.path.realpath(__file__)) + "/.."
     if MODE == "file":
         for image_index in range(100):
             filename = (
@@ -206,7 +210,7 @@ if __name__ == "__main__":
         for image_index in range(100):
             print(int((time.time() - time_last_capture) * 1000))
             time.sleep(max(time_last_capture + 0.5 - time.time(), 0))
-            image = c.capture()
+            image = c.get_image_bgr()
             time_last_capture = time.time()
             filename = (
                 repository_path
