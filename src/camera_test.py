@@ -16,7 +16,7 @@ FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = False
 READ_DIR = "hybrid1"
-WRITE_DIR = "test6"
+WRITE_DIR = "test7"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
