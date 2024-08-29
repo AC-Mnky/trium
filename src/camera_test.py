@@ -22,11 +22,13 @@ WRITE_DIR = "test4"
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((303, 0, -212), (53.7, 2.0, 0.4), (62.2, 60), (640, 480))
+# CAMERA_STATE = camera_convert.CameraState(
+#     (269, 12, -198), (53.2, 0.9, 0.9), (62.2, 62), (640, 480)
+# )
+# (357, 10, -207) [51.7  1.2  1. ]
+# (295, 12, -221) [57.7  1.1  0.3] (np.float64(51.44557864216593), np.float64(51.08994556912829))
 CAMERA_STATE = camera_convert.CameraState(
-    (309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480)
-)
-CAMERA_STATE = camera_convert.CameraState(
-    (240, 0, -180), (52.8, 2.1, 0.4), (37.58, 28.63), (640, 480)
+    (295, 12, -221), (57.7, 1.1, 0.3), (51.45, 51.09), (640, 480)
 )
 
 SHOW_RED = SHOW_YELLOW = True
@@ -202,10 +204,19 @@ if __name__ == "__main__":
                 CAMERA_STATE.y += 1
             elif key == ord("p"):
                 CAMERA_STATE.y += -1
+            elif key == ord("n"):
+                CAMERA_STATE.half_fov_h += 0.001
+            elif key == ord("m"):
+                CAMERA_STATE.half_fov_h += -0.001
+            elif key == ord("v"):
+                CAMERA_STATE.half_fov_v += 0.001
+            elif key == ord("b"):
+                CAMERA_STATE.half_fov_v += -0.001
             CAMERA_STATE.update()
             print(
                 (CAMERA_STATE.x, CAMERA_STATE.y, CAMERA_STATE.z),
                 np.degrees((CAMERA_STATE.theta, CAMERA_STATE.phi, CAMERA_STATE.omega)),
+                (CAMERA_STATE.half_fov_h / np.pi * 360, CAMERA_STATE.half_fov_v / np.pi * 360),
             )
 
     if MODE == "camera":
