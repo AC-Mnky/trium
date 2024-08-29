@@ -11,14 +11,14 @@ from communication.camera import Camera
 from algorithm import vision
 
 
-# MODE = "file"
+MODE = "file"
 # MODE = 'adjust'
-MODE = 'camera'
+# MODE = 'camera'
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
-MASK_SHOW = False
-READ_DIR = "hybrid1"
-WRITE_DIR = "test6"
+MASK_SHOW = True
+READ_DIR = "test6"
+WRITE_DIR = "test7"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
@@ -122,7 +122,7 @@ def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
     overlay = np.minimum(
         overlay,
         np.repeat(
-            (255 - find_color.get_color_mask(img, find_color.RED))[:, :, np.newaxis],
+            (255 - find_color.get_color_mask(img, [find_color.RED1]))[:, :, np.newaxis],
             3,
             axis=2,
         ),
@@ -130,7 +130,7 @@ def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
     overlay = np.minimum(
         overlay,
         np.repeat(
-            (255 - find_color.get_color_mask(img, find_color.YELLOW))[:, :, np.newaxis],
+            (255 - find_color.get_color_mask(img, [find_color.RED2]))[:, :, np.newaxis],
             3,
             axis=2,
         ),
@@ -138,7 +138,15 @@ def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
     overlay = np.minimum(
         overlay,
         np.repeat(
-            (255 - find_color.get_color_mask(img, find_color.BLUE))[:, :, np.newaxis],
+            (255 - find_color.get_color_mask(img, [find_color.YELLOW]))[:, :, np.newaxis],
+            3,
+            axis=2,
+        ),
+    )
+    overlay = np.minimum(
+        overlay,
+        np.repeat(
+            (255 - find_color.get_color_mask(img, [find_color.BLUE]))[:, :, np.newaxis],
             3,
             axis=2,
         ),
