@@ -150,7 +150,7 @@ class Core:
             angle = get_angle(perpendicular)
             vote_x_angle.append((ROOM_X - distance, -angle, distance, line_length))
             vote_x_angle.append((distance, np.pi - angle, distance, line_length))
-            vote_y_angle.append((ROOM_Y - distance, np.pi / 2 - angle, distance, line_length)) # why use the same distance to deal with y?
+            vote_y_angle.append((ROOM_Y - distance, np.pi / 2 - angle, distance, line_length))  # why use the same distance to deal with y?
             vote_y_angle.append((distance, 3 * np.pi / 2 - angle, distance, line_length))
 
         x_weight_sum = y_weight_sum = angle_weight_sum = 1
