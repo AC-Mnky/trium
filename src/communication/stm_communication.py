@@ -1,7 +1,8 @@
 import math
 import time
-import serial
 from struct import unpack
+
+import serial
 
 ENCODER_PULSE_EACH_ROUND = 22
 ENCODER_READ_FREQUENCY = 500

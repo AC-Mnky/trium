@@ -1,9 +1,8 @@
+import math
 from struct import unpack
 
 import pygame
 from numpy import clip
-from struct import unpack
-import math
 
 PWM_PERIOD = 100
 
