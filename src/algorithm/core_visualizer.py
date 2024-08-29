@@ -40,6 +40,8 @@ class Visualizer:
 
         self.core = _core
 
+        self.walls = []
+
         ...
 
     def update(self, time: float) -> core.Core:
@@ -170,7 +172,10 @@ class Visualizer:
                     core.MERGE_RADIUS / UNIT / 2,
                 )
 
-        for wall in self.core.walls:
+        if self.core.camera_input is not None:
+            self.walls = self.core.camera_input[3]
+
+        for wall in self.walls:
             draw_alpha.line(self.screen, (0, 128, 255, 128),
                             real2window(self.core.predicted_cords + core.rotated(wall[0], self.core.predicted_angle)),
                             real2window(self.core.predicted_cords + core.rotated(wall[1], self.core.predicted_angle)),
