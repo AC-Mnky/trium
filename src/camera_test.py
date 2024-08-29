@@ -12,11 +12,11 @@ from algorithm import vision
 
 
 # MODE = "file"
-MODE = 'adjust'
-# MODE = 'camera'
+# MODE = 'adjust'
+MODE = 'camera'
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
-MASK_SHOW = True
+MASK_SHOW = False
 READ_DIR = "hybrid1"
 WRITE_DIR = "test6"
 

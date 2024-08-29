@@ -241,7 +241,7 @@ def real2window(vec: tuple[float, float]) -> tuple[float, float]:
     Returns:
         tuple (tuple[float, float]): The converted window coordinate.
     """
-    return core.vec_add(VEC_MARGIN, core.vec_multiply(vec, 1 / UNIT))
+    return core.vec_add(VEC_MARGIN, core.vec_mul(vec, 1 / UNIT))
 
 
 def window2real(vec: tuple[float, float]) -> tuple[float, float]:
@@ -254,4 +254,4 @@ def window2real(vec: tuple[float, float]) -> tuple[float, float]:
     Returns:
         tuple (tuple[float, float]): The vector in real coordinates.
     """
-    return core.vec_multiply(core.vec_subtract(vec, VEC_MARGIN), UNIT)
+    return core.vec_mul(core.vec_sub(vec, VEC_MARGIN), UNIT)
