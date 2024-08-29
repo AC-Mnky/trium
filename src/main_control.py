@@ -1,10 +1,11 @@
 import time
 
 ENABLE_STM_INPUT = True  # True
+STM_INPUT_PROTOCOL = 127  # 127
 ENABLE_IMU = False  # True
 ENABLE_CAMERA = True  # True
 ENABLE_VISION = True # True
-ENABLE_CORE = True  # True
+ENABLE_CORE = False  # True
 ENABLE_STM_OUTPUT = True  # True
 
 ENABLE_DUMMY = True  # False
@@ -61,7 +62,7 @@ if __name__ == '__main__':
     imu_input = None
     stm32_input = None
 
-    stm = stm.STM() if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT else None
+    stm = stm.STM(STM_INPUT_PROTOCOL) if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT else None
     if stm is not None:
         print('STM32 connected, used time:', next(module_time))
 
@@ -74,11 +75,11 @@ if __name__ == '__main__':
     if camera is not None:
         print('CAMERA enabled, used time:', next(module_time))
 
-    core = core.Core(real_time()) if ENABLE_CORE else None
+    core = core.Core(real_time(), STM_INPUT_PROTOCOL) if ENABLE_CORE else None
     if core is not None:
         print('Core initialized, used time:', next(module_time))
 
-    dummy = dummy.Dummy(DUMMY_CONTROL) if ENABLE_DUMMY else None
+    dummy = dummy.Dummy(DUMMY_CONTROL, STM_INPUT_PROTOCOL) if ENABLE_DUMMY else None
     if dummy is not None:
         print('Dummy plugged in, used time:', next(module_time))
 
@@ -101,6 +102,7 @@ if __name__ == '__main__':
         if ENABLE_STM_INPUT:
             stm32_input = stm.get_message()
             print('Got STM32 input, used time:', next(module_time))
+            
         if ENABLE_IMU:
             imu_input = imu.get_imu_input()
             print('Got IMU input:', imu_input)
