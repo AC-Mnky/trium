@@ -2,6 +2,15 @@ PWM_PERIOD = 100
 
 
 def output_to_message(output) -> bytes:
+    """
+    Converts the given output to a message in bytes format.
+
+    Args:
+        output (list): The output to be converted.
+
+    Returns:
+        bytes: The converted message in bytes format.
+    """
     message = (
         [
             0x80,
