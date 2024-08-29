@@ -16,7 +16,7 @@ MODE = 'adjust'
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = False
-READ_DIR = "wall4"
+READ_DIR = "test3"
 WRITE_DIR = "test4"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
@@ -46,7 +46,7 @@ def process(img, show: bool = False):
     )
 
     if show and DRAW_GRID:
-        draw_grid(img, (255, 255, 255, 255), 400, 2000, 50, -1000, 1000, 50)
+        draw_grid(img, (255, 255, 255, 255), 450, 2000, 50, -1000, 1000, 50)
 
     print()
 
