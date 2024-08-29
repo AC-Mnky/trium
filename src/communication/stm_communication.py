@@ -1,4 +1,4 @@
-import math
+import numpy as np
 import time
 from struct import unpack
 
@@ -9,7 +9,7 @@ ENCODER_READ_FREQUENCY = 500
 PWM_PERIOD = 100
 
 WHEEL_RADIUS = 33
-STANDARD_SPEED = 280 / 60 * math.tau * WHEEL_RADIUS
+STANDARD_SPEED = 280 / 60 * np.tau * WHEEL_RADIUS
 
 
 class STM:
@@ -67,7 +67,7 @@ class STM:
 
             # print("Message from STM32:", message.hex(" "))
             
-            lag = (time.time() - self.stm_start_time) * 1000 - unpack('<I', message[13:17])[0]
+            # lag = (time.time() - self.stm_start_time) * 1000 - unpack('<I', message[13:17])[0]
             # print("Message lag:", lag)
             # if lag < 25 or self.ser.inWaiting() < self.message_length:
             if self.ser.inWaiting() < self.message_length:
@@ -93,13 +93,13 @@ class STM:
         velocity_1 = (
             encoder_1
             * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND)
-            * math.tau
+            * np.tau
             * WHEEL_RADIUS
         )
         velocity_2 = (
             encoder_2
             * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND)
-            * math.tau
+            * np.tau
             * WHEEL_RADIUS
         )
 
