@@ -10,10 +10,10 @@ YELLOW = [np.array(((15, 150, 50), (35, 255, 255)))]
 
 BLUE = [np.array(((100, 100, 50), (120, 255, 255)))]
 
-WHITE = [np.array(((0, 0, 100), (180, 100, 255)))]
+WHITE = [np.array(((0, 0, 50), (180, 100, 255)))]
 
 SHIFT1_ONLY_UP_SHIFT = True
-WALL_SHIFT1 = 5
+WALL_SHIFT1 = 10
 ENABLE_WALL_SHIFT2 = True
 WALL_SHIFT2 = 1
 HOUGH_THRESHOLD = 180
@@ -22,8 +22,8 @@ HOUGH_P_THRESHOLD = 50
 HOUGH_P_MIN_LENGTH = 20
 HOUGH_P_MAX_GAP = 100
 
-SHOW_BLUE = False
-SHOW_WHITE = False
+SHOW_BLUE = True
+SHOW_WHITE = True
 SHOW_LINE = True
 
 
