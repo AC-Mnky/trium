@@ -1,5 +1,4 @@
 import pymunk
-
 from room import Room
 
 

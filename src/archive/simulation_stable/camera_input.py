@@ -1,4 +1,3 @@
-
 class Camera:
     def __init__(self, car, camera_state):
         self.car = car
@@ -17,12 +16,18 @@ class Camera:
 
         seen_reds = []
         for r in self.room.reds:
-            if r is not None and len(self.car.camera_range.shapes_collide(r.shape).points) > 0:
+            if (
+                r is not None
+                and len(self.car.camera_range.shapes_collide(r.shape).points) > 0
+            ):
                 seen_reds.append(self.car.body.world_to_local(r.body.position))
 
         seen_yellows = []
         for y in self.room.yellows:
-            if y is not None and len(self.car.camera_range.shapes_collide(y.shape).points) > 0:
+            if (
+                y is not None
+                and len(self.car.camera_range.shapes_collide(y.shape).points) > 0
+            ):
                 seen_yellows.append(self.car.body.world_to_local(y.body.position))
 
         wall_inferred_x = None
@@ -37,4 +42,10 @@ class Camera:
                 wall_inferred_y = self.car.body.position[1]
                 wall_inferred_angle = self.car.body.angle
 
-        return seen_reds, seen_yellows, wall_inferred_x, wall_inferred_y, wall_inferred_angle
+        return (
+            seen_reds,
+            seen_yellows,
+            wall_inferred_x,
+            wall_inferred_y,
+            wall_inferred_angle,
+        )

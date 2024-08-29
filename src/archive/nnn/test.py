@@ -1,5 +1,4 @@
 import torch.nn as nn
 
 
-class NNN(nn.Module):
-    ...
+class NNN(nn.Module): ...
