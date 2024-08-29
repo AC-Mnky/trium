@@ -13,6 +13,7 @@ from communication.camera import Camera
 # MODE = "file"
 # MODE = 'adjust'
 MODE = 'camera'
+FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = False
 READ_DIR = "wall4"
@@ -204,7 +205,9 @@ if __name__ == "__main__":
             )
 
     if MODE == "camera":
-        os.mkdir(repository_path + "/assets/openCV_pic/" + WRITE_DIR + "/")
+        target_dir = repository_path + "/assets/openCV_pic/" + WRITE_DIR + "/"
+        os.path.isdir(target_dir)
+        os.mkdir(target_dir)
         c = Camera()
         time_last_capture = time.time() + 1.5
         for image_index in range(100):
@@ -213,10 +216,7 @@ if __name__ == "__main__":
             image = c.get_image_bgr()
             time_last_capture = time.time()
             filename = (
-                repository_path
-                + "/assets/openCV_pic/"
-                + WRITE_DIR
-                + "/"
+                target_dir
                 + str(image_index)
                 + ".jpg"
             )

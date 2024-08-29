@@ -8,7 +8,7 @@ START_WAIT_TIME = 2
 class Camera:
     def __init__(self):
         # self.cam = Picamera2()
-        self.cam = cv2.VideoCapture(0)
+        self.cam = cv2.VideoCapture(0)  # 0|1
         self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         # self.cam.start()

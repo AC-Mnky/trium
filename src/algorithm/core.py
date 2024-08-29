@@ -102,9 +102,10 @@ def merge_item_prediction(dictionary) -> None:
 
 
 class Core:
-    def __init__(self, time: float):
+    def __init__(self, time: float, input_protocol: int):
 
         self.last_update_time = time
+        self.protocol = input_protocol
 
         self.status_code = 1
         self.motor = [0.0, 0.0].copy()

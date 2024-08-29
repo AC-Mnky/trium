@@ -1,7 +1,7 @@
+import cv2
 try:
     import camera_convert
     import find_color
-    import cv2
 except ModuleNotFoundError:
     import os
     import sys

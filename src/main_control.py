@@ -5,7 +5,7 @@ STM_INPUT_PROTOCOL = 127  # 127
 ENABLE_IMU = False  # True
 ENABLE_CAMERA = True  # True
 ENABLE_VISION = True  # True
-ENABLE_CORE = True  # True
+ENABLE_CORE = False  # True
 ENABLE_STM_OUTPUT = True  # True
 
 ENABLE_DUMMY = True  # False
@@ -14,7 +14,7 @@ ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
 
 CAMERA_COOLDOWN = 5
-CYCLE_MIN_TIME = 0.02
+CYCLE_MIN_TIME = 0.0
 
 FORCE_STOP_MESSAGE = bytes(
     (128, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0)
