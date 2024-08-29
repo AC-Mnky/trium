@@ -1,5 +1,5 @@
 import math
-
+import time
 import serial
 
 ENCODER_PULSE_EACH_ROUND = 22
@@ -19,8 +19,12 @@ class STM:
         self.message_head = bytes((128, ) * 4) if protocol == 128 else bytes((127, ))
         if not self.ser.is_open:
             self.ser.open()
+        self.stm_time = time.time()
+            
+    def reset_time() -> None:
+        self.stm_time = time.time()
 
-    def get_message(self):
+    def get_message(self) -> bytes:
 
         if not self.ser.is_open:
             self.ser.open()

@@ -226,7 +226,7 @@ if __name__ == "__main__":
                 + ".jpg"
             )
             
-            if image != None:
+            if image is not None:
                 cv2.imwrite(filename, image)
                 process(image, GLOBAL_SHOW)
                 

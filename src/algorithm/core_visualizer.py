@@ -87,7 +87,7 @@ class Visualizer:
 
         self.force_stop = keys[pygame.K_s]
         if keys[pygame.K_r]:
-            self.core = core.Core(time)
+            self.core = core.Core(time, self.core.protocol)
 
         if self.control:
             self.core.motor = [0, 0]
@@ -184,6 +184,11 @@ class Visualizer:
         draw_alpha.circle(
             self.screen, (0, 0, 255, 64), real2window(self.core.contact_center), core.CONTACT_RADIUS / UNIT
         )
+        
+        text = self.font.render(self.core.output.hex(' '), True, WHITE)
+        self.screen.blit(text, (0, 0))
+        text = self.font.render(self.core.stm_input.hex(' '), True, WHITE)
+        self.screen.blit(text, (0, 20))
 
         pygame.display.flip()
 

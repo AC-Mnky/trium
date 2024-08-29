@@ -22,7 +22,7 @@ ROOM_X = 3000
 ROOM_Y = 2000
 
 INITIAL_CORD_X = 200
-INITIAL_CORD_Y = ROOM_Y - 200
+INITIAL_CORD_Y = 200
 INITIAL_ANGLE = 0
 
 MAX_CORD_DIFFERENCE = 100
@@ -109,15 +109,17 @@ class Core:
 
         self.status_code = 1
         self.motor = [0.0, 0.0].copy()
-        self.brush = False
+        self.brush = True
         self.back_open = False
         self.motor_PID = [
             [15, 10, 40, 10, 0, 10, 5, 0],
             [15, 10, 40, 10, 0, 10, 5, 0],
         ].copy()
-        self.stm_input = bytes((0,) * 96) if input_protocol == 128 else bytes((0,) * 13)
+        self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 13)
         self.imu_input = None
         self.camera_input = None
+        
+        self.output = bytes((0,) * 16)
 
         self.predicted_cords = (INITIAL_CORD_X, INITIAL_CORD_Y)
         self.predicted_angle = INITIAL_ANGLE
@@ -404,8 +406,10 @@ class Core:
         for i in range(len(output)):
             if output[i] < 0:
                 output[i] += 256
+                
+        self.output = bytes(output)
 
-        return bytes(output)
+        return self.output
 
 
 def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> float:
