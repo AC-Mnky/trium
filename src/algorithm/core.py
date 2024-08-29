@@ -1,4 +1,3 @@
-import math
 from struct import unpack
 
 import numpy as np
@@ -225,7 +224,7 @@ class Core:
         print(inferred_angular_speed)
         # if self.imu_input is not None:
         #     ass = self.imu_angular_speed_deg_s
-        #     inferred_angular_speed = math.radians(math.sqrt(ass[0] ** 2 + ass[1] ** 2 + ass[2] ** 2)) * (1 if ass[2] > 0 else -1)
+        #     inferred_angular_speed = np.radians(np.sqrt(ass[0] ** 2 + ass[1] ** 2 + ass[2] ** 2)) * (1 if ass[2] > 0 else -1)
         #     print(inferred_angular_speed)
             
             
@@ -330,7 +329,7 @@ class Core:
         if imu_input is not None:
             self.imu_acceleration_g, self.imu_angular_speed_deg_s, self.imu_angle_deg = imu_input
             if self.imu_input is None:
-                self.start_angle = math.radians(self.imu_angle_deg[2])
+                self.start_angle = np.radians(self.imu_angle_deg[2])
             self.imu_input = imu_input
         if camera_input is not None:
             self.camera_has_input = True
@@ -347,11 +346,11 @@ class Core:
         self.predicted_angle += dt * inferred_angular_speed
         
         if self.imu_input is not None:
-            self.predicted_angle = INITIAL_ANGLE + self.start_angle - math.radians(self.imu_angle_deg[2])
+            self.predicted_angle = INITIAL_ANGLE + self.start_angle - np.radians(self.imu_angle_deg[2])
         
         print(self.predicted_angle)
         if self.imu_input is not None:
-            print([math.radians(x) for x in self.imu_angle_deg], 'yee')
+            print([np.radians(x) for x in self.imu_angle_deg], 'yee')
         inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
         self.predicted_cords = vec_add(
             vec_mul(inferred_velocity, dt), self.predicted_cords
