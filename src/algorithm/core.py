@@ -1,3 +1,4 @@
+import math
 from struct import unpack
 
 import numpy as np
@@ -119,8 +120,11 @@ class Core:
         self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 17)
         self.unpacked_stm_input = None
         self.imu_input = None
+        self.imu_acceleration_g = None
+        self.imu_angular_speed_deg_s = None
+        self.imu_angle_deg = None
         self.camera_input = None
-        
+
         self.output = bytes((0,) * 16)
 
         self.predicted_cords = (INITIAL_CORD_X, INITIAL_CORD_Y)
@@ -160,6 +164,51 @@ class Core:
                 closest = x
                 closest_distance = x_distance
         return closest
+
+    def infer_velocity(self) -> tuple[float, tuple[float, float]]:
+        """
+        infer current relative movement from encoder.
+        "inferred_angular_speed" = speed of rotating around the center of the car
+        "inferred_relative_velocity" = speed of the center of the car
+
+        paras have to be modified: WHEEL_X_OFFSET
+        angular_speed can use data from imu directly
+        """
+
+        if self.protocol == 128:
+            encoder = (
+                unpack("<h", self.stm_input[68:70])[0],
+                unpack("<h", self.stm_input[36:38])[0],
+            )
+            tick = ...  # TODO
+        else:
+            if self.unpacked_stm_input is None:
+                encoder = (
+                    unpack("<h", self.stm_input[11:13])[0],
+                    unpack("<h", self.stm_input[5:7])[0],
+                )
+                tick = (
+                    unpack("<I", self.stm_input[7:11])[0],
+                    unpack("<I", self.stm_input[1:5])[0],
+                )
+            else:
+                encoder = self.unpacked_stm_input[2:4]
+                tick = self.unpacked_stm_input[0:2]
+
+        wheel_speed = (encoder[0] * DISTANCE_PER_ENCODER / tick[0] * 72000000,
+                       encoder[1] * DISTANCE_PER_ENCODER / tick[1] * 72000000)
+
+        inferred_angular_speed = (
+                (wheel_speed[1] - wheel_speed[0])
+                / DISTANCE_BETWEEN_WHEELS
+        )
+        print(inferred_angular_speed)
+        print([math.radians(x) for x in self.imu_angular_speed_deg_s])
+        inferred_relative_velocity = (
+            (wheel_speed[0] + wheel_speed[1]) / 2,
+            -inferred_angular_speed * WHEEL_X_OFFSET
+        )
+        return inferred_angular_speed, inferred_relative_velocity
 
     def infer_position_from_walls(self) -> None:
         """
@@ -211,7 +260,7 @@ class Core:
         x_diff_average = x_diff_sum / x_weight_sum
         y_diff_average = y_diff_sum / y_weight_sum
         angle_diff_average = angle_diff_sum / angle_weight_sum
-        
+
         print(x_weight_sum, y_weight_sum, angle_weight_sum)
         print(x_diff_average, y_diff_average, angle_diff_average)
 
@@ -254,52 +303,14 @@ class Core:
             self.unpacked_stm_input = unpacked_stm32_input
         if imu_input is not None:
             self.imu_input = imu_input
+            self.imu_acceleration_g, self.imu_angular_speed_deg_s, self.imu_angle_deg = imu_input
         if camera_input is not None:
             self.camera_input = camera_input
 
         if self.status_code > 0:
             self.status_code = 0
 
-        """
-        infer current relative movement from encoder.
-        "inferred_angular_speed" = speed of rotating around the center of the car
-        "inferred_relative_velocity" = speed of the center of the car
-        
-        paras have to be modified: WHEEL_X_OFFSET
-        angular_speed can use data from imu directly
-        """
-
-        if self.protocol == 128:
-            encoder = (
-                unpack("<h", self.stm_input[68:70])[0],
-                unpack("<h", self.stm_input[36:38])[0],
-            )
-            tick = ...  # TODO
-        elif self.protocol == 127:
-            if self.unpacked_stm_input is None:
-                encoder = (
-                    unpack("<h", self.stm_input[11:13])[0],
-                    unpack("<h", self.stm_input[5:7])[0],
-                )
-                tick = (
-                    unpack("<I", self.stm_input[7:11])[0],
-                    unpack("<I", self.stm_input[1:5])[0],
-                )
-            else:
-                encoder = self.unpacked_stm_input[2:4]
-                tick = self.unpacked_stm_input[0:2]
-        
-        wheel_speed = (encoder[0] * DISTANCE_PER_ENCODER / tick[0] * 72000000,
-                       encoder[1] * DISTANCE_PER_ENCODER / tick[1] * 72000000)
-        
-        inferred_angular_speed = (
-                (wheel_speed[1] - wheel_speed[0])
-                / DISTANCE_BETWEEN_WHEELS
-        )
-        inferred_relative_velocity = (
-            (wheel_speed[0] + wheel_speed[1]) / 2 ,
-            -inferred_angular_speed * WHEEL_X_OFFSET,
-        )
+        inferred_angular_speed, inferred_relative_velocity = self.infer_velocity()
 
         # predict current position
         self.predicted_angle += dt * inferred_angular_speed
@@ -364,7 +375,8 @@ class Core:
             # TODO: seen items decay
 
         # decay all items and delete items with low value
-        self.contact_center = vec_add(self.predicted_cords, rotated((CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK, 0), self.predicted_angle))
+        self.contact_center = vec_add(self.predicted_cords,
+                                      rotated((CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK, 0), self.predicted_angle))
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
@@ -395,9 +407,9 @@ class Core:
                 self.motor = [-MOTOR_SPEED, MOTOR_SPEED]
             else:
                 self.motor = [MOTOR_SPEED, MOTOR_SPEED]
-                
+
         self.brush = True
-        
+
         if time - self.start_time < 3:
             self.status_code = 1
 
@@ -426,7 +438,7 @@ class Core:
         for i in range(len(output)):
             if output[i] < 0:
                 output[i] += 256
-                
+
         self.output = bytes(output)
 
         return self.output

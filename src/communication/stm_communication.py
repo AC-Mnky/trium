@@ -33,7 +33,7 @@ class STM:
             
         unpacked_message = [0, 0, 0, 0]
         
-        for i in range(10):
+        while True:
             
             while True:
                 flag_match = True
@@ -68,9 +68,9 @@ class STM:
             
             lag = (time.time() - self.stm_start_time) * 1000 - unpack('<I', message[13:17])[0]
             # print("Message lag:", lag)
-            if lag < 50:
+            # if lag < 25 or self.ser.inWaiting() < self.message_length:
+            if self.ser.inWaiting() < self.message_length:
                 break
-            
 
         # self.ser.close()
         

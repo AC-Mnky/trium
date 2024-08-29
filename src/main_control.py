@@ -13,7 +13,7 @@ DUMMY_CONTROL = True  # Whatever
 ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
 
-DEBUG_INFO = False
+DEBUG_INFO = True
 CAMERA_DEBUG_INFO = True
 DEBUG_RESET = False
 
