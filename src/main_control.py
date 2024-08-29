@@ -2,7 +2,7 @@ import time
 
 ENABLE_STM_INPUT = True  # True
 STM_INPUT_PROTOCOL = 127  # 127
-ENABLE_IMU = False  # True
+ENABLE_IMU = True  # True
 ENABLE_CAMERA = True  # True
 ENABLE_VISION = True  # True
 ENABLE_CORE = True  # True
@@ -13,7 +13,7 @@ DUMMY_CONTROL = True  # Whatever
 ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
 
-DEBUG_INFO = True
+DEBUG_INFO = False
 CAMERA_DEBUG_INFO = True
 DEBUG_RESET = False
 

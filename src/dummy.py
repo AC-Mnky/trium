@@ -39,7 +39,7 @@ class Dummy:
 
         pygame.init()
         pygame.font.init()
-        self.font = pygame.font.SysFont("Cambria", FONT_SIZE)
+        self.font = pygame.font.SysFont("DejaVuSansMono", FONT_SIZE)
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
 
         self.left_rect = self.right_rect = self.top_rect = self.bottom_rect = (

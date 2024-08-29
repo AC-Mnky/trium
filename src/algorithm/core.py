@@ -3,7 +3,19 @@ from struct import unpack
 
 import numpy as np
 
-ENABLE_INFER_POSITION_FROM_WALLS = True  # True
+from algorithm import vision
+
+try:
+    import camera_convert
+
+except ModuleNotFoundError:
+    import os
+    import sys
+    work_path = os.getcwd()
+    sys.path.append(f"{work_path}/algorithm")
+    import camera_convert
+
+ENABLE_INFER_POSITION_FROM_WALLS = False  # True
 
 np.tau = 2 * np.pi
 
@@ -22,17 +34,17 @@ RIGHT_WHEEL = (WHEEL_X_OFFSET, DISTANCE_BETWEEN_WHEELS / 2)
 ROOM_X = 3000
 ROOM_Y = 2000
 
-INITIAL_CORD_X = 200
+INITIAL_CORD_X = 1100
 INITIAL_CORD_Y = 200
 INITIAL_ANGLE = 0
 
-MAX_CORD_DIFFERENCE = 500
+MAX_CORD_DIFFERENCE = 1000
 MAX_CORD_RELATIVE_DIFFERENCE = 0.5
 MAX_ANGLE_DIFFERENCE = 0.4
 GOOD_SEEN_WALL_LENGTH = 500
 
 MERGE_RADIUS = 75
-CONTACT_CENTER_TO_BACK = 50
+CONTACT_CENTER_TO_BACK = 100
 CONTACT_RADIUS = 40
 SEEN_ITEMS_DECAY_EXPONENTIAL = 0.5
 ALL_ITEMS_DECAY_EXPONENTIAL = 1
@@ -45,6 +57,11 @@ ROOM_MARGIN = -1000000
 
 MOTOR_SPEED = 0.5
 
+RED = 0
+YELLOW = 1
+
+CAMERA_MARGIN_H = 80
+CAMERA_MARGIN_V = 60
 
 def calc_weight(
         cord_difference: float,
@@ -52,7 +69,7 @@ def calc_weight(
         distance_to_wall: float,
         seen_wall_length: float,
 ) -> float:
-    weight = 1
+    weight = 0.1
     if np.abs(cord_difference) > MAX_CORD_DIFFERENCE:
         return 0
     if np.abs(cord_difference / distance_to_wall) > MAX_CORD_RELATIVE_DIFFERENCE:
@@ -124,16 +141,19 @@ class Core:
         self.imu_angular_speed_deg_s = None
         self.imu_angle_deg = None
         self.camera_input = None
+        self.camera_has_input = False
 
         self.output = bytes((0,) * 16)
 
         self.predicted_cords = (INITIAL_CORD_X, INITIAL_CORD_Y)
         self.predicted_angle = INITIAL_ANGLE
+        self.start_angle = 0
 
         self.predicted_vertices = [
             [(0.0, 0.0), (0.0, 0.0)],
             [(0.0, 0.0), (0.0, 0.0)],
         ].copy()
+        self.predicted_camera_vertices = ([(0.0, 0.0),] * 8).copy()
         self.contact_center = (0, 0)
 
         """
@@ -203,7 +223,12 @@ class Core:
                 / DISTANCE_BETWEEN_WHEELS
         )
         print(inferred_angular_speed)
-        print([math.radians(x) for x in self.imu_angular_speed_deg_s])
+        # if self.imu_input is not None:
+        #     ass = self.imu_angular_speed_deg_s
+        #     inferred_angular_speed = math.radians(math.sqrt(ass[0] ** 2 + ass[1] ** 2 + ass[2] ** 2)) * (1 if ass[2] > 0 else -1)
+        #     print(inferred_angular_speed)
+            
+            
         inferred_relative_velocity = (
             (wheel_speed[0] + wheel_speed[1]) / 2,
             -inferred_angular_speed * WHEEL_X_OFFSET
@@ -266,6 +291,7 @@ class Core:
 
         self.predicted_cords = vec_add(self.predicted_cords, (x_diff_average, y_diff_average))
         self.predicted_angle += angle_diff_average
+        self.start_angle += angle_diff_average
 
     # Get realtime data from other modules
     def update(
@@ -302,10 +328,15 @@ class Core:
         if unpacked_stm32_input is not None:
             self.unpacked_stm_input = unpacked_stm32_input
         if imu_input is not None:
-            self.imu_input = imu_input
             self.imu_acceleration_g, self.imu_angular_speed_deg_s, self.imu_angle_deg = imu_input
+            if self.imu_input is None:
+                self.start_angle = math.radians(self.imu_angle_deg[2])
+            self.imu_input = imu_input
         if camera_input is not None:
+            self.camera_has_input = True
             self.camera_input = camera_input
+        else:
+            self.camera_has_input = False
 
         if self.status_code > 0:
             self.status_code = 0
@@ -314,6 +345,13 @@ class Core:
 
         # predict current position
         self.predicted_angle += dt * inferred_angular_speed
+        
+        if self.imu_input is not None:
+            self.predicted_angle = INITIAL_ANGLE + self.start_angle - math.radians(self.imu_angle_deg[2])
+        
+        print(self.predicted_angle)
+        if self.imu_input is not None:
+            print([math.radians(x) for x in self.imu_angle_deg], 'yee')
         inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
         self.predicted_cords = vec_add(
             vec_multiply(inferred_velocity, dt), self.predicted_cords
@@ -325,6 +363,22 @@ class Core:
                 self.predicted_vertices[i][j] = vec_add(
                     rotated(
                         (i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH),
+                        self.predicted_angle,
+                    ),
+                    self.predicted_cords,
+                )
+        for i, camera_point in ((0, (0, 0)),
+                                (1, (0, vision.CAMERA_STATE.res_v)),
+                                (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
+                                (3, (vision.CAMERA_STATE.res_h, 0)),
+                                (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                                (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                                (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                                (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                                ):
+            self.predicted_camera_vertices[i] = vec_add(
+                    rotated(
+                        camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3],
                         self.predicted_angle,
                     ),
                     self.predicted_cords,
@@ -352,7 +406,7 @@ class Core:
                 ):
                     self.predicted_items[cords] = [
                         self.predicted_items.get(cords, (0, 0))[0] + 2,
-                        0,
+                        RED,
                         0,
                     ]  # let the first element of the value add 2, and let the second element be 0
 
@@ -366,17 +420,23 @@ class Core:
                 ):
                     self.predicted_items[cords] = [
                         self.predicted_items.get(cords, (0, 1))[0] + 3,
-                        1,
+                        YELLOW,
                         0,
                     ]  # let the first element of the value add 3, and let the second element be 1
 
             merge_item_prediction(self.predicted_items)
 
-            # TODO: seen items decay
+            # decay seen items
+            for item, v in self.predicted_items.items():
+                relative_cords = rotated(vec_subtract(item, self.predicted_cords), -self.predicted_angle)
+                _, i, j =  camera_convert.space2img(vision.CAMERA_STATE, relative_cords[0], relative_cords[1], -12.5 if v[1] == RED else -15)
+                if 0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H \
+                    and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V:
+                    v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
 
         # decay all items and delete items with low value
         self.contact_center = vec_add(self.predicted_cords,
-                                      rotated((CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK, 0), self.predicted_angle))
+            rotated((CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK, 0), self.predicted_angle))
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL

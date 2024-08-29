@@ -6,15 +6,17 @@ import numpy as np
 
 from algorithm import camera_convert, find_color
 from communication.camera import Camera
+from algorithm import vision
 
-MODE = "file"
-# MODE = 'adjust'
+
+# MODE = "file"
+MODE = 'adjust'
 # MODE = 'camera'
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
-READ_DIR = "test4"
-WRITE_DIR = "test5"
+READ_DIR = "hybrid1"
+WRITE_DIR = "test6"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
@@ -24,9 +26,7 @@ WRITE_DIR = "test5"
 # )
 # (357, 10, -207) [51.7  1.2  1. ]
 # (295, 12, -221) [57.7  1.1  0.3] (np.float64(51.44557864216593), np.float64(51.08994556912829))
-CAMERA_STATE = camera_convert.CameraState(
-    (295, 12, -221), (57.7, 1.1, 0.3), (51.45, 51.09), (640, 480)
-)
+CAMERA_STATE = vision.CAMERA_STATE
 
 SHOW_RED = SHOW_YELLOW = True
 SHOW_WALL = True
@@ -48,7 +48,7 @@ def process(img, show: bool = False):
     )
 
     if show and DRAW_GRID:
-        draw_grid(img, (255, 255, 255, 255), 450, 2000, 50, -1000, 1000, 50)
+        draw_grid(img, (255, 255, 255, 255), 300, 2000, 100, -500, 500, 100)
 
     print()
 
