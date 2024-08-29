@@ -110,7 +110,7 @@ if __name__ == "__main__":
         camera_input = None
 
         if ENABLE_STM_INPUT:
-            stm32_input = stm.get_message()
+            stm32_input, unpacked_stm32_input = stm.get_message()
             if DEBUG_INFO: print("Got STM32 input, used time:", next(module_time))
         if ENABLE_IMU:
             imu_input = imu.get_imu_input()
@@ -124,16 +124,16 @@ if __name__ == "__main__":
             if ENABLE_VISION:
                 camera_input = vision.process(camera_last_used_time, camera_image)
                 if DEBUG_INFO or CAMERA_DEBUG_INFO: print("Processed camera input, used time:", next(module_time))
-                print(camera_input)
+                # print(camera_input)
 
         if ENABLE_CORE:
-            core.update(real_time(), stm32_input, imu_input, camera_input)
+            core.update(real_time(), stm32_input, unpacked_stm32_input, imu_input, camera_input)
             output = core.get_output()
             if DEBUG_INFO: print("Got core output:", output.hex(" "))
             if DEBUG_INFO: print("Used time:", next(module_time))
 
         if ENABLE_DUMMY:
-            dummy_output = dummy.get_output(stm32_input)
+            dummy_output = dummy.get_output(stm32_input, unpacked_stm32_input)
             if DUMMY_CONTROL:
                 output = dummy_output
             if dummy.force_stop:

@@ -2,7 +2,7 @@ from struct import unpack
 
 import numpy as np
 
-ENABLE_INFER_POSITION_FROM_WALLS = False  # True
+ENABLE_INFER_POSITION_FROM_WALLS = True  # True
 
 np.tau = 2 * np.pi
 
@@ -25,8 +25,8 @@ INITIAL_CORD_X = 200
 INITIAL_CORD_Y = 200
 INITIAL_ANGLE = 0
 
-MAX_CORD_DIFFERENCE = 100
-MAX_CORD_RELATIVE_DIFFERENCE = 0.2
+MAX_CORD_DIFFERENCE = 500
+MAX_CORD_RELATIVE_DIFFERENCE = 0.5
 MAX_ANGLE_DIFFERENCE = 0.4
 GOOD_SEEN_WALL_LENGTH = 500
 
@@ -117,6 +117,7 @@ class Core:
             [15, 10, 40, 10, 0, 10, 5, 0],
         ].copy()
         self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 17)
+        self.unpacked_stm_input = None
         self.imu_input = None
         self.camera_input = None
         
@@ -193,25 +194,28 @@ class Core:
             weight = calc_weight(x_diff, angle_diff, v[2], v[3])
 
             x_weight_sum += weight
-            x_diff_sum += x_diff
+            x_diff_sum += x_diff * weight
             angle_weight_sum += weight
-            angle_diff_sum += angle_diff
+            angle_diff_sum += angle_diff * weight
 
         for v in vote_y_angle:
-            y_diff = v[0] - self.predicted_cords[0]
+            y_diff = v[0] - self.predicted_cords[1]
             angle_diff = angle_subtract(v[1], self.predicted_angle)
             weight = calc_weight(y_diff, angle_diff, v[2], v[3])
 
             y_weight_sum += weight
-            y_diff_sum += y_diff
+            y_diff_sum += y_diff * weight
             angle_weight_sum += weight
-            angle_diff_sum += angle_diff
+            angle_diff_sum += angle_diff * weight
 
         x_diff_average = x_diff_sum / x_weight_sum
         y_diff_average = y_diff_sum / y_weight_sum
         angle_diff_average = angle_diff_sum / angle_weight_sum
+        
+        print(x_weight_sum, y_weight_sum, angle_weight_sum)
+        print(x_diff_average, y_diff_average, angle_diff_average)
 
-        self.predicted_cords += x_diff_average, y_diff_average
+        self.predicted_cords = vec_add(self.predicted_cords, (x_diff_average, y_diff_average))
         self.predicted_angle += angle_diff_average
 
     # Get realtime data from other modules
@@ -219,6 +223,7 @@ class Core:
             self,
             time: float,
             stm32_input: bytes,
+            unpacked_stm32_input: list[int],
             imu_input: (
                     tuple[
                         tuple[float, float, float],
@@ -245,6 +250,8 @@ class Core:
         # update all the input data
         if stm32_input is not None:
             self.stm_input = stm32_input
+        if unpacked_stm32_input is not None:
+            self.unpacked_stm_input = unpacked_stm32_input
         if imu_input is not None:
             self.imu_input = imu_input
         if camera_input is not None:
@@ -269,14 +276,18 @@ class Core:
             )
             tick = ...  # TODO
         elif self.protocol == 127:
-            encoder = (
-                unpack("<h", self.stm_input[11:13])[0],
-                unpack("<h", self.stm_input[5:7])[0],
-            )
-            tick = (
-                unpack("<I", self.stm_input[7:11])[0],
-                unpack("<I", self.stm_input[1:5])[0],
-            )
+            if self.unpacked_stm_input is None:
+                encoder = (
+                    unpack("<h", self.stm_input[11:13])[0],
+                    unpack("<h", self.stm_input[5:7])[0],
+                )
+                tick = (
+                    unpack("<I", self.stm_input[7:11])[0],
+                    unpack("<I", self.stm_input[1:5])[0],
+                )
+            else:
+                encoder = self.unpacked_stm_input[2:4]
+                tick = self.unpacked_stm_input[0:2]
         
         wheel_speed = (encoder[0] * DISTANCE_PER_ENCODER / tick[0] * 72000000,
                        encoder[1] * DISTANCE_PER_ENCODER / tick[1] * 72000000)

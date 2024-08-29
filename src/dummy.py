@@ -70,11 +70,14 @@ class Dummy:
         self.motor_PID = [[15, 10, 40, 10, 0, 10, 5, 0], [15, 10, 40, 10, 0, 10, 5, 0]]
 
         self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 17)
+        self.unpacked_stm_input = None
         self.output = bytes((0,) * 16)
 
-    def get_output(self, stm_input: bytes) -> bytes:
+    def get_output(self, stm_input: bytes, unpacked_stm_input) -> bytes:
         if stm_input is not None:
             self.stm_input = stm_input
+        if unpacked_stm_input is not None:
+            self.unpacked_stm_input = unpacked_stm_input
 
         self.mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
@@ -310,8 +313,13 @@ class Dummy:
             
         elif self.input_protocol == 127:
             
-            self.drawn_rect(1.5 * UNIT, unpack("<h", self.stm_input[5:7])[0] * 72000000 / 44 /  unpack("<I", self.stm_input[1:5])[0] / 90, ACTUAL)
-            self.drawn_rect(2.5 * UNIT, unpack("<h", self.stm_input[11:13])[0] * 72000000 / 44 /  unpack("<I", self.stm_input[7:11])[0] / 90, ACTUAL)
+            if self.unpacked_stm_input is None:
+                self.drawn_rect(1.5 * UNIT, unpack("<h", self.stm_input[5:7])[0] * 72000000 / 44 /  unpack("<I", self.stm_input[1:5])[0] / 90, ACTUAL)
+                self.drawn_rect(2.5 * UNIT, unpack("<h", self.stm_input[11:13])[0] * 72000000 / 44 /  unpack("<I", self.stm_input[7:11])[0] / 90, ACTUAL)
+            else:
+                self.drawn_rect(1.5 * UNIT, self.unpacked_stm_input[3] * 72000000 / 44 / self.unpacked_stm_input[1] / 90, ACTUAL)
+                self.drawn_rect(2.5 * UNIT, self.unpacked_stm_input[2] * 72000000 / 44 / self.unpacked_stm_input[0] / 90, ACTUAL)
+                
 
         if self.enabled:
             self.left_rect = self.drawn_rect(1.5 * UNIT, self.motor[0], LOCK if self.left_lock else FRONT)

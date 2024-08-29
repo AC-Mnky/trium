@@ -33,7 +33,7 @@ class Visualizer:
 
         pygame.init()
         pygame.font.init()
-        self.font = pygame.font.SysFont("Cambria", FONT_SIZE)
+        self.font = pygame.font.SysFont("DejaVuSansMono", FONT_SIZE)
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
 
         self.mouse_pos = 0

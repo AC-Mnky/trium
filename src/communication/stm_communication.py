@@ -16,6 +16,7 @@ class STM:
         self.port = "/dev/ttyAMA0"
         self.baud = "115200"
         self.ser = serial.Serial(self.port, self.baud, parity=serial.PARITY_NONE)
+        self.protocol = protocol
         self.message_length = 96 if protocol == 128 else 17
         self.message_head = bytes((128, ) * 4) if protocol == 128 else bytes((127, ))
         if not self.ser.is_open:
@@ -25,11 +26,13 @@ class STM:
     def reset_time(self) -> None:
         self.stm_start_time = time.time()
 
-    def get_message(self) -> bytes:
+    def get_message(self) -> tuple[bytes, list[int]]:
 
         if not self.ser.is_open:
             self.ser.open()
             
+        unpacked_message = [0, 0, 0, 0]
+        
         for i in range(10):
             
             while True:
@@ -44,6 +47,22 @@ class STM:
             message = self.message_head + self.ser.read(
                 self.message_length - len(self.message_head)
             )
+            
+            if self.protocol == 128:
+                ...  # TODO
+            elif self.protocol == 127:
+                encoder = (
+                    unpack("<h", message[11:13])[0],
+                    unpack("<h", message[5:7])[0],
+                )
+                tick = (
+                    unpack("<I", message[7:11])[0],
+                    unpack("<I", message[1:5])[0],
+                )
+                unpacked_message[0] += tick[0]
+                unpacked_message[1] += tick[1]
+                unpacked_message[2] += encoder[0]
+                unpacked_message[3] += encoder[1]
 
             # print("Message from STM32:", message.hex(" "))
             
@@ -54,8 +73,10 @@ class STM:
             
 
         # self.ser.close()
+        
+        # message = bytes((0,) * 17)
 
-        return message
+        return message, unpacked_message
 
     def get_encoder_and_ultrasonic_input(self) -> tuple[float, float, int, int]:
         message: bytes = self.get_message()
