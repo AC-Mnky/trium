@@ -8,7 +8,7 @@ ENABLE_VISION = True  # True
 ENABLE_CORE = True  # True
 ENABLE_STM_OUTPUT = True  # True
 
-ENABLE_DUMMY = True  # False
+ENABLE_DUMMY = False  # False
 DUMMY_CONTROL = True  # Whatever
 ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
@@ -147,6 +147,9 @@ if __name__ == "__main__":
             if DEBUG_INFO: print("Visualization used time:", next(module_time))
 
         if ENABLE_STM_OUTPUT:
+            if output[1] == 1:
+                stm.reset_time()
+                print("STM time reset.")
             stm.send_message(output, MAX_MESSAGE_LENGTH)
             if DEBUG_INFO: print("Sent out output to STM32, used time:", next(module_time))
 

@@ -11,13 +11,13 @@ from communication.camera import Camera
 
 
 # MODE = "file"
-# MODE = 'adjust'
-MODE = 'camera'
+MODE = 'adjust'
+# MODE = 'camera'
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = False
 READ_DIR = "wall4"
-WRITE_DIR = "test3"
+WRITE_DIR = "test4"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
@@ -232,4 +232,4 @@ if __name__ == "__main__":
                 
             else:
                 print("shit")
-            cv2.waitKey(500)
+            cv2.waitKey(200)

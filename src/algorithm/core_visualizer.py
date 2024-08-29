@@ -88,6 +88,8 @@ class Visualizer:
         self.force_stop = keys[pygame.K_s]
         if keys[pygame.K_r]:
             self.core = core.Core(time, self.core.protocol)
+        if keys[pygame.K_e]:
+            self.core.status_code = 1
 
         if self.control:
             self.core.motor = [0, 0]

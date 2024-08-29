@@ -30,7 +30,7 @@ class STM:
         if not self.ser.is_open:
             self.ser.open()
             
-        while True:
+        for i in range(10):
             
             while True:
                 flag_match = True
