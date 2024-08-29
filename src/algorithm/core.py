@@ -51,7 +51,7 @@ def calc_weight(
         distance_to_wall: float,
         seen_wall_length: float,
 ) -> float:
-    weight = 0.5
+    weight = 1
     if np.abs(cord_difference) > MAX_CORD_DIFFERENCE:
         return 0
     if np.abs(cord_difference / distance_to_wall) > MAX_CORD_RELATIVE_DIFFERENCE:
