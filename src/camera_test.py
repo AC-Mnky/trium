@@ -25,6 +25,9 @@ WRITE_DIR = "test4"
 CAMERA_STATE = camera_convert.CameraState(
     (309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480)
 )
+CAMERA_STATE = camera_convert.CameraState(
+    (240, 0, -180), (52.8, 2.1, 0.4), (37.58, 28.63), (640, 480)
+)
 
 SHOW_RED = SHOW_YELLOW = True
 SHOW_WALL = True
