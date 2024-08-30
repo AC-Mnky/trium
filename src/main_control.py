@@ -40,9 +40,8 @@ CAMERA_DEBUG_INFO = True
 DEBUG_RESET = False
 core.CORE_TIME_DEBUG = True  # False
 
-FORCE_STOP_MESSAGE = bytes(
-    (128, 1, 0, 0,True, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0)
-)
+FORCE_STOP_MESSAGE = bytes((128, 1, 0, 0, True, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0))
+
 
 def real_time() -> float:
     return time.time() - start_time
@@ -96,11 +95,7 @@ if __name__ == "__main__":
         if DEBUG_INFO:
             print("Dummy plugged in, used time:", next(module_time))
 
-    visualizer = (
-        core_visualizer.Visualizer(core, VISUALIZER_CONTROL)
-        if ENABLE_CORE_VISUALIZER
-        else None
-    )
+    visualizer = core_visualizer.Visualizer(core, VISUALIZER_CONTROL) if ENABLE_CORE_VISUALIZER else None
     if visualizer is not None:
         if DEBUG_INFO:
             print("Visualizer initialized, used time:", next(module_time))
@@ -142,9 +137,7 @@ if __name__ == "__main__":
                 # print(camera_input)
 
         if ENABLE_CORE:
-            core.update(
-                real_time(), stm32_input, unpacked_stm32_input, imu_input, camera_input
-            )
+            core.update(real_time(), stm32_input, unpacked_stm32_input, imu_input, camera_input)
             output = core.get_output()
             if DEBUG_INFO:
                 print("Got core output:", output.hex(" "))
