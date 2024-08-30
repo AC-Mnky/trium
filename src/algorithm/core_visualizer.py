@@ -62,9 +62,9 @@ class Visualizer:
         self.mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if (
-                    event.type == pygame.QUIT
-                    or event.type == pygame.KEYDOWN
-                    and (event.key in [pygame.K_ESCAPE, pygame.K_q])
+                event.type == pygame.QUIT
+                or event.type == pygame.KEYDOWN
+                and (event.key in [pygame.K_ESCAPE, pygame.K_q])
             ):
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -187,8 +187,13 @@ class Visualizer:
             CAR,
             [real2window(v) for v in self.core.predicted_vertices[0] + self.core.predicted_vertices[1][::-1]],
         )
-        draw_alpha.line(self.screen, WHITE, real2window(self.core.predicted_cords),
-                        real2window(self.core.relative2absolute((1000, 0))), 1)
+        draw_alpha.line(
+            self.screen,
+            WHITE,
+            real2window(self.core.predicted_cords),
+            real2window(self.core.relative2absolute((1000, 0))),
+            1,
+        )
 
         camera_color = CAMERA if self.core.camera_has_input else CAMERA_SHOT
         draw_alpha.polygon(
@@ -213,7 +218,7 @@ class Visualizer:
         # message
         text = self.font.render(self.core.vision_message, True, WHITE)
         self.screen.blit(text, (10, WINDOW_SIZE[1] - 50 + 5))
-        self.core.vision_message = '...'
+        self.core.vision_message = "..."
 
         if self.core.vision_target_cords is not None:
             c = real2window(self.core.vision_target_cords)
