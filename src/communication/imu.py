@@ -14,7 +14,7 @@ class IMU:
         Current IMU retrieval rate: 200Hz.
         """
         # self.port = "COM6"  # PC
-        self.port = "/dev/ttyAMA5"  # Pi 4B
+        self.port = "/dev/ttyAMA5"  # Pi 4B -> UART5
         self.baud = 115200
 
     def get_imu_input(
@@ -22,9 +22,11 @@ class IMU:
     ) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
         """
         Reads IMU data from a serial port.
+
+        Returns:
+            tuple (tuple | None): A tuple containing the acceleration, angular velocity, and angle values.
         """
         ser = serial.Serial(self.port, self.baud, timeout=0.5)
-        # print(ser.is_open)
 
         datahex = ser.read(33)
         return self._process_input_data(datahex)
@@ -205,10 +207,13 @@ class IMU:
                     if data == (check_sum & 0xFF):
                         angle = self._extract_angle(angle_data)
                         return acceleration, angular_velocity, angle
-                        # print("Acceleration(g):", acceleration)
-                        # print("Angular_Velocity(deg/s):", angular_velocity)
-                        # print("Angle(deg):", angle)
-                        # print("\n")
+                    """ Debug printing codes
+
+                        print("Acceleration(g):", acceleration)
+                        print("Angular_Velocity(deg/s):", angular_velocity)
+                        print("Angle(deg):", angle)
+                        print("\n")
+                    """
                     check_sum = 0
                     byte_num = 0
                     frame_state = 0
