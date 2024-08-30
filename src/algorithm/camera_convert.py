@@ -61,8 +61,8 @@ class CameraState:
     def update(self) -> None:
         """
         Update the camera conversion matrices and mappings.
-        This method updates the camera conversion matrices and mappings based on the current values of phi, theta, omega,
-        half_fov_h, half_fov_v, and resolution.
+        This method updates the camera conversion matrices and mappings based on the current values of phi,
+        theta, omega, half_fov_h, half_fov_v, and resolution.
 
         The camera conversion matrices are calculated as follows:
         - trans_phi: Rotation matrix around the z-axis (phi angle).
@@ -77,7 +77,7 @@ class CameraState:
         Note:
             The matrices and mappings are stored as attributes of the CameraConvert object.
 
-        Parameters:
+        Args:
             None
 
         Returns:
