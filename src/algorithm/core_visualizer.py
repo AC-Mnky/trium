@@ -174,10 +174,13 @@ class Visualizer:
             self.walls = self.core.camera_input[3]
 
         for wall in self.walls:
-            draw_alpha.line(self.screen, (0, 128, 255, 128),
-                            real2window(self.core.relative2absolute(wall[0])),
-                            real2window(self.core.relative2absolute(wall[1])),
-                            1)
+            draw_alpha.line(
+                self.screen,
+                (0, 128, 255, 128),
+                real2window(self.core.relative2absolute(wall[0])),
+                real2window(self.core.relative2absolute(wall[1])),
+                1,
+            )
 
         draw_alpha.polygon(
             self.screen,
