@@ -92,7 +92,10 @@ def time_since_last_call(mul: int = 1000):
 
 
 def calc_weight(
-    cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
+    cord_difference: float,
+    angle_difference: float,
+    distance_to_wall: float,
+    seen_wall_length: float,
 ) -> float:
     """
     Calculate the weight based on the given parameters.
@@ -245,10 +248,19 @@ class Core:
             tick = self.unpacked_stm_input[0:2]
         else:
             if self.protocol == 128:
-                encoder = (unpack("<h", self.stm_input[68:70])[0], unpack("<h", self.stm_input[36:38])[0])
-                tick = (unpack("<I", self.stm_input[64:68])[0], unpack("<I", self.stm_input[32:36])[0])
+                encoder = (
+                    unpack("<h", self.stm_input[68:70])[0],
+                    unpack("<h", self.stm_input[36:38])[0],
+                )
+                tick = (
+                    unpack("<I", self.stm_input[64:68])[0],
+                    unpack("<I", self.stm_input[32:36])[0],
+                )
             else:
-                encoder = (unpack("<h", self.stm_input[11:13])[0], unpack("<h", self.stm_input[5:7])[0])
+                encoder = (
+                    unpack("<h", self.stm_input[11:13])[0],
+                    unpack("<h", self.stm_input[5:7])[0],
+                )
                 tick = (unpack("<I", self.stm_input[7:11])[0], unpack("<I", self.stm_input[1:5])[0])
         try:
             wheel_speed = (
@@ -342,7 +354,6 @@ class Core:
         Yields:
             None: This method is a generator and yields None at each step.
         """
-
         while True:
 
             current_cords = self.predicted_cords
@@ -426,6 +437,12 @@ class Core:
                 yield
 
     def distance_to_wall(self) -> float:
+        """
+        Calculates the minimum distance from the current position to the nearest wall in the room.
+
+        Returns:
+            distance (float): The minimum distance to the nearest wall.
+        """
         return np.min(
             (
                 self.predicted_cords[0],
@@ -436,15 +453,31 @@ class Core:
         )
 
     def distance_before_crashing_into_wall(self) -> float:
+        """
+        Calculates the distance before the object crashes into a wall.
+
+        Returns:
+            distance (float): The minimum distance before crashing into a wall.
+        """
         cos = np.cos(self.predicted_angle)
         sin = np.sin(self.predicted_angle)
         crash_left = np.inf if cos >= 0 else self.predicted_cords[0] / (-cos)
         crash_top = np.inf if sin >= 0 else self.predicted_cords[1] / (-sin)
         crash_right = np.inf if cos <= 0 else (ROOM_X - self.predicted_cords[0]) / cos
         crash_bottom = np.inf if cos >= 0 else (ROOM_Y - self.predicted_cords[1]) / sin
+
         return np.min((crash_left, crash_top, crash_right, crash_bottom))
 
     def target_toward_cords(self, cords: tuple[float, float]) -> None:
+        """
+        Sets the target coordinates for the vision system and calculates the motor output.
+
+        Args:
+            cords (tuple[float, float]): The target coordinates in absolute units.
+
+        Returns:
+            None
+        """
         self.vision_target_cords = cords
         cords = self.absolute2relative(cords)
         length = get_length(cords)
@@ -459,7 +492,8 @@ class Core:
         summ = np.clip(summ, -0.9 - diff, 0.9 - diff)
         summ = np.clip(summ, -0.9 + diff, 0.9 + diff)
         max_summ = np.clip(
-            np.sqrt(self.distance_to_wall() * self.distance_before_crashing_into_wall()) / WALL_SLOW_MARGIN,
+            np.sqrt(self.distance_to_wall() * self.distance_before_crashing_into_wall())
+            / WALL_SLOW_MARGIN,
             0.1,
             0.9,
         )
@@ -481,7 +515,10 @@ class Core:
         stm32_input: bytes,
         unpacked_stm32_input: list[int],
         imu_input: (
-            tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None
+            tuple[
+                tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]
+            ]
+            | None
         ),
         camera_input: (
             tuple[
@@ -530,7 +567,9 @@ class Core:
 
         if self.imu_input is not None:
             # print(np.radians(self.imu_angle_deg[2]), 'yes')
-            self.predicted_angle = INITIAL_ANGLE + self.start_angle - np.radians(self.imu_angle_deg[2])
+            self.predicted_angle = (
+                INITIAL_ANGLE + self.start_angle - np.radians(self.imu_angle_deg[2])
+            )
         # print(self.start_angle, 'no')
         # print(self.predicted_angle)
         # if self.imu_input is not None:
@@ -555,7 +594,13 @@ class Core:
             (3, (vision.CAMERA_STATE.res_h, 0)),
             (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
             (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+            (
+                6,
+                (
+                    vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H,
+                    vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V,
+                ),
+            ),
             (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
         ):
             self.predicted_camera_vertices[i] = self.relative2absolute(
@@ -607,7 +652,10 @@ class Core:
             for item, v in self.predicted_items.items():
                 relative_cords = self.absolute2relative(item)
                 _, i, j = camera_convert.space2img(
-                    vision.CAMERA_STATE, relative_cords[0], relative_cords[1], -12.5 if v[1] == RED else -15
+                    vision.CAMERA_STATE,
+                    relative_cords[0],
+                    relative_cords[1],
+                    -12.5 if v[1] == RED else -15,
                 )
                 if (
                     0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H
