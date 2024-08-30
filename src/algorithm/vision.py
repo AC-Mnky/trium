@@ -52,7 +52,7 @@ def process(
 
     Args:
         time (float): The time associated with the image.
-        image (cv2.UMat): The image to be processed.
+        image (cv2.UMat | None): The image to be processed.
 
     Returns:
         tuple: A tuple containing the following information or None:
