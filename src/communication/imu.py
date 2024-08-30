@@ -16,6 +16,7 @@ class IMU:
         # self.port = "COM6"  # PC
         self.port = "/dev/ttyAMA5"  # Pi 4B -> UART5
         self.baud = 115200
+        self.ser_imu = serial.Serial(self.port, self.baud, timeout=0.5)
 
     def get_imu_input(
         self,
@@ -26,9 +27,7 @@ class IMU:
         Returns:
             tuple (tuple | None): A tuple containing the acceleration, angular velocity, and angle values.
         """
-        ser = serial.Serial(self.port, self.baud, timeout=0.5)
-
-        datahex = ser.read(33)
+        datahex = self.ser_imu.read(33)
         return self._process_input_data(datahex)
 
     def _extract_acceleration(self, datahex: bytes) -> tuple[float, float, float]:
