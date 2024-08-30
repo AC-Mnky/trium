@@ -1,4 +1,3 @@
-import math
 from struct import unpack
 
 import numpy as np
@@ -53,7 +52,7 @@ DELETE_VALUE = 0.2
 INTEREST_ADDITION = 5
 INTEREST_MAXIMUM = 30
 AIM_ANGLE = 0.4
-UNAIM_ANGLE = 0.2
+NO_AIM_ANGLE = 0.2
 ROOM_MARGIN = -1000000
 
 MOTOR_SPEED = 0.5
@@ -159,7 +158,7 @@ class Core:
         self.contact_center = (0, 0)
 
         """
-        Keys are the items' coords. 
+        Keys are the items' cords. 
         First element of the list is the decay term,  
         second is the tag to identify red/yellow blocks
         third is the interest of an item
@@ -227,7 +226,8 @@ class Core:
         print(inferred_angular_speed)
         # if self.imu_input is not None:
         #     ass = self.imu_angular_speed_deg_s
-        #     inferred_angular_speed = math.radians(math.sqrt(ass[0] ** 2 + ass[1] ** 2 + ass[2] ** 2)) * (1 if ass[2] > 0 else -1)
+        #     inferred_angular_speed =
+        #     np.radians(np.sqrt(ass[0] ** 2 + ass[1] ** 2 + ass[2] ** 2)) * (1 if ass[2] > 0 else -1)
         #     print(inferred_angular_speed)
 
         inferred_relative_velocity = (
@@ -241,7 +241,7 @@ class Core:
         Infers the position of an object based on the walls in the environment.
 
         This method modifies the predicted position of the car by analyzing the walls in the environment.
-        It uses the distances and angles between thecar and the walls to modify predictions.
+        It uses the distances and angles between the car and the walls to modify predictions.
 
         Returns:
             None
@@ -331,7 +331,7 @@ class Core:
         if imu_input is not None:
             self.imu_acceleration_g, self.imu_angular_speed_deg_s, self.imu_angle_deg = imu_input
             if self.imu_input is None:
-                self.start_angle = math.radians(self.imu_angle_deg[2])
+                self.start_angle = np.radians(self.imu_angle_deg[2])
             self.imu_input = imu_input
         if camera_input is not None:
             self.camera_has_input = True
@@ -348,11 +348,11 @@ class Core:
         self.predicted_angle += dt * inferred_angular_speed
 
         if self.imu_input is not None:
-            self.predicted_angle = INITIAL_ANGLE + self.start_angle - math.radians(self.imu_angle_deg[2])
+            self.predicted_angle = INITIAL_ANGLE + self.start_angle - np.radians(self.imu_angle_deg[2])
 
         print(self.predicted_angle)
         if self.imu_input is not None:
-            print([math.radians(x) for x in self.imu_angle_deg], 'yee')
+            print([np.radians(x) for x in self.imu_angle_deg], 'yee')
         inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
         self.predicted_cords = vec_add(
             vec_mul(inferred_velocity, dt), self.predicted_cords
@@ -379,8 +379,8 @@ class Core:
         # analyze camera input
         if camera_input is not None:
             """
-            "camera_reds", "camera_yellows" are coords of red blocks and yellow blocks
-            "camera_walls" are pairs of coords of the walls' end points
+            "camera_reds", "camera_yellows" are cords of red blocks and yellow blocks
+            "camera_walls" are pairs of cords of the walls' end points
             """
             camera_time, camera_reds, camera_yellows, camera_walls = camera_input
 
@@ -465,9 +465,9 @@ class Core:
             elif item_angle < 0:
                 self.motor = [-0.5, 0.5]
 
-            # if item_angle > AIM_ANGLE or item_angle > UNAIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
+            # if item_angle > AIM_ANGLE or item_angle > NO_AIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
             #     self.motor = [0.2, -0.2]
-            # elif item_angle < -AIM_ANGLE or item_angle < -UNAIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
+            # elif item_angle < -AIM_ANGLE or item_angle < -NO_AIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
             #     self.motor = [-0.2, 0.2]
             # else:
             #     self.motor = [0.5, 0.5]
