@@ -29,6 +29,6 @@
 ## Mnky
 
 > [!WARNING]
-> 禁止`†升天†`
+> 禁止[`†升天†`](https://www.bilibili.com/video/BV1gU4y187xA/)
 
 ![Mnky](assets/miscellaneous/justice.jpg)
