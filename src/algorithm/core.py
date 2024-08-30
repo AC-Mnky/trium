@@ -36,11 +36,11 @@ RIGHT_WHEEL = (WHEEL_X_OFFSET, DISTANCE_BETWEEN_WHEELS / 2)
 ROOM_X = 3000
 ROOM_Y = 2000
 
-INITIAL_CORD_X = 1100
-INITIAL_CORD_Y = 200
+INITIAL_CORD_X = 100
+INITIAL_CORD_Y = 150
 INITIAL_ANGLE = 0
 
-HOME = (1100, 200)
+HOME = (500, 200)
 HOME_ANGLE = 0
 
 MAX_CORD_DIFFERENCE = 1000
@@ -62,7 +62,8 @@ ROOM_MARGIN = -1000000
 ANGLE_TYPICAL = 0.2
 ANGLE_STANDARD_DEVIATION = 0.1
 LENGTH_TYPICAL = 0.002
-WALL_SLOW_MARGIN = 300
+WALL_SLOW_MARGIN = 1000
+MAX_SPEED = 914.8
 
 MOTOR_SPEED = 0.5
 
@@ -389,7 +390,19 @@ class Core:
                 ROOM_Y - self.predicted_cords[1],
             )
         )
-        # TODO: give more information
+
+    def distance_before_crashing_into_wall(self) -> float:
+        cos = np.cos(self.predicted_angle)
+        sin = np.sin(self.predicted_angle)
+        crash_left = np.inf if np.cos(self.predicted_cords) >= 0 else \
+            self.predicted_cords[0] / (-np.cos(self.predicted_cords))
+        crash_top = np.inf if np.sin(self.predicted_cords) >= 0 else \
+            self.predicted_cords[1] / (-np.sin(self.predicted_cords))
+        crash_right = np.inf if np.cos(self.predicted_cords) <= 0 else \
+            (ROOM_X - self.predicted_cords[0]) / np.cos(self.predicted_cords)
+        crash_bottom = np.inf if np.cos(self.predicted_cords) >= 0 else \
+            (ROOM_Y - self.predicted_cords[1]) / np.sin(self.predicted_cords)
+        return np.min((crash_left, crash_top, crash_right, crash_bottom))
 
     def target_toward_cords(self, cords: tuple[float, float]) -> None:
         self.vision_target_cords = cords
@@ -402,12 +415,16 @@ class Core:
         self.set_motor_output(diff, summ)
 
     def set_motor_output(self, diff: float, summ: float) -> None:
-        # print(diff, summ)
+        diff = np.clip(diff, -0.9, 0.9)
+        summ = np.clip(summ, -0.9 - diff, 0.9 - diff)
+        summ = np.clip(summ, -0.9 + diff, 0.9 + diff)
+        max_summ = np.clip(
+            np.sqrt(self.distance_to_wall() * self.distance_before_crashing_into_wall()) / WALL_SLOW_MARGIN, 0.1, 0.9)
+        summ = np.clip(summ, -0.4, max_summ)
+
         self.motor = [(summ + diff) / 2, (summ - diff) / 2]
 
-        self.motor[0] = np.clip(self.motor[0], -0.9, 0.9)
-
-        # TODO: clip speed when near walls
+        # TODO: dependent on angle to walls
 
         # k = np.maximum(np.abs(np.max(self.motor)) / 0.9, 1)
         # self.motor[0] /= k
