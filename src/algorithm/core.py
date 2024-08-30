@@ -107,7 +107,7 @@ def calc_weight(
         seen_wall_length (float): The length of the wall seen.
 
     Returns:
-        wright (float): The calculated weight.
+        weight (float): The calculated weight.
     """
     weight = 0.1
     if np.abs(cord_difference) > MAX_CORD_DIFFERENCE:
