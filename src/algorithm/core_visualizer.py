@@ -202,10 +202,22 @@ class Visualizer:
 
         self.core.get_output()
 
+        # message IO
         text = self.font.render(self.core.output.hex(" "), True, WHITE)
-        self.screen.blit(text, (0, 0))
+        self.screen.blit(text, (10, 5))
         text = self.font.render(self.core.stm_input.hex(" "), True, WHITE)
-        self.screen.blit(text, (0, 20))
+        self.screen.blit(text, (10, 25))
+
+        # message
+        text = self.font.render(self.core.vision_message, True, WHITE)
+        self.screen.blit(text, (10, WINDOW_SIZE[1] - 50 + 5))
+        self.core.vision_message = '...'
+
+        if self.core.vision_target_cords is not None:
+            c = real2window(self.core.vision_target_cords)
+            draw_alpha.line(self.screen, WHITE, core.vec_add(c, (-1000, 0)), core.vec_add(c, (1000, 0)), 1)
+            draw_alpha.line(self.screen, WHITE, core.vec_add(c, (0, -1000)), core.vec_add(c, (0, 1000)), 1)
+            self.core.vision_target_cords = None
 
         pygame.display.flip()
 
