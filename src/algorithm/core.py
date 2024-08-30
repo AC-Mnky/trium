@@ -12,7 +12,7 @@ except ModuleNotFoundError:
     import sys
 
     work_path = os.getcwd()
-    sys.path.append(f"{work_path}/algorithm")
+    sys.path.append(f"{work_path}/../algorithm")
     import camera_convert
     import vision
 
@@ -322,7 +322,6 @@ class Core:
             #         print('Core: Rotating left for', t)
             #         yield
 
-
             while get_length(vec_sub(self.predicted_cords, HOME)) > 50:
                 self.target_toward_cords(HOME)
                 yield
@@ -384,8 +383,8 @@ class Core:
         length = get_length(cords)
         angle = get_angle(cords)
         diff = ANGLE_TYPICAL * angle
-        print('diff:', diff)
-        sum = LENGTH_TYPICAL * length * np.exp(- (angle / ANGLE_STANDARD_DEVIATION) ** 2 / 2)
+        print("diff:", diff)
+        sum = LENGTH_TYPICAL * length * np.exp(-((angle / ANGLE_STANDARD_DEVIATION) ** 2) / 2)
         self.set_motor_output(diff, sum)
 
     def set_motor_output(self, diff: float, sum: float) -> None:
@@ -569,12 +568,11 @@ class Core:
             self.predicted_items[item][2] = min(
                 self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
             )
-            
-            self.target_toward_cords(item)
-                
-        if CORE_TIME_DEBUG:
-            print('Core: Action decided, used time:', next(self.time_tracker))
 
+            self.target_toward_cords(item)
+
+        if CORE_TIME_DEBUG:
+            print("Core: Action decided, used time:", next(self.time_tracker))
 
             # if angle > AIM_ANGLE or angle > NO_AIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
             #     self.motor = [0.2, -0.2]
