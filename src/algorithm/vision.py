@@ -55,7 +55,7 @@ def process(
         image (cv2.UMat | None): The image to be processed.
 
     Returns:
-        tuple: A tuple containing the following information or None:
+        tuple (tuple | None): A tuple containing the following information or None:
             - time (float): The time associated with the image.
             - reds (list): A list of red points found in the image.
             - yellows (list): A list of yellow points found in the image.
