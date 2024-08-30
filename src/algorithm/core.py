@@ -443,26 +443,44 @@ class Core:
             cords = self.absolute2relative(item)
             item_angle = angle_subtract(get_angle(cords), 0)
             
-            if cords[0] > -50 and -30 < cords[1] < 30:
+            if -50 < cords[0] < 300 and -30 < cords[1] < 30:
                 self.motor = [0.5, 0.5]
-            elif get_length(cords) < 150:
+            elif get_length(cords) < 175:
                 self.predicted_items.pop(item)  # to close. who knows where the thing goes?
                 self.motor = [0, 0]
+            elif 0 < cords[0] and -30 < cords[1] < 30:
+                self.motor = [0.8, 0.8]
             elif 0 < item_angle < 0.2:
-                self.motor = [0.5, 0.2]
+                if get_length(cords) > 300:
+                    self.motor = [0.6, 0.4]
+                else:
+                    self.motor = [0.2, 0.0]    
             elif -0.2 < item_angle < 0:
-                self.motor = [0.2, 0.5]
-            elif 0 < item_angle < 1:
-                self.motor = [0.2, 0]
-            elif -1 < item_angle < 0:
-                self.motor = [0, 0.2]
+                if get_length(cords) > 300:
+                    self.motor = [0.4, 0.6]
+                else:
+                    self.motor = [0.0, 0.2] 
+            elif 0 < item_angle < 0.5:
+                if get_length(cords) > 300:
+                    self.motor = [0.6, 0.4]
+                else:
+                    self.motor = [0, -0.2]    
+            elif -0.5 < item_angle < 0:
+                if get_length(cords) > 300:
+                    self.motor = [0.4, 0.6]
+                else:
+                    self.motor = [-0.2, 0]
             elif 0 < item_angle:
-                self.motor = [0.5, -0.5]
+                if get_length(cords) > 300:
+                    self.motor = [0.5, -0.5]
+                else:
+                    self.motor = [0.5, -0.5]    
             elif item_angle < 0:
-                self.motor = [-0.5, 0.5]
-                
-                
-                
+                if get_length(cords) > 300:
+                    self.motor = [-0.5, 0.5]
+                else:
+                    self.motor = [-0.5, 0.5] 
+            
             # if item_angle > AIM_ANGLE or item_angle > UNAIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
             #     self.motor = [0.2, -0.2]
             # elif item_angle < -AIM_ANGLE or item_angle < -UNAIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
