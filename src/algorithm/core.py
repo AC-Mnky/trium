@@ -12,7 +12,7 @@ except ModuleNotFoundError:
     import sys
 
     work_path = os.getcwd()
-    sys.path.append(f"{work_path}/algorithm")
+    sys.path.append(f"{work_path}/../algorithm")
     import camera_convert
     import vision
 

@@ -20,14 +20,16 @@ except ModuleNotFoundError:
 else:
     ...
 
-# MODE = "file"
-# MODE = 'adjust'
-MODE = 'camera'
+"""
+MODE = "camera", "file", "adjust"
+"""
+MODE = "camera"
+
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
 READ_DIR = "test7"
-#naming rule: forward dist first, right dist second
+# naming rule: forward dist first, right dist second
 WRITE_DIR = "0.35m, 1.18m"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
@@ -46,9 +48,6 @@ DRAW_GRID = True
 
 USE_HOUGH_P = True
 
-# if MODE == "camera":
-#     # from camera_ori import Camera
-
 
 def process(img, show: bool = False):
     points_red = find_color.find_red(img, show and MASK_SHOW)
@@ -62,6 +61,7 @@ def process(img, show: bool = False):
     if show and DRAW_GRID:
         draw_grid(img, (255, 255, 255, 255), 300, 2000, 100, -500, 500, 100)
 
+    # switch to a new line
     print()
 
     for p in points_red:

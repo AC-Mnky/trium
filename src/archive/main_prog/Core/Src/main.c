@@ -96,7 +96,6 @@ int main(void) {
 
 	/* USER CODE BEGIN 1 */
 	const uint8_t transmit_protocol = 127;
-	const uint8_t empty_length = 8;
 	const int32_t urgent_count_init = 1;
 	const uint8_t max_attempt = 30;
 	/* USER CODE END 1 */
@@ -130,7 +129,7 @@ int main(void) {
 	MX_TIM7_Init();
 	/* USER CODE BEGIN 2 */
 
-	// messages settings
+// messages settings
 	uint8_t transmit_buffer[13] = { 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 //	uint32_t start_tick = uwTick;
@@ -141,7 +140,10 @@ int main(void) {
 //	uint32_t *transmit_tick = (uint32_t*) &transmit_buffer[13];
 //	uint8_t buffer_0x80 = 0; // buffer used to receive 0x80, used in inquiry mode
 
-	uint8_t empty[empty_length] = { 0 };
+// used only for 128-protocol
+	const uint8_t empty_length = 8;
+	uint8_t empty[empty_length];
+	memset(empty, 0, empty_length);
 
 // start to receive messages
 	if (transmit_protocol == 127) {
@@ -158,8 +160,8 @@ int main(void) {
 	motor_init();
 	struct PID_struct PID_obj_1;
 	struct PID_struct PID_obj_2;
-	int32_t PID_para_1[8] = { 15, 10, 40, 1, 0, 10, 5, 0 };
-	int32_t PID_para_2[8] = { 15, 10, 40, 1, 0, 10, 5, 0 };
+	uint8_t PID_para_1[8] = { 15, 10, 40, 1, 0, 10, 5, 0 };
+	uint8_t PID_para_2[8] = { 15, 10, 40, 1, 0, 10, 5, 0 };
 	PID_init(&PID_obj_1, PID_para_1[0], PID_para_1[1], PID_para_1[2], PID_para_1[3], PID_para_1[4],
 			PID_para_1[5], PID_para_1[6]);
 	PID_init(&PID_obj_2, PID_para_2[0], PID_para_2[1], PID_para_2[2], PID_para_2[3], PID_para_2[4],
