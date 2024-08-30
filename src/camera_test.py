@@ -20,14 +20,15 @@ except ModuleNotFoundError:
 else:
     ...
 
-# MODE = "file"
-# MODE = 'adjust'
-MODE = 'camera'
+"""
+MODE = "camera", "file", "adjust"
+"""
+MODE = "camera"
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
 READ_DIR = "test7"
-#naming rule: forward dist first, right dist second
+# naming rule: forward dist first, right dist second
 WRITE_DIR = "0.35m, 1.18m"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
@@ -45,9 +46,6 @@ SHOW_WALL = True
 DRAW_GRID = True
 
 USE_HOUGH_P = True
-
-# if MODE == "camera":
-#     # from camera_ori import Camera
 
 
 def process(img, show: bool = False):
