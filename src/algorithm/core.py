@@ -751,10 +751,10 @@ class Core:
 
     def get_output(self) -> bytes:
         """
-        Returns the message to be sent to STM32 as a bytes object.
+        Return the message to be sent to STM32 as a bytes object.
 
         Returns:
-            bytes: The output as a bytes object.
+            output (bytes): The output as a bytes object.
         """
         output = (
             [
@@ -781,7 +781,7 @@ class Core:
 
     def absolute2relative(self, vec: tuple[float, float]) -> tuple[float, float]:
         """
-        Converts an absolute vector to a relative vector based on the predicted coordinates and angle.
+        Convert an absolute vector to a relative vector based on the predicted coordinates and angle.
 
         Args:
             vec (tuple[float, float]): The absolute vector to be converted.
@@ -793,7 +793,7 @@ class Core:
 
     def relative2absolute(self, vec: tuple[float, float]) -> tuple[float, float]:
         """
-        Converts a relative vector to an absolute vector based on the predicted angle and coordinates.
+        Convert a relative vector to an absolute vector based on the predicted angle and coordinates.
 
         Args:
             vec (tuple[float, float]): The relative vector to be converted.
@@ -806,7 +806,7 @@ class Core:
 
 def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> float:
     """
-    Calculate the distance between two points in a two-dimensional space.
+    Calculate the distance between two points in a 2D-space.
 
     Args:
         point1 (tuple[float, float]): The coordinates of the first point.
@@ -820,10 +820,10 @@ def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> fl
 
 def get_length(vec: tuple[float, float]) -> float:
     """
-    Calculate the length of a 2D vector.
+    Calculate the length of a 2D-vector.
 
     Args:
-        vec (tuple[float, float]): The 2D vector represented as a tuple of floats.
+        vec (tuple[float, float]): The 2D-vector represented as a tuple of floats.
 
     Returns:
         length (float): The length of the vector.
@@ -848,7 +848,7 @@ def get_angle(vec: tuple[float, float]) -> float:
 
 def vec_add(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
     """
-    Adds two vectors together.
+    Add two vectors together.
 
     Args:
         vec1 (tuple[float, float]): The first vector.
@@ -890,7 +890,7 @@ def vec_mul(vec: tuple[float, float], k: float) -> tuple[float, float]:
 
 def angle_subtract(angle1: float, angle2: float) -> float:
     """
-    Calculates the difference between two angles.
+    Calculate the difference between two angles.
 
     Args:
         angle1 (float): The first angle in radians.
@@ -906,7 +906,7 @@ def angle_subtract(angle1: float, angle2: float) -> float:
 
 def projection(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
     """
-    Calculates the projection of vec1 onto vec2.
+    Calculate the projection of vec1 onto vec2.
 
     Args:
         vec1 (tuple[float, float]): The first vector.
@@ -925,7 +925,7 @@ def projection(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[fl
 
 def rotated(vec: tuple[float, float], angle_radians: float) -> tuple[float, float]:
     """
-    Rotates a 2D vector by a given angle in radians.
+    Rotate a 2D vector by a given angle in radians.
 
     Args:
         vec (tuple[float, float]): The 2D vector to be rotated.
@@ -943,7 +943,7 @@ def rotated(vec: tuple[float, float], angle_radians: float) -> tuple[float, floa
 
 def get_str(vec: tuple[float, float]) -> str:
     """
-    Converts a tuple of floats into a string representation.
+    Convert a tuple of floats into a string representation.
 
     Args:
         vec (tuple[float, float]): The input tuple containing two float values.
