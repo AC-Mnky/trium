@@ -8,23 +8,14 @@ ENABLE_VISION = True  # True
 ENABLE_CORE = True  # True
 ENABLE_STM_OUTPUT = True  # True
 
-ENABLE_DUMMY = True  # False
+ENABLE_DUMMY = False  # False
 DUMMY_CONTROL = True  # Whatever
 ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
 MAX_MESSAGE_LENGTH = 6 # 6
 
-DEBUG_INFO = True
-CAMERA_DEBUG_INFO = True
-DEBUG_RESET = False
-
 CAMERA_COOLDOWN = 0.0
 CYCLE_MIN_TIME = 0.0
-
-FORCE_STOP_MESSAGE = bytes(
-    (128, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0)
-)
-
 
 if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT:
     from communication import stm_communication as stm
@@ -39,12 +30,19 @@ if ENABLE_CORE:
 if ENABLE_DUMMY:
     if ENABLE_CORE_VISUALIZER:
         ENABLE_CORE_VISUALIZER = False
-        if DEBUG_INFO:
-            print("Visualizer disabled by dummy.")
+        print("Visualizer disabled by dummy.")
     import dummy
 if ENABLE_CORE_VISUALIZER:
     from algorithm import core_visualizer
 
+DEBUG_INFO = True
+CAMERA_DEBUG_INFO = True
+DEBUG_RESET = False
+core.CORE_TIME_DEBUG = True  # False
+
+FORCE_STOP_MESSAGE = bytes(
+    (128, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0)
+)
 
 def real_time() -> float:
     return time.time() - start_time

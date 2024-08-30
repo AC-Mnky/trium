@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 
 ENABLE_INFER_POSITION_FROM_WALLS = True  # True
 
-CORE_TIME_DEBUG = True  # False
+
 
 np.tau = 2 * np.pi
 
@@ -218,7 +218,7 @@ class Core:
         except ZeroDivisionError:
             wheel_speed = (0, 0)
         inferred_angular_speed = (wheel_speed[1] - wheel_speed[0]) / DISTANCE_BETWEEN_WHEELS
-        print(inferred_angular_speed)
+        # print(inferred_angular_speed)
         # if self.imu_input is not None:
         #     ass = self.imu_angular_speed_deg_s
         #     inferred_angular_speed =
@@ -283,8 +283,8 @@ class Core:
         y_diff_average = y_diff_sum / y_weight_sum
         angle_diff_average = angle_diff_sum / angle_weight_sum
 
-        print(x_weight_sum, y_weight_sum, angle_weight_sum)
-        print(x_diff_average, y_diff_average, angle_diff_average)
+        # print(x_weight_sum, y_weight_sum, angle_weight_sum)
+        # print(x_diff_average, y_diff_average, angle_diff_average)
 
         self.predicted_cords = vec_add(self.predicted_cords, (x_diff_average, y_diff_average))
         self.predicted_angle += angle_diff_average
@@ -417,6 +417,8 @@ class Core:
         ),
     ) -> None:
 
+        if(CORE_TIME_DEBUG):
+            next(self.time_tracker)
         # calculate the time interval between two updates
         dt = time - self.last_update_time
         self.last_update_time = time
@@ -439,6 +441,9 @@ class Core:
 
         if self.status_code > 0:
             self.status_code = 0
+            
+        if(CORE_TIME_DEBUG):
+            print('Core: Input updated, used time:', next(self.time_tracker))
 
         inferred_angular_speed, inferred_relative_velocity = self.infer_velocity()
 
@@ -448,11 +453,14 @@ class Core:
         if self.imu_input is not None:
             self.predicted_angle = INITIAL_ANGLE + self.start_angle - np.radians(self.imu_angle_deg[2])
 
-        print(self.predicted_angle)
-        if self.imu_input is not None:
-            print([np.radians(x) for x in self.imu_angle_deg], "yee")
+        # print(self.predicted_angle)
+        # if self.imu_input is not None:
+        #     print([np.radians(x) for x in self.imu_angle_deg], "yee")
         inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
         self.predicted_cords = vec_add(vec_mul(inferred_velocity, dt), self.predicted_cords)
+
+        if(CORE_TIME_DEBUG):
+            print('Core: Velocity and cords predicted, used time:', next(self.time_tracker))
 
         # calculate vertices after displacement
         for i in 0, 1:
@@ -474,6 +482,9 @@ class Core:
             self.predicted_camera_vertices[i] = self.relative2absolute(
                 camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3]
             )
+            
+        if(CORE_TIME_DEBUG):
+            print('Core: Vertices calculated, used time:', next(self.time_tracker))
 
         # analyze camera input
         if camera_input is not None:
@@ -524,6 +535,9 @@ class Core:
                     and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V
                 ):
                     v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
+        
+        if(CORE_TIME_DEBUG):
+            print('Core: Camera input analyzed, used time:', next(self.time_tracker))
 
         # decay all items and delete items with low value
         self.contact_center = self.relative2absolute((CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK, 0))
@@ -537,6 +551,9 @@ class Core:
                 items_to_delete.append(item)
         for item in items_to_delete:
             self.predicted_items.pop(item)
+            
+        if(CORE_TIME_DEBUG):
+            print('Core: Items deleted, used time:', next(self.time_tracker))
 
         # go towards the closest item
         item = self.get_closest_item()
@@ -586,6 +603,9 @@ class Core:
                     self.motor = [0.5, -0.5]
             elif angle < 0:
                 self.motor = [-0.5, 0.5]
+                
+        if(CORE_TIME_DEBUG):
+            print('Core: Action decided, used time:', next(self.time_tracker))
 
             # if angle > AIM_ANGLE or angle > NO_AIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
             #     self.motor = [0.2, -0.2]
