@@ -1,17 +1,18 @@
 import time
 
 ENABLE_STM_INPUT = True  # True
-STM_INPUT_PROTOCOL = 127  # 127
+STM_INPUT_PROTOCOL = 128  # 127
 ENABLE_IMU = True  # True
 ENABLE_CAMERA = True  # True
 ENABLE_VISION = True  # True
 ENABLE_CORE = True  # True
 ENABLE_STM_OUTPUT = True  # True
 
-ENABLE_DUMMY = False  # False
+ENABLE_DUMMY = True  # False
 DUMMY_CONTROL = True  # Whatever
 ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
+MAX_MESSAGE_LENGTH = 24 # 8
 
 DEBUG_INFO = False
 CAMERA_DEBUG_INFO = True
@@ -21,9 +22,9 @@ CAMERA_COOLDOWN = 0.0
 CYCLE_MIN_TIME = 0.0
 
 FORCE_STOP_MESSAGE = bytes(
-    (128, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0)
+    (128, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0)
 )
-MAX_MESSAGE_LENGTH = 8
+
 
 if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT:
     from communication import stm_communication as stm

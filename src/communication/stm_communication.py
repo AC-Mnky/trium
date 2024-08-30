@@ -4,6 +4,8 @@ from struct import unpack
 import numpy as np
 import serial
 
+np.tau = np.pi * 2
+
 ENCODER_PULSE_EACH_ROUND = 22
 ENCODER_READ_FREQUENCY = 500
 PWM_PERIOD = 100
@@ -19,7 +21,7 @@ class STM:
         self.baud = "115200"
         self.ser = serial.Serial(self.port, self.baud, parity=serial.PARITY_NONE)
         self.protocol = protocol
-        self.message_length = 96 if protocol == 128 else 17
+        self.message_length = 96 if protocol == 128 else 13
         self.message_head = bytes((128,) * 4) if protocol == 128 else bytes((127,))
         if not self.ser.is_open:
             self.ser.open()
@@ -64,7 +66,14 @@ class STM:
             )
 
             if self.protocol == 128:
-                ...  # TODO
+                encoder = (
+                unpack("<h", self.stm_input[68:70])[0],
+                unpack("<h", self.stm_input[36:38])[0],
+                )
+                tick = (
+                    unpack("<I", self.stm_input[64:68])[0],
+                    unpack("<I", self.stm_input[32:36])[0],
+                )
             elif self.protocol == 127:
                 encoder = (
                     unpack("<h", message[11:13])[0],
@@ -74,10 +83,10 @@ class STM:
                     unpack("<I", message[7:11])[0],
                     unpack("<I", message[1:5])[0],
                 )
-                unpacked_message[0] += tick[0]
-                unpacked_message[1] += tick[1]
-                unpacked_message[2] += encoder[0]
-                unpacked_message[3] += encoder[1]
+            unpacked_message[0] += tick[0]
+            unpacked_message[1] += tick[1]
+            unpacked_message[2] += encoder[0]
+            unpacked_message[3] += encoder[1]
 
             # print("Message from STM32:", message.hex(" "))
 

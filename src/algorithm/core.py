@@ -135,7 +135,7 @@ class Core:
             [15, 10, 40, 10, 0, 10, 5, 0],
             [15, 10, 40, 10, 0, 10, 5, 0],
         ].copy()
-        self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 17)
+        self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 13)
         self.unpacked_stm_input = None
         self.imu_input = None
         self.imu_acceleration_g = None
@@ -196,14 +196,20 @@ class Core:
         angular_speed can use data from imu directly
         """
 
-        if self.protocol == 128:
-            encoder = (
-                unpack("<h", self.stm_input[68:70])[0],
-                unpack("<h", self.stm_input[36:38])[0],
-            )
-            tick = ...  # TODO
+        if self.unpacked_stm_input is not None:
+            encoder = self.unpacked_stm_input[2:4]
+            tick = self.unpacked_stm_input[0:2]
         else:
-            if self.unpacked_stm_input is None:
+            if self.protocol == 128:
+                encoder = (
+                    unpack("<h", self.stm_input[68:70])[0],
+                    unpack("<h", self.stm_input[36:38])[0],
+                )
+                tick = (
+                    unpack("<I", self.stm_input[64:68])[0],
+                    unpack("<I", self.stm_input[32:36])[0],
+                )
+            else:
                 encoder = (
                     unpack("<h", self.stm_input[11:13])[0],
                     unpack("<h", self.stm_input[5:7])[0],
@@ -212,10 +218,6 @@ class Core:
                     unpack("<I", self.stm_input[7:11])[0],
                     unpack("<I", self.stm_input[1:5])[0],
                 )
-            else:
-                encoder = self.unpacked_stm_input[2:4]
-                tick = self.unpacked_stm_input[0:2]
-
         wheel_speed = (
             encoder[0] * DISTANCE_PER_ENCODER / tick[0] * 72000000,
             encoder[1] * DISTANCE_PER_ENCODER / tick[1] * 72000000,
