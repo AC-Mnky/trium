@@ -28,9 +28,9 @@
 #include "PID.h"
 #include "message.h"
 #include "tick.h"
-#include "stm32f1xx_hal.h"
 #include "ultra.h"
 #include <string.h>
+#include "math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -86,6 +86,25 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+/* @brief call urgency by analyzing the speed and distance
+ * @param distance: distance to the obstacle detected by the ultrasonic sensor
+ * @param encoder_CNT1->encoder count of motor 1 | encoder_CNT2->encoder count of motor 2
+ * @retval call_flag: 1 (urgency) | 0 (no urgency)
+ * @note ratio = max(v1 / distance, v2 / distance)
+ * @note call_flag = 1 if ratio > 1 | call_flag = 0 otherwise
+ * */
+uint8_t urgency_call(uint8_t distance, uint16_t encoder_CNT1, uint16_t encoder_CNT2) {
+	uint8_t call_flag = (get_encoder_direction(1) == get_encoder_direction(2)) ? 1 : 0;
+	if (call_flag) {
+		uint8_t v1 = (uint8_t) 3 * M_PI * encoder_CNT1 / 8; // cm/s
+		uint8_t v2 = (uint8_t) 3 * M_PI * encoder_CNT2 / 8; //
+		uint8_t ratio = (uint8_t) (v1 > v2) ? (v1 / distance) : (v2 / distance);
+		if (ratio > 1) {
+			return 1;
+		}
+	}
+	return 0;
+}
 /* USER CODE END 0 */
 
 /**
@@ -138,7 +157,6 @@ int main(void) {
 	uint32_t *motor1time = (uint32_t*) &transmit_buffer[7];
 	uint16_t *motor1count = (uint16_t*) &transmit_buffer[11];
 //	uint32_t *transmit_tick = (uint32_t*) &transmit_buffer[13];
-//	uint8_t buffer_0x80 = 0; // buffer used to receive 0x80, used in inquiry mode
 
 // used only for 128-protocol
 	const uint8_t empty_length = 8;
@@ -151,8 +169,6 @@ int main(void) {
 	}
 
 	// urgency settings
-//	const uint32_t dangerous_distance = 20;
-//	uint8_t distance[2];
 	uint8_t urgent_flag = 0;
 	uint8_t urgent_count = urgent_count_init;
 
@@ -172,6 +188,12 @@ int main(void) {
 	HAL_TIM_Base_Start(&htim6);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, SET);
 
+	/* @brief ultra sonic sensor order init
+	 * @note 0 -> left | 1 -> right
+	 * */
+	uint8_t ultra_order = 0;
+	uint8_t distance = 0;
+
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -181,8 +203,10 @@ int main(void) {
 
 		/* USER CODE BEGIN 3 */
 
-		// inquiry mode
-		// receive controlling message
+		/* @brief receive controlling message under 128-protocol
+		 * @note 0x80 -> head of the message
+		 * @note inquiry mode
+		 * */
 		if (transmit_protocol == 128) {
 
 			for (uint8_t j = 0; j < max_attempt; ++j) {
@@ -203,7 +227,7 @@ int main(void) {
 
 		// debug message of receiving
 		if (debug_print)
-			HAL_UART_Transmit(&huart1, (uint8_t*) "receive\n", 9, 400);
+			HAL_UART_Transmit(&huart1, (uint8_t*) "received\n", 9, 400);
 
 		// soft restart
 		if (receive_buffer[1] == 1) {
@@ -214,10 +238,10 @@ int main(void) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
 		}
 
-		if (transmit_protocol == 127) {
-			speed_1 = receive_buffer[2], speed_2 = receive_buffer[3];
-		} else {
+		if (transmit_protocol == 128) {
 			speed_1 = receive_buffer_128[2], speed_2 = receive_buffer_128[3];
+		} else if (transmit_protocol == 127) {
+			speed_1 = receive_buffer[2], speed_2 = receive_buffer[3];
 		}
 
 		// urgent case dealing
@@ -229,13 +253,12 @@ int main(void) {
 			} else if (urgent_flag == 2) {
 				speed_1 = -50;
 				speed_2 = -20;
-			} else {
 			}
 		}
 
 		// debug message of urgency handling
 		if (debug_print)
-			HAL_UART_Transmit(&huart1, (uint8_t*) "urgent handled\n", 15, 400);
+			HAL_UART_Transmit(&huart1, (uint8_t*) "urgency handled\n", 16, 400);
 
 		if (transmit_protocol == 128) {
 			PID_change_para(&PID_obj_1, receive_buffer_128[8], receive_buffer_128[9],
@@ -264,6 +287,8 @@ int main(void) {
 		if (debug_print)
 			HAL_UART_Transmit(&huart1, (uint8_t*) "head transmitted\n", 17, 400);
 
+		/* @brief velocity control under 128-protocol.
+		 * */
 		if (transmit_protocol == 128) {
 			uint32_t real_tick_2;
 			uint16_t encoder_CNT_2 = get_encoder_CNT(2, &real_tick_2);
@@ -293,7 +318,10 @@ int main(void) {
 			HAL_UART_Transmit(&huart3, (uint8_t*) (&PID_obj_1.integral), 4, 20);
 			HAL_UART_Transmit(&huart3, empty, 8, 20);
 
-		} else if (transmit_protocol == 127) {
+		}
+		/* @brief velocity control under 127-protocol.
+		 * */
+		else if (transmit_protocol == 127) {
 			*motor2count = get_encoder_CNT(2, motor2time);
 			*motor1count = get_encoder_CNT(1, motor1time);
 			set_motor_speed(2, PID_vel(&PID_obj_2, speed_2, *motor2count, *motor2time));
@@ -312,6 +340,8 @@ int main(void) {
 				HAL_UART_Transmit(&huart1, (uint8_t*) "transmitted\n", 12, 400);
 		}
 
+		/* @brief clear integral when velocity is set to zero.
+		 * */
 		if (PID_obj_1.target_val == 0) {
 			PID_obj_1.integral = 0;
 		}
@@ -324,7 +354,10 @@ int main(void) {
 			HAL_UART_Transmit(&huart1, (uint8_t*) "pid integral set\n", 17, 400);
 		}
 
-		// control the brush and servo motor
+		/* @brief control the brush and servo motor
+		 * @note brush -> motor 3 | servo -> motor 4
+		 * @note receive_buffer[4] -> brush | reveive_buffer[5] -> servo
+		 * */
 		if (receive_buffer[4]) {
 			set_motor_speed(3, 80);
 		} else {
@@ -341,7 +374,20 @@ int main(void) {
 			HAL_UART_Transmit(&huart1, (uint8_t*) "brush and servo set\n", 20, 400);
 		}
 
-		// time controller
+		distance = get_distance_single(ultra_order);
+		ultra_order = ultra_order ? 0 : 1;
+
+		if (urgency_call(distance, *motor1count, *motor2count)) {
+			urgent_flag = ultra_order ? 1 : 2;
+			urgent_count = 3;
+		} else {
+			urgent_flag = 0;
+			urgent_count = 0;
+		}
+
+		/* @brief control the time of one loop
+		 * @note set  the time of one loop to 200 ticks of timer 6 (0.1ms per tick)
+		 * */
 		while (__HAL_TIM_GET_COUNTER(&htim6) < 200) {
 		}
 		__HAL_TIM_SET_COUNTER(&htim6, 0);
@@ -350,8 +396,9 @@ int main(void) {
 			HAL_UART_Transmit(&huart1, (uint8_t*) "timer ended\n", 12, 400);
 		}
 
-		// use blink to test whether the loop is conducted properly
-//		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+		/* @brief use blink to test whether the loop is conducted properly
+		 * HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+		 * */
 	}
 	/* USER CODE END 3 */
 }
