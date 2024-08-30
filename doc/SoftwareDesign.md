@@ -119,7 +119,7 @@ main.c
 main_control.py
 ├── 调用 stm_communication.py 和 imu.py 建立连接
 ├── 调用 camera.py 启动相机
-└── 调用 _core.py 创建算法对象
+└── 调用 core.py 创建算法对象
 ```
 
 循环：
@@ -128,8 +128,8 @@ main_control.py
 main_control.py
 ├── 从 stm_communication.py 和 imu.py 读取编码器、超声传感器、IMU输入
 ├── 从 camera.py 读取图片，用 vision.py 转化为信息
-├── 用相机信息、编码器、超声传感器、IMU输入更新 _core.py
-└── 调用 stm_communication.py 传递 _core.py 得到的电机转速与舵机角度
+├── 用相机信息、编码器、超声传感器、IMU输入更新 core.py
+└── 调用 stm_communication.py 传递 core.py 得到的电机转速与舵机角度
 ```
 
 ### 关于树莓派接收的信息的格式
