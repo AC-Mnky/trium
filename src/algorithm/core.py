@@ -488,6 +488,16 @@ class Core:
         self.set_motor_output(diff, summ)
 
     def set_motor_output(self, diff: float, summ: float) -> None:
+        """
+        Sets the motor output based on the difference and sum of inputs.
+
+        Args:
+            diff (float): The difference input.
+            summ (float): The sum input.
+
+        Returns:
+            None
+        """
         diff = np.clip(diff, -0.9, 0.9)
         summ = np.clip(summ, -0.9 - diff, 0.9 - diff)
         summ = np.clip(summ, -0.9 + diff, 0.9 + diff)
@@ -530,7 +540,21 @@ class Core:
             | None
         ),
     ) -> None:
+        """
+        Updates the state of the algorithm based on the input data.
 
+        Args:
+            time (float): The current time.
+            stm32_input (bytes): The input from the STM32 device.
+            unpacked_stm32_input (list): The unpacked input from the STM32 device.
+            imu_input (tuple | None):
+                The input from the IMU device, containing acceleration, angular speed, and angle.
+            camera_input (tuple | None):
+                The input from the camera device, containing time, red blocks, yellow blocks, and wall coordinates.
+
+        Returns:
+            None
+        """
         if CORE_TIME_DEBUG:
             next(self.time_tracker)
         # calculate the time interval between two updates
