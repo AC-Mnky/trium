@@ -1,18 +1,18 @@
 import time
 
-ENABLE_STM_INPUT = True  # True
+ENABLE_STM_INPUT = False  # True
 STM_INPUT_PROTOCOL = 127  # 127
-ENABLE_IMU = True  # True
-ENABLE_CAMERA = True  # True
-ENABLE_VISION = True  # True
+ENABLE_IMU = False  # True
+ENABLE_CAMERA = False  # True
+ENABLE_VISION = False  # True
 ENABLE_CORE = True  # True
-ENABLE_STM_OUTPUT = True  # True
+ENABLE_STM_OUTPUT = False  # True
 
 ENABLE_DUMMY = False  # False
 DUMMY_CONTROL = True  # Whatever
 ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
-MAX_MESSAGE_LENGTH = 6 # 6
+MAX_MESSAGE_LENGTH = 6  # 6
 
 CAMERA_COOLDOWN = 0.0
 CYCLE_MIN_TIME = 0.0
