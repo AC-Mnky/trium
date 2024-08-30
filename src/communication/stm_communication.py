@@ -67,12 +67,12 @@ class STM:
 
             if self.protocol == 128:
                 encoder = (
-                unpack("<h", self.stm_input[68:70])[0],
-                unpack("<h", self.stm_input[36:38])[0],
+                    unpack("<h", message[68:70])[0],
+                    unpack("<h", message[36:38])[0],
                 )
                 tick = (
-                    unpack("<I", self.stm_input[64:68])[0],
-                    unpack("<I", self.stm_input[32:36])[0],
+                    unpack("<I", message[64:68])[0],
+                    unpack("<I", message[32:36])[0],
                 )
             elif self.protocol == 127:
                 encoder = (
@@ -83,6 +83,9 @@ class STM:
                     unpack("<I", message[7:11])[0],
                     unpack("<I", message[1:5])[0],
                 )
+            else:
+                encoder = ...
+                tick = ...
             unpacked_message[0] += tick[0]
             unpacked_message[1] += tick[1]
             unpacked_message[2] += encoder[0]
@@ -112,27 +115,27 @@ class STM:
             - ultrasonic_1 (int): The distance value from ultrasonic sensor 1.
             - ultrasonic_2 (int): The distance value from ultrasonic sensor 2.
         """
-        message: bytes = self.get_message()
+        message: bytes = self.get_message()[0]
         encoder_1: int = int.from_bytes(message[0:2], "big")
         encoder_2: int = int.from_bytes(message[2:4], "big")
         ultrasonic_1: int = int.from_bytes(message[4:6], "big")
         ultrasonic_2: int = int.from_bytes(message[6:8], "big")
-        if encoder_1 >= 2**15:
-            encoder_1 -= 2**16
-        if encoder_2 >= 2**15:
-            encoder_2 -= 2**16
+        if encoder_1 >= 2 ** 15:
+            encoder_1 -= 2 ** 16
+        if encoder_2 >= 2 ** 15:
+            encoder_2 -= 2 ** 16
 
         velocity_1 = (
-            encoder_1
-            * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND)
-            * np.tau
-            * WHEEL_RADIUS
+                encoder_1
+                * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND)
+                * np.tau
+                * WHEEL_RADIUS
         )
         velocity_2 = (
-            encoder_2
-            * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND)
-            * np.tau
-            * WHEEL_RADIUS
+                encoder_2
+                * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND)
+                * np.tau
+                * WHEEL_RADIUS
         )
 
         return velocity_1, velocity_2, ultrasonic_1, ultrasonic_2

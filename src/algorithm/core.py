@@ -65,10 +65,10 @@ CAMERA_MARGIN_V = 30  # 60
 
 
 def calc_weight(
-    cord_difference: float,
-    angle_difference: float,
-    distance_to_wall: float,
-    seen_wall_length: float,
+        cord_difference: float,
+        angle_difference: float,
+        distance_to_wall: float,
+        seen_wall_length: float,
 ) -> float:
     weight = 0.1
     if np.abs(cord_difference) > MAX_CORD_DIFFERENCE:
@@ -297,27 +297,27 @@ class Core:
 
     # Get realtime data from other modules
     def update(
-        self,
-        time: float,
-        stm32_input: bytes,
-        unpacked_stm32_input: list[int],
-        imu_input: (
-            tuple[
-                tuple[float, float, float],
-                tuple[float, float, float],
-                tuple[float, float, float],
-            ]
-            | None
-        ),
-        camera_input: (
-            tuple[
-                float,
-                list[tuple[float, float]],
-                list[tuple[float, float]],
-                list[tuple[tuple[float, float], tuple[float, float]]],
-            ]
-            | None
-        ),
+            self,
+            time: float,
+            stm32_input: bytes,
+            unpacked_stm32_input: list[int],
+            imu_input: (
+                    tuple[
+                        tuple[float, float, float],
+                        tuple[float, float, float],
+                        tuple[float, float, float],
+                    ]
+                    | None
+            ),
+            camera_input: (
+                    tuple[
+                        float,
+                        list[tuple[float, float]],
+                        list[tuple[float, float]],
+                        list[tuple[tuple[float, float], tuple[float, float]]],
+                    ]
+                    | None
+            ),
     ) -> None:
 
         # calculate the time interval between two updates
@@ -416,7 +416,7 @@ class Core:
             for item, v in self.predicted_items.items():
                 relative_cords = self.absolute2relative(item)
                 _, i, j = camera_convert.space2img(vision.CAMERA_STATE, relative_cords[0], relative_cords[1],
-                                                -12.5 if v[1] == RED else -15)
+                                                   -12.5 if v[1] == RED else -15)
                 if 0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H \
                         and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V:
                     v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
@@ -439,7 +439,7 @@ class Core:
             self.predicted_items[item][2] = min(self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM)
             cords = self.absolute2relative(item)
             item_angle = angle_subtract(get_angle(cords), 0)
-            
+
             if -50 < cords[0] < 300 and -30 < cords[1] < 30:
                 self.motor = [0.5, 0.5]
             elif get_length(cords) < 175:
@@ -451,17 +451,17 @@ class Core:
                 if get_length(cords) > 300:
                     self.motor = [0.6, 0.4]
                 else:
-                    self.motor = [0.2, 0.0]    
+                    self.motor = [0.2, 0.0]
             elif -0.2 < item_angle < 0:
                 if get_length(cords) > 300:
                     self.motor = [0.4, 0.6]
                 else:
-                    self.motor = [0.0, 0.2] 
+                    self.motor = [0.0, 0.2]
             elif 0 < item_angle < 0.5:
                 if get_length(cords) > 300:
                     self.motor = [0.6, 0.4]
                 else:
-                    self.motor = [0, -0.2]    
+                    self.motor = [0, -0.2]
             elif -0.5 < item_angle < 0:
                 if get_length(cords) > 300:
                     self.motor = [0.4, 0.6]
@@ -471,7 +471,7 @@ class Core:
                 if get_length(cords) > 300:
                     self.motor = [0.5, -0.5]
                 else:
-                    self.motor = [0.5, -0.5]    
+                    self.motor = [0.5, -0.5]
             elif item_angle < 0:
                 self.motor = [-0.5, 0.5]
 
@@ -495,18 +495,18 @@ class Core:
             bytes: The output as a bytes object.
         """
         output = (
-            [
-                128,
-                self.status_code,
-                int(self.motor[1] * PWM_PERIOD),
-                int(self.motor[0] * PWM_PERIOD),
-                int(self.brush),
-                int(self.back_open),
-                0,
-                0,
-            ]
-            + self.motor_PID[1]
-            + self.motor_PID[0]
+                [
+                    128,
+                    self.status_code,
+                    int(self.motor[1] * PWM_PERIOD),
+                    int(self.motor[0] * PWM_PERIOD),
+                    int(self.brush),
+                    int(self.back_open),
+                    0,
+                    0,
+                ]
+                + self.motor_PID[1]
+                + self.motor_PID[0]
         )
 
         for i in range(len(output)):

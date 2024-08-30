@@ -1,10 +1,10 @@
 import pygame
 
 try:
-    from algorithm import core, draw_alpha
-except ModuleNotFoundError:
     import core
     import draw_alpha
+except ModuleNotFoundError:
+    from algorithm import core, draw_alpha
 else:
     ...
 
@@ -185,8 +185,8 @@ class Visualizer:
 
         for wall in self.walls:
             draw_alpha.line(self.screen, (0, 128, 255, 128),
-                            real2window(core.vec_add(self.core.predicted_cords, core.rotated(wall[0], self.core.predicted_angle))),
-                            real2window(core.vec_add(self.core.predicted_cords, core.rotated(wall[1], self.core.predicted_angle))),
+                            real2window(self.core.relative2absolute(wall[0])),
+                            real2window(self.core.relative2absolute(wall[1])),
                             1)
 
         draw_alpha.polygon(
