@@ -98,6 +98,7 @@ int main(void) {
 	const uint8_t transmit_protocol = 127;
 	const uint8_t empty_length = 8;
 	const int32_t urgent_count_init = 1;
+	const uint8_t max_attempt = 30;
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -181,9 +182,8 @@ int main(void) {
 		// inquiry mode
 		// receive controlling message
 		if (transmit_protocol == 128) {
-			const uint8_t max_attempt = 30;
 
-			for (uint8_t i = 0; i < max_attempt; ++i) {
+			for (uint8_t j = 0; j < max_attempt; ++j) {
 				temp_buffer_128[0] = 0;
 				HAL_UART_Receive(&huart3, &temp_buffer_128[0], 1, 10);
 
@@ -245,9 +245,9 @@ int main(void) {
 		}
 
 		// debug message of pid parameters change
-//		if (debug_print) {
-//			HAL_UART_Transmit(&huart1, (uint8_t*) "pid para changed\n", 17, 400);
-//		}
+		if (debug_print) {
+			HAL_UART_Transmit(&huart1, (uint8_t*) "pid para changed\n", 17, 400);
+		}
 
 		if (transmit_protocol == 128) {
 			const uint8_t head_length = 4;
@@ -297,9 +297,10 @@ int main(void) {
 			set_motor_speed(2, PID_vel(&PID_obj_2, speed_2, *motor2count, *motor2time));
 			set_motor_speed(1, PID_vel(&PID_obj_1, speed_1, *motor1count, *motor1time));
 
-//			if (debug_print) {
-//				HAL_UART_Transmit(&huart1, (uint8_t*) "motor speed set\n", 16, 400);
-//			}
+			// debug message of motor speed
+			if (debug_print) {
+				HAL_UART_Transmit(&huart1, (uint8_t*) "motor speed set\n", 16, 400);
+			}
 //			*transmit_tick = get_real_tick() - start_tick;
 //			*transmit_tick = uwTick - start_tick;
 			HAL_UART_Transmit_IT(&huart3, transmit_buffer, 13);
@@ -405,9 +406,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (reflect) {
 		HAL_UART_Transmit(&huart1, temp_buffer, 6, 400);
 	}
-	//	for (int i = 0; i < 8; i++) {
-	//		temp_buffer[i] = 0;
-	//	}
 
 	HAL_UART_Receive_IT(&huart3, temp_buffer, 6);
 

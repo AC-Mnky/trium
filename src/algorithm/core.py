@@ -20,7 +20,6 @@ ENABLE_INFER_POSITION_FROM_WALLS = True  # True
 CORE_TIME_DEBUG = False
 
 
-
 np.tau = 2 * np.pi
 
 PWM_PERIOD = 100
@@ -80,8 +79,8 @@ def time_since_last_call(mul: int = 1000):
         temp = time.time() - last_call
         last_call += temp
         yield int(mul * temp)
-        
-        
+
+
 def calc_weight(
     cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
 ) -> float:
@@ -296,25 +295,23 @@ class Core:
         self.start_angle += angle_diff_average
 
     def act_when_there_is_no_item(self):
-        
+
         while True:
 
             current_cords = self.predicted_cords
 
-            for rotation_spot in (current_cords,
-                                  (1000, 1000),
-                                  (2000, 1000)):
+            for rotation_spot in (current_cords, (1000, 1000), (2000, 1000)):
 
                 while get_length(vec_sub(self.predicted_cords, rotation_spot)) < 50:
                     self.target_toward_cords(rotation_spot)
-                    print('Core: Targeting toward', rotation_spot)
+                    print("Core: Targeting toward", rotation_spot)
                     yield
 
                 t = 0
                 while t < 5:
                     t += self.dt
                     self.motor = [0.3, -0.3]
-                    print('Core: Rotating right for', t)
+                    print("Core: Rotating right for", t)
                     yield
 
             #     t = 0
@@ -323,6 +320,7 @@ class Core:
             #         self.motor = [-0.1, 0.1]
             #         print('Core: Rotating left for', t)
             #         yield
+
 
             while get_length(vec_sub(self.predicted_cords, HOME)) > 50:
                 self.target_toward_cords(HOME)
@@ -371,9 +369,15 @@ class Core:
                 yield
 
     def distance_to_wall(self) -> float:
-        return np.min((self.predicted_cords[0], self.predicted_cords[1],
-                       ROOM_X - self.predicted_cords[0], ROOM_Y - self.predicted_cords[1]))
-    
+        return np.min(
+            (
+                self.predicted_cords[0],
+                self.predicted_cords[1],
+                ROOM_X - self.predicted_cords[0],
+                ROOM_Y - self.predicted_cords[1],
+            )
+        )
+
     def target_toward_cords(self, cords: tuple[int, int]) -> None:
         cords = self.absolute2relative(cords)
         length = get_length(cords)
@@ -419,7 +423,9 @@ class Core:
     def set_motor_output(self, diff: float, sum: float) -> None:
         print(diff, sum)
         self.motor = [(sum + diff) / 2, (sum - diff) / 2]
+
         k = np.maximum(np.abs(np.max(self.motor)) / 0.9, 1)
+
         self.motor[0] /= k
         self.motor[1] /= k
         print(self.motor)
@@ -444,7 +450,7 @@ class Core:
         ),
     ) -> None:
 
-        if(CORE_TIME_DEBUG):
+        if CORE_TIME_DEBUG:
             next(self.time_tracker)
         # calculate the time interval between two updates
         self.dt = time - self.last_update_time
@@ -469,9 +475,9 @@ class Core:
 
         if self.status_code > 0:
             self.status_code = 0
-            
-        if(CORE_TIME_DEBUG):
-            print('Core: Input updated, used time:', next(self.time_tracker))
+
+        if CORE_TIME_DEBUG:
+            print("Core: Input updated, used time:", next(self.time_tracker))
 
         inferred_angular_speed, inferred_relative_velocity = self.infer_velocity()
 
@@ -488,8 +494,8 @@ class Core:
         inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
         self.predicted_cords = vec_add(vec_mul(inferred_velocity, self.dt), self.predicted_cords)
 
-        if(CORE_TIME_DEBUG):
-            print('Core: Velocity and cords predicted, used time:', next(self.time_tracker))
+        if CORE_TIME_DEBUG:
+            print("Core: Velocity and cords predicted, used time:", next(self.time_tracker))
 
         # calculate vertices after displacement
         for i in 0, 1:
@@ -511,9 +517,9 @@ class Core:
             self.predicted_camera_vertices[i] = self.relative2absolute(
                 camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3]
             )
-            
-        if(CORE_TIME_DEBUG):
-            print('Core: Vertices calculated, used time:', next(self.time_tracker))
+
+        if CORE_TIME_DEBUG:
+            print("Core: Vertices calculated, used time:", next(self.time_tracker))
 
         # analyze camera input
         if camera_input is not None:
@@ -564,9 +570,9 @@ class Core:
                     and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V
                 ):
                     v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
-        
-        if(CORE_TIME_DEBUG):
-            print('Core: Camera input analyzed, used time:', next(self.time_tracker))
+
+        if CORE_TIME_DEBUG:
+            print("Core: Camera input analyzed, used time:", next(self.time_tracker))
 
         # decay all items and delete items with low value
         self.contact_center = self.relative2absolute((CONTACT_CENTER_TO_BACK - CM_TO_CAR_BACK, 0))
@@ -580,9 +586,9 @@ class Core:
                 items_to_delete.append(item)
         for item in items_to_delete:
             self.predicted_items.pop(item)
-            
-        if(CORE_TIME_DEBUG):
-            print('Core: Items deleted, used time:', next(self.time_tracker))
+
+        if CORE_TIME_DEBUG:
+            print("Core: Items deleted, used time:", next(self.time_tracker))
 
         # go towards the closest item
         item = self.get_closest_item()
@@ -637,6 +643,7 @@ class Core:
                 
         if(CORE_TIME_DEBUG):
             print('Core: Action decided, used time:', next(self.time_tracker))
+
 
             # if angle > AIM_ANGLE or angle > NO_AIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
             #     self.motor = [0.2, -0.2]
