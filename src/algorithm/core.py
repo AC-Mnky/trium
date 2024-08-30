@@ -637,8 +637,8 @@ class Core:
         # analyze camera input
         if camera_input is not None:
             """
-            "camera_reds", "camera_yellows" are cords of red blocks and yellow blocks
-            "camera_walls" are pairs of cords of the walls' end points
+            "camera_reds", "camera_yellows" are cords of red blocks and yellow blocks.
+            "camera_walls" are pairs of cords of the walls' end points.
             """
             camera_time, camera_reds, camera_yellows, camera_walls = camera_input
 
@@ -933,4 +933,15 @@ def rotated(vec: tuple[float, float], angle_radians: float) -> tuple[float, floa
 
 
 def get_str(vec: tuple[float, float]) -> str:
+    """
+    Converts a tuple of floats into a string representation.
+
+    Args:
+        vec (tuple[float, float]): The input tuple containing two float values.
+
+    Returns:
+        str (string):
+            The string representation of the input tuple, with each float value converted
+            to an integer and separated by a comma.
+    """
     return str(int(vec[0])) + ", " + str(int(vec[1]))
