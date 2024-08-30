@@ -1,7 +1,7 @@
 import time
 
 ENABLE_STM_INPUT = True  # True
-STM_INPUT_PROTOCOL = 127  # 127
+STM_INPUT_PROTOCOL = 127  # 127 | 128
 ENABLE_IMU = True  # True
 ENABLE_CAMERA = True  # True
 ENABLE_VISION = True  # True
