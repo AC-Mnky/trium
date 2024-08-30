@@ -24,6 +24,7 @@ else:
 MODE = "camera", "file", "adjust"
 """
 MODE = "camera"
+
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
