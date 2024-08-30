@@ -62,9 +62,9 @@ class Visualizer:
         self.mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if (
-                event.type == pygame.QUIT
-                or event.type == pygame.KEYDOWN
-                and (event.key in [pygame.K_ESCAPE, pygame.K_q])
+                    event.type == pygame.QUIT
+                    or event.type == pygame.KEYDOWN
+                    and (event.key in [pygame.K_ESCAPE, pygame.K_q])
             ):
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -181,12 +181,14 @@ class Visualizer:
                 real2window(self.core.relative2absolute(wall[1])),
                 1,
             )
-
+        # car
         draw_alpha.polygon(
             self.screen,
             CAR,
             [real2window(v) for v in self.core.predicted_vertices[0] + self.core.predicted_vertices[1][::-1]],
         )
+        draw_alpha.line(self.screen, WHITE, real2window(self.core.predicted_cords),
+                        real2window(self.core.relative2absolute((1000, 0))), 1)
 
         camera_color = CAMERA if self.core.camera_has_input else CAMERA_SHOT
         draw_alpha.polygon(
@@ -215,8 +217,9 @@ class Visualizer:
 
         if self.core.vision_target_cords is not None:
             c = real2window(self.core.vision_target_cords)
-            draw_alpha.line(self.screen, WHITE, core.vec_add(c, (-1000, 0)), core.vec_add(c, (1000, 0)), 1)
-            draw_alpha.line(self.screen, WHITE, core.vec_add(c, (0, -1000)), core.vec_add(c, (0, 1000)), 1)
+            draw_alpha.line(self.screen, WHITE, core.vec_add(c, (-100, 0)), core.vec_add(c, (100, 0)), 1)
+            draw_alpha.line(self.screen, WHITE, core.vec_add(c, (0, -100)), core.vec_add(c, (0, 100)), 1)
+            draw_alpha.line(self.screen, WHITE, c, real2window(self.core.predicted_cords), 1)
             self.core.vision_target_cords = None
 
         pygame.display.flip()
