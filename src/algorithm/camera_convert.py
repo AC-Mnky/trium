@@ -2,9 +2,13 @@ import numpy as np
 
 
 class CameraState:
-    # 座标架：车向前为x，车向右为y，向下为z，方向与z轴夹角为theta，右手螺旋向下相对x轴旋转为phi，绕入射光方向右手螺旋偏转为omega
-    # 方向指摄像头中央对准的位置
-    # 摄像头必须是竖直对准的
+    """
+    Ruleset:
+        - 座标架: 车向前为x, 车向右为y, 向下为z, 方向与z轴夹角为theta, 右手螺旋向下相对x轴旋转为phi,
+        绕入射光方向右手螺旋偏转为omega, 方向指摄像头中央对准的位置
+        - 摄像头必须是竖直对准的
+    """
+
     def __init__(
         self,
         camera_xyz: tuple[float, float, float],
