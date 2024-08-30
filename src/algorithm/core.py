@@ -38,6 +38,9 @@ INITIAL_CORD_X = 1100
 INITIAL_CORD_Y = 200
 INITIAL_ANGLE = 0
 
+HOME = (1100, 200)
+HOME_ANGLE = 0
+
 MAX_CORD_DIFFERENCE = 1000
 MAX_CORD_RELATIVE_DIFFERENCE = 0.5
 MAX_ANGLE_DIFFERENCE = 0.4
@@ -168,6 +171,8 @@ class Core:
         # pairs of walls' endpoints
         self.walls: list[tuple[tuple[float, float], tuple[float, float]]] = []
 
+        self.action_no_item = self.act_when_there_is_no_item(0)
+
         # There is no reset function. When you want to reset the _core, just create a new object.
 
     def get_closest_item(self) -> tuple[float, float] | None:
@@ -294,6 +299,111 @@ class Core:
         self.predicted_cords = vec_add(self.predicted_cords, (x_diff_average, y_diff_average))
         self.predicted_angle += angle_diff_average
         self.start_angle += angle_diff_average
+
+    def act_when_there_is_no_item(self, dt):
+        while True:
+
+            current_cords = self.predicted_cords
+
+            for rotation_spot in (current_cords,
+                                  (1000, 1000),
+                                  (2000, 1000)):
+
+                while get_length(vec_sub(self.predicted_cords, rotation_spot)) < 50:
+                    self.target_toward_cords(rotation_spot)
+                    yield
+
+                t = 0
+                while t < 10:
+                    t += dt
+                    self.motor = [0.3, -0.3]
+                    yield
+
+                t = 0
+                while t < 30:
+                    t += dt
+                    self.motor = [-0.1, 0.1]
+                    yield
+
+            while get_length(vec_sub(self.predicted_cords, HOME)) < 50:
+                self.target_toward_cords(rotation_spot)
+                yield
+
+            while not -0.1 < angle_subtract(self.predicted_angle, HOME_ANGLE) < 0.1:
+                if angle_subtract(self.predicted_angle, HOME_ANGLE) > 0:
+                    self.motor = [-0.1, 0.1]
+                    yield
+                else:
+                    self.motor = [0.1, -0.1]
+                    yield
+
+            t = 0
+            while t < 5:
+                t += dt
+                self.motor = [-0.1, -0.1]
+                yield
+
+            t = 0
+            while t < 2:
+                t += t
+                self.back_open = True
+                self.motor = [0.0, 0.0]
+                yield
+
+            t = 0
+            while t < 0.5:
+                t += dt
+                self.back_open = True
+                self.motor = [0.9, 0.9]
+
+            t = 0
+            while t < 2:
+                t += t
+                self.back_open = True
+                self.motor = [0.0, 0.0]
+                yield
+
+            t = 0
+            while t < 2:
+                t += t
+                self.back_open = False
+                self.motor = [0.0, 0.0]
+                yield
+
+    def target_toward_cords(self, cords: tuple[int, int]) -> None:
+        cords = self.absolute2relative(cords)
+        angle = get_angle(cords)
+        if -50 < cords[0] < 300 and -30 < cords[1] < 30:
+            self.motor = [0.5, 0.5]
+        elif 0 < cords[0] and -30 < cords[1] < 30:
+            self.motor = [0.8, 0.8]
+        elif 0 < angle < 0.2:
+            if get_length(cords) > 300:
+                self.motor = [0.6, 0.4]
+            else:
+                self.motor = [0.2, 0.0]
+        elif -0.2 < angle < 0:
+            if get_length(cords) > 300:
+                self.motor = [0.4, 0.6]
+            else:
+                self.motor = [0.0, 0.2]
+        elif 0 < angle < 0.5:
+            if get_length(cords) > 300:
+                self.motor = [0.6, 0.4]
+            else:
+                self.motor = [0, -0.2]
+        elif -0.5 < angle < 0:
+            if get_length(cords) > 300:
+                self.motor = [0.4, 0.6]
+            else:
+                self.motor = [-0.2, 0]
+        elif 0 < angle:
+            if get_length(cords) > 300:
+                self.motor = [0.5, -0.5]
+            else:
+                self.motor = [0.5, -0.5]
+        elif angle < 0:
+            self.motor = [-0.5, 0.5]
 
     # Get realtime data from other modules
     def update(
@@ -434,11 +544,13 @@ class Core:
         # go towards the closest item
         item = self.get_closest_item()
         if item is None:
-            self.motor = [0.2, -0.2]
+            self.action_no_item.send(dt)
         else:
+            self.action_no_item = self.act_when_there_is_no_item(0)
+
             self.predicted_items[item][2] = min(self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM)
             cords = self.absolute2relative(item)
-            item_angle = angle_subtract(get_angle(cords), 0)
+            angle = get_angle(cords)
 
             if -50 < cords[0] < 300 and -30 < cords[1] < 30:
                 self.motor = [0.5, 0.5]
@@ -447,37 +559,37 @@ class Core:
                 self.motor = [0, 0]
             elif 0 < cords[0] and -30 < cords[1] < 30:
                 self.motor = [0.8, 0.8]
-            elif 0 < item_angle < 0.2:
+            elif 0 < angle < 0.2:
                 if get_length(cords) > 300:
                     self.motor = [0.6, 0.4]
                 else:
                     self.motor = [0.2, 0.0]
-            elif -0.2 < item_angle < 0:
+            elif -0.2 < angle < 0:
                 if get_length(cords) > 300:
                     self.motor = [0.4, 0.6]
                 else:
                     self.motor = [0.0, 0.2]
-            elif 0 < item_angle < 0.5:
+            elif 0 < angle < 0.5:
                 if get_length(cords) > 300:
                     self.motor = [0.6, 0.4]
                 else:
                     self.motor = [0, -0.2]
-            elif -0.5 < item_angle < 0:
+            elif -0.5 < angle < 0:
                 if get_length(cords) > 300:
                     self.motor = [0.4, 0.6]
                 else:
                     self.motor = [-0.2, 0]
-            elif 0 < item_angle:
+            elif 0 < angle:
                 if get_length(cords) > 300:
                     self.motor = [0.5, -0.5]
                 else:
                     self.motor = [0.5, -0.5]
-            elif item_angle < 0:
+            elif angle < 0:
                 self.motor = [-0.5, 0.5]
 
-            # if item_angle > AIM_ANGLE or item_angle > NO_AIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
+            # if angle > AIM_ANGLE or angle > NO_AIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
             #     self.motor = [0.2, -0.2]
-            # elif item_angle < -AIM_ANGLE or item_angle < -NO_AIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
+            # elif angle < -AIM_ANGLE or angle < -NO_AIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
             #     self.motor = [-0.2, 0.2]
             # else:
             #     self.motor = [0.5, 0.5]
