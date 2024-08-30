@@ -2,10 +2,10 @@ import time
 
 ENABLE_STM_INPUT = True  # True
 STM_INPUT_PROTOCOL = 127  # 127
-ENABLE_IMU = False  # True
-ENABLE_CAMERA = False  # True
-ENABLE_VISION = False  # True
-ENABLE_CORE = False  # True
+ENABLE_IMU = True  # True
+ENABLE_CAMERA = True  # True
+ENABLE_VISION = True  # True
+ENABLE_CORE = True  # True
 ENABLE_STM_OUTPUT = True  # True
 
 ENABLE_DUMMY = True  # False
@@ -14,7 +14,7 @@ ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
 MAX_MESSAGE_LENGTH = 6 # 6
 
-DEBUG_INFO = False
+DEBUG_INFO = True
 CAMERA_DEBUG_INFO = True
 DEBUG_RESET = False
 
@@ -69,6 +69,7 @@ if __name__ == "__main__":
 
     output = None
     imu_input = None
+    unpacked_stm32_input = None
     stm32_input = None
 
     stm = stm.STM(STM_INPUT_PROTOCOL) if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT else None
