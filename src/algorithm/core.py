@@ -347,12 +347,19 @@ class Core:
 
     def act_when_there_is_no_item(self):
         """
-        Perform a series of actions when there is no item present.
+        Perform a series of actions when there is no item captured.
 
-        - This method executes a sequence of actions to be performed when there is no item present.
-        - It includes rotating towards specific coordinates, rotating left and right for a certain duration,
-        returning home, rotating at home until a specific angle is reached, backing up, opening a door,
-        dumping items, waiting for items to drop, and closing the door.
+        - This method executes a sequence of actions to be performed when there is no item in sight.
+        - It includes the following actions:
+            - rotating towards specific coordinates
+            - rotating left and right for a certain duration
+            - returning home
+            - rotating at home until a specific angle is reached
+            - backing up
+            - opening a door
+            - dumping items
+            - waiting for items to drop
+            - closing the door
 
         Yields:
             None: This method is a generator and yields None at each step.
