@@ -1,4 +1,3 @@
-import math
 from struct import unpack
 
 import pygame
@@ -28,7 +27,7 @@ MAX_SPEED_CLIP = 1
 MIN_PID_CLIP = 0
 MAX_PID_CLIP = 127
 
-SPEED_CONTROL = 0.9
+SPEED_CONTROL = 0.1
 
 
 class Dummy:
