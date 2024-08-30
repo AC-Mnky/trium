@@ -26,10 +26,7 @@ SHOW_LINE = True
 
 
 def get_color_mask(
-        image: np.ndarray,
-        color_range_list: list[np.ndarray],
-        show: bool = False,
-        color_name: str = "color",
+    image: np.ndarray, color_range_list: list[np.ndarray], show: bool = False, color_name: str = "color"
 ):
     x = image
     # x = cv2.GaussianBlur(image, (3, 3), 0)
@@ -38,11 +35,14 @@ def get_color_mask(
     if len(color_range_list) == 1:
         x = cv2.inRange(x, color_range_list[0][0], color_range_list[0][1])
     elif len(color_range_list) == 2:
-        x = np.maximum(cv2.inRange(x, color_range_list[0][0], color_range_list[0][1]),
-                       cv2.inRange(x, color_range_list[1][0], color_range_list[1][1]))
+        x = np.maximum(
+            cv2.inRange(x, color_range_list[0][0], color_range_list[0][1]),
+            cv2.inRange(x, color_range_list[1][0], color_range_list[1][1]),
+        )
     else:
-        x = np.max(np.stack([cv2.inRange(x, color_range[0], color_range[1])
-                             for color_range in color_range_list]), 0)
+        x = np.max(
+            np.stack([cv2.inRange(x, color_range[0], color_range[1]) for color_range in color_range_list]), 0
+        )
 
     # x = cv2.erode(x, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)), iterations=1)
     # x = cv2.dilate(x, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)), iterations=1)
@@ -55,10 +55,7 @@ def get_color_mask(
 
 
 def find_color(
-        image: np.ndarray,
-        color_range_list: list[np.ndarray],
-        show: bool = False,
-        color_name: str = "color",
+    image: np.ndarray, color_range_list: list[np.ndarray], show: bool = False, color_name: str = "color"
 ) -> list[(int, int)]:
     output = get_color_mask(image, color_range_list, show, color_name)
 
@@ -99,7 +96,7 @@ def find_yellow(image: np.ndarray, show: bool = False) -> list[(int, int)]:
     Returns:
         list (list[(int, int)]): A list of coordinates (row, column) of yellow pixels in the image.
     """
-    return find_color(image, [YELLOW, ], show, "yellow")
+    return find_color(image, [YELLOW], show, "yellow")
 
 
 def show_blue(image: np.ndarray) -> None:
@@ -112,7 +109,7 @@ def show_blue(image: np.ndarray) -> None:
     Returns:
         None
     """
-    get_color_mask(image, [BLUE,], True, "blue")
+    get_color_mask(image, [BLUE], True, "blue")
 
 
 def show_white(image: np.ndarray) -> None:
@@ -125,12 +122,12 @@ def show_white(image: np.ndarray) -> None:
     Returns:
         None
     """
-    get_color_mask(image, [WHITE,], True, "white")
+    get_color_mask(image, [WHITE], True, "white")
 
 
 def find_wall_bottom(image: np.ndarray, show: bool = False):
-    blue = get_color_mask(image, [BLUE,])
-    white = get_color_mask(image, [WHITE,])
+    blue = get_color_mask(image, [BLUE])
+    white = get_color_mask(image, [WHITE])
 
     if SHOW_BLUE and show:
         cv2.imshow("blue", blue)
@@ -139,13 +136,9 @@ def find_wall_bottom(image: np.ndarray, show: bool = False):
 
     x = np.zeros(image.shape[:2]).astype(np.uint8)
 
-    x[WALL_SHIFT1:-WALL_SHIFT1, :] = np.minimum(
-        blue[: -2 * WALL_SHIFT1, :], white[2 * WALL_SHIFT1:, :]
-    )
+    x[WALL_SHIFT1:-WALL_SHIFT1, :] = np.minimum(blue[: -2 * WALL_SHIFT1, :], white[2 * WALL_SHIFT1 :, :])
     if ENABLE_WALL_SHIFT2:
-        x[WALL_SHIFT2:-WALL_SHIFT2, :] = np.minimum(
-            x[: -2 * WALL_SHIFT2, :], (255 - x)[2 * WALL_SHIFT2:, :]
-        )
+        x[WALL_SHIFT2:-WALL_SHIFT2, :] = np.minimum(x[: -2 * WALL_SHIFT2, :], (255 - x)[2 * WALL_SHIFT2 :, :])
 
     draw = cv2.cvtColor(x, cv2.COLOR_GRAY2BGR)
 
@@ -172,8 +165,8 @@ def find_wall_bottom(image: np.ndarray, show: bool = False):
 
 
 def find_wall_bottom_p(image: np.ndarray, show: bool = False):
-    blue = get_color_mask(image, [BLUE,])
-    white = get_color_mask(image, [WHITE,])
+    blue = get_color_mask(image, [BLUE])
+    white = get_color_mask(image, [WHITE])
 
     if SHOW_BLUE and show:
         cv2.imshow("blue", blue)
@@ -183,28 +176,17 @@ def find_wall_bottom_p(image: np.ndarray, show: bool = False):
     x = np.zeros(image.shape[:2]).astype(np.uint8)
 
     if SHIFT1_ONLY_UP_SHIFT:
-        x[0:-WALL_SHIFT1, :] = np.minimum(
-            blue[:-WALL_SHIFT1, :], white[WALL_SHIFT1:, :]
-        )
+        x[0:-WALL_SHIFT1, :] = np.minimum(blue[:-WALL_SHIFT1, :], white[WALL_SHIFT1:, :])
     else:
-        x[WALL_SHIFT1:-WALL_SHIFT1, :] = np.minimum(
-            blue[: -2 * WALL_SHIFT1, :], white[2 * WALL_SHIFT1:, :]
-        )
+        x[WALL_SHIFT1:-WALL_SHIFT1, :] = np.minimum(blue[: -2 * WALL_SHIFT1, :], white[2 * WALL_SHIFT1 :, :])
 
     if ENABLE_WALL_SHIFT2:
-        x[WALL_SHIFT2:-WALL_SHIFT2, :] = np.minimum(
-            x[: -2 * WALL_SHIFT2, :], (255 - x)[2 * WALL_SHIFT2:, :]
-        )
+        x[WALL_SHIFT2:-WALL_SHIFT2, :] = np.minimum(x[: -2 * WALL_SHIFT2, :], (255 - x)[2 * WALL_SHIFT2 :, :])
 
     draw = cv2.cvtColor(x, cv2.COLOR_GRAY2BGR)
 
     lines = cv2.HoughLinesP(
-        x,
-        1,
-        np.pi / 180,
-        HOUGH_P_THRESHOLD,
-        minLineLength=HOUGH_P_MIN_LENGTH,
-        maxLineGap=HOUGH_P_MAX_GAP,
+        x, 1, np.pi / 180, HOUGH_P_THRESHOLD, minLineLength=HOUGH_P_MIN_LENGTH, maxLineGap=HOUGH_P_MAX_GAP
     )
     # print(lines)
     if SHOW_LINE and lines is not None:

@@ -19,14 +19,7 @@ class IMU:
 
     def get_imu_input(
         self,
-    ) -> (
-        tuple[
-            tuple[float, float, float],
-            tuple[float, float, float],
-            tuple[float, float, float],
-        ]
-        | None
-    ):
+    ) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
         """
         Reads IMU data from a serial port.
         """
@@ -132,14 +125,9 @@ class IMU:
 
         return angle_x, angle_y, angle_z
 
-    def _process_input_data(self, inputdata: bytes) -> (
-        tuple[
-            tuple[float, float, float],
-            tuple[float, float, float],
-            tuple[float, float, float],
-        ]
-        | None
-    ):
+    def _process_input_data(
+        self, inputdata: bytes
+    ) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
         """
         Process the input data and extract acceleration, angular velocity, and angle information.
 
@@ -166,15 +154,11 @@ class IMU:
 
         for data in inputdata:  # 在输入的数据进行遍历
             if frame_state == 0:  # 当未确定状态的时候，进入以下判断
-                if (
-                    data == 0x55 and byte_num == 0
-                ):  # 0x55位于第一位时候，开始读取数据，增大bytenum
+                if data == 0x55 and byte_num == 0:  # 0x55位于第一位时候，开始读取数据，增大bytenum
                     check_sum = data
                     byte_num = 1
                     continue
-                elif (
-                    data == 0x51 and byte_num == 1
-                ):  # 在byte不为0 且 识别到 0x51 的时候，改变frame
+                elif data == 0x51 and byte_num == 1:  # 在byte不为0 且 识别到 0x51 的时候，改变frame
                     check_sum += data
                     frame_state = 1
                     byte_num = 2
