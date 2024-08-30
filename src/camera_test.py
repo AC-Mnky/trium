@@ -4,10 +4,8 @@ import time
 import cv2
 import numpy as np
 
-from algorithm import camera_convert, find_color
+from algorithm import camera_convert, find_color, vision
 from communication.camera import Camera
-from algorithm import vision
-
 
 MODE = "file"
 # MODE = 'adjust'

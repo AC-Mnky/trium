@@ -1,7 +1,7 @@
-import numpy as np
 import time
 from struct import unpack
 
+import numpy as np
 import serial
 
 ENCODER_PULSE_EACH_ROUND = 22
