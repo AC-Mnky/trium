@@ -218,11 +218,13 @@ class Core:
                     unpack("<I", self.stm_input[7:11])[0],
                     unpack("<I", self.stm_input[1:5])[0],
                 )
-        wheel_speed = (
-            encoder[0] * DISTANCE_PER_ENCODER / tick[0] * 72000000,
-            encoder[1] * DISTANCE_PER_ENCODER / tick[1] * 72000000,
-        )
-
+        try:
+            wheel_speed = (
+                encoder[0] * DISTANCE_PER_ENCODER / tick[0] * 72000000,
+                encoder[1] * DISTANCE_PER_ENCODER / tick[1] * 72000000,
+            )
+        except ZeroDivisionError:
+            wheel_speed = (0, 0)
         inferred_angular_speed = (wheel_speed[1] - wheel_speed[0]) / DISTANCE_BETWEEN_WHEELS
         print(inferred_angular_speed)
         # if self.imu_input is not None:
