@@ -2,6 +2,8 @@ import time
 
 import serial
 
+"""Test the serial communication with STM32"""
+
 if __name__ == "__main__":
     ser = serial.Serial("/dev/ttyAMA0", "115200")
     ser.timeout = 1
