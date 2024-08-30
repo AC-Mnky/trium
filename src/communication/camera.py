@@ -24,6 +24,7 @@ class Camera:
 
 
 if __name__ == "__main__":
+    # Test codes
     print(-2)
     camera = Camera()
     print(-1)
