@@ -1,7 +1,7 @@
+import time
 from struct import unpack
 
 import numpy as np
-import time
 
 try:
     import camera_convert
@@ -163,7 +163,6 @@ def merge_item_prediction(dictionary) -> None:
 class Core:
 
     def __init__(self, time: float, input_protocol: int):
-
         self.start_time = time
         self.last_update_time = time
         self.dt = 0
