@@ -1,17 +1,18 @@
 import time
 
 ENABLE_STM_INPUT = True  # True
-STM_INPUT_PROTOCOL = 127  # 127
+STM_INPUT_PROTOCOL = 128  # 127
 ENABLE_IMU = True  # True
 ENABLE_CAMERA = True  # True
 ENABLE_VISION = True  # True
 ENABLE_CORE = True  # True
 ENABLE_STM_OUTPUT = True  # True
 
-ENABLE_DUMMY = False  # False
+ENABLE_DUMMY = True  # False
 DUMMY_CONTROL = True  # Whatever
 ENABLE_CORE_VISUALIZER = True  # False
 VISUALIZER_CONTROL = True  # False
+MAX_MESSAGE_LENGTH = 24 # 8
 
 DEBUG_INFO = False
 CAMERA_DEBUG_INFO = True
@@ -20,8 +21,10 @@ DEBUG_RESET = False
 CAMERA_COOLDOWN = 0.0
 CYCLE_MIN_TIME = 0.0
 
-FORCE_STOP_MESSAGE = bytes((128, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0))
-MAX_MESSAGE_LENGTH = 8
+FORCE_STOP_MESSAGE = bytes(
+    (128, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0)
+)
+
 
 if ENABLE_STM_INPUT or ENABLE_STM_OUTPUT:
     from communication import stm_communication as stm
@@ -94,7 +97,11 @@ if __name__ == "__main__":
         if DEBUG_INFO:
             print("Dummy plugged in, used time:", next(module_time))
 
-    visualizer = core_visualizer.Visualizer(core, VISUALIZER_CONTROL) if ENABLE_CORE_VISUALIZER else None
+    visualizer = (
+        core_visualizer.Visualizer(core, VISUALIZER_CONTROL)
+        if ENABLE_CORE_VISUALIZER
+        else None
+    )
     if visualizer is not None:
         if DEBUG_INFO:
             print("Visualizer initialized, used time:", next(module_time))
@@ -136,7 +143,9 @@ if __name__ == "__main__":
                 # print(camera_input)
 
         if ENABLE_CORE:
-            core.update(real_time(), stm32_input, unpacked_stm32_input, imu_input, camera_input)
+            core.update(
+                real_time(), stm32_input, unpacked_stm32_input, imu_input, camera_input
+            )
             output = core.get_output()
             if DEBUG_INFO:
                 print("Got core output:", output.hex(" "))

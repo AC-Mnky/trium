@@ -65,7 +65,10 @@ CAMERA_MARGIN_V = 30  # 60
 
 
 def calc_weight(
-    cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
+    cord_difference: float,
+    angle_difference: float,
+    distance_to_wall: float,
+    seen_wall_length: float,
 ) -> float:
     weight = 0.1
     if np.abs(cord_difference) > MAX_CORD_DIFFERENCE:
@@ -100,7 +103,13 @@ def merge_item_prediction(dictionary) -> None:
                     value_sum += v2[0]
                     interest_max = max(interest_max, v2[2])
                 pos_avg = (pos_sum[0] / value_sum, pos_sum[1] / value_sum)
-                substitution = (neighbour_of_k1, pos_avg, value_sum, v1[1], interest_max)
+                substitution = (
+                    neighbour_of_k1,
+                    pos_avg,
+                    value_sum,
+                    v1[1],
+                    interest_max,
+                )
                 break
 
         if substitution is None:
@@ -123,8 +132,11 @@ class Core:
         self.motor = [0.0, 0.0].copy()
         self.brush = False
         self.back_open = False
-        self.motor_PID = [[15, 10, 40, 10, 0, 10, 5, 0], [15, 10, 40, 10, 0, 10, 5, 0]].copy()
-        self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 17)
+        self.motor_PID = [
+            [15, 10, 40, 10, 0, 10, 5, 0],
+            [15, 10, 40, 10, 0, 10, 5, 0],
+        ].copy()
+        self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 13)
         self.unpacked_stm_input = None
         self.imu_input = None
         self.imu_acceleration_g = None
@@ -139,8 +151,11 @@ class Core:
         self.predicted_angle = INITIAL_ANGLE
         self.start_angle = 0
 
-        self.predicted_vertices = [[(0.0, 0.0), (0.0, 0.0)], [(0.0, 0.0), (0.0, 0.0)]].copy()
-        self.predicted_camera_vertices = ([(0.0, 0.0)] * 8).copy()
+        self.predicted_vertices = [
+            [(0.0, 0.0), (0.0, 0.0)],
+            [(0.0, 0.0), (0.0, 0.0)],
+        ].copy()
+        self.predicted_camera_vertices = ([(0.0, 0.0), ] * 8).copy()
         self.contact_center = (0, 0)
         """
         Keys are the items' cords. 
@@ -181,17 +196,28 @@ class Core:
         angular_speed can use data from imu directly
         """
 
-        if self.protocol == 128:
-            encoder = (unpack("<h", self.stm_input[68:70])[0], unpack("<h", self.stm_input[36:38])[0])
-            tick = ...  # TODO
+        if self.unpacked_stm_input is not None:
+            encoder = self.unpacked_stm_input[2:4]
+            tick = self.unpacked_stm_input[0:2]
         else:
-            if self.unpacked_stm_input is None:
-                encoder = (unpack("<h", self.stm_input[11:13])[0], unpack("<h", self.stm_input[5:7])[0])
-                tick = (unpack("<I", self.stm_input[7:11])[0], unpack("<I", self.stm_input[1:5])[0])
+            if self.protocol == 128:
+                encoder = (
+                    unpack("<h", self.stm_input[68:70])[0],
+                    unpack("<h", self.stm_input[36:38])[0],
+                )
+                tick = (
+                    unpack("<I", self.stm_input[64:68])[0],
+                    unpack("<I", self.stm_input[32:36])[0],
+                )
             else:
-                encoder = self.unpacked_stm_input[2:4]
-                tick = self.unpacked_stm_input[0:2]
-
+                encoder = (
+                    unpack("<h", self.stm_input[11:13])[0],
+                    unpack("<h", self.stm_input[5:7])[0],
+                )
+                tick = (
+                    unpack("<I", self.stm_input[7:11])[0],
+                    unpack("<I", self.stm_input[1:5])[0],
+                )
         wheel_speed = (
             encoder[0] * DISTANCE_PER_ENCODER / tick[0] * 72000000,
             encoder[1] * DISTANCE_PER_ENCODER / tick[1] * 72000000,
@@ -276,7 +302,12 @@ class Core:
         stm32_input: bytes,
         unpacked_stm32_input: list[int],
         imu_input: (
-            tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None
+            tuple[
+                tuple[float, float, float],
+                tuple[float, float, float],
+                tuple[float, float, float],
+            ]
+            | None
         ),
         camera_input: (
             tuple[
@@ -299,7 +330,11 @@ class Core:
         if unpacked_stm32_input is not None:
             self.unpacked_stm_input = unpacked_stm32_input
         if imu_input is not None:
-            (self.imu_acceleration_g, self.imu_angular_speed_deg_s, self.imu_angle_deg) = imu_input
+            (
+                self.imu_acceleration_g,
+                self.imu_angular_speed_deg_s,
+                self.imu_angle_deg,
+            ) = imu_input
             if self.imu_input is None:
                 self.start_angle = np.radians(self.imu_angle_deg[2])
             self.imu_input = imu_input
@@ -329,23 +364,21 @@ class Core:
         # calculate vertices after displacement
         for i in 0, 1:
             for j in 0, 1:
-                self.predicted_vertices[i][j] = self.relative2absolute(
-                    (i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH)
-                )
+                self.predicted_vertices[i][j] = self.relative2absolute((i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH))
 
-        for i, camera_point in (
-            (0, (0, 0)),
-            (1, (0, vision.CAMERA_STATE.res_v)),
-            (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
-            (3, (vision.CAMERA_STATE.res_h, 0)),
-            (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
-            (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
-        ):
+        for i, camera_point in ((0, (0, 0)),
+                                (1, (0, vision.CAMERA_STATE.res_v)),
+                                (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
+                                (3, (vision.CAMERA_STATE.res_h, 0)),
+                                (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                                (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                                (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H,
+                                     vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                                (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                                ):
             self.predicted_camera_vertices[i] = self.relative2absolute(
-                camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3]
-            )
+
+                camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3])
 
         # analyze camera input
         if camera_input is not None:
@@ -361,10 +394,7 @@ class Core:
 
             for red in camera_reds:
                 cords = self.relative2absolute(red)  # position of red block
-                if (
-                    ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
-                    and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
-                ):
+                if ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
                     self.predicted_items[cords] = [
                         self.predicted_items.get(cords, (0, 0))[0] + 2,
                         RED,
@@ -373,10 +403,7 @@ class Core:
 
             for yellow in camera_yellows:
                 cords = self.relative2absolute(yellow)  # position of yellow block
-                if (
-                    ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
-                    and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
-                ):
+                if ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
                     self.predicted_items[cords] = [
                         self.predicted_items.get(cords, (0, 1))[0] + 3,
                         YELLOW,
@@ -388,13 +415,10 @@ class Core:
             # decay seen items
             for item, v in self.predicted_items.items():
                 relative_cords = self.absolute2relative(item)
-                _, i, j = camera_convert.space2img(
-                    vision.CAMERA_STATE, relative_cords[0], relative_cords[1], -12.5 if v[1] == RED else -15
-                )
-                if (
-                    0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H
-                    and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V
-                ):
+                _, i, j = camera_convert.space2img(vision.CAMERA_STATE, relative_cords[0], relative_cords[1],
+                                                -12.5 if v[1] == RED else -15)
+                if 0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H \
+                        and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V:
                     v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
 
         # decay all items and delete items with low value
@@ -402,10 +426,7 @@ class Core:
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
-            if (
-                get_distance(item, self.contact_center) < CONTACT_RADIUS
-                or self.predicted_items[item][0] < DELETE_VALUE
-            ):
+            if get_distance(item, self.contact_center) < CONTACT_RADIUS or self.predicted_items[item][0] < DELETE_VALUE:
                 items_to_delete.append(item)
         for item in items_to_delete:
             self.predicted_items.pop(item)
@@ -415,12 +436,10 @@ class Core:
         if item is None:
             self.motor = [0.2, -0.2]
         else:
-            self.predicted_items[item][2] = min(
-                self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
-            )
+            self.predicted_items[item][2] = min(self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM)
             cords = self.absolute2relative(item)
             item_angle = angle_subtract(get_angle(cords), 0)
-
+            
             if -50 < cords[0] < 300 and -30 < cords[1] < 30:
                 self.motor = [0.5, 0.5]
             elif get_length(cords) < 175:
@@ -432,17 +451,17 @@ class Core:
                 if get_length(cords) > 300:
                     self.motor = [0.6, 0.4]
                 else:
-                    self.motor = [0.2, 0.0]
+                    self.motor = [0.2, 0.0]    
             elif -0.2 < item_angle < 0:
                 if get_length(cords) > 300:
                     self.motor = [0.4, 0.6]
                 else:
-                    self.motor = [0.0, 0.2]
+                    self.motor = [0.0, 0.2] 
             elif 0 < item_angle < 0.5:
                 if get_length(cords) > 300:
                     self.motor = [0.6, 0.4]
                 else:
-                    self.motor = [0, -0.2]
+                    self.motor = [0, -0.2]    
             elif -0.5 < item_angle < 0:
                 if get_length(cords) > 300:
                     self.motor = [0.4, 0.6]
@@ -452,7 +471,7 @@ class Core:
                 if get_length(cords) > 300:
                     self.motor = [0.5, -0.5]
                 else:
-                    self.motor = [0.5, -0.5]
+                    self.motor = [0.5, -0.5]    
             elif item_angle < 0:
                 self.motor = [-0.5, 0.5]
 

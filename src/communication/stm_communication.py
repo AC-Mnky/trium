@@ -4,6 +4,8 @@ from struct import unpack
 import numpy as np
 import serial
 
+np.tau = np.pi * 2
+
 ENCODER_PULSE_EACH_ROUND = 22
 ENCODER_READ_FREQUENCY = 500
 PWM_PERIOD = 100
@@ -19,7 +21,7 @@ class STM:
         self.baud = "115200"
         self.ser = serial.Serial(self.port, self.baud, parity=serial.PARITY_NONE)
         self.protocol = protocol
-        self.message_length = 96 if protocol == 128 else 17
+        self.message_length = 96 if protocol == 128 else 13
         self.message_head = bytes((128,) * 4) if protocol == 128 else bytes((127,))
         if not self.ser.is_open:
             self.ser.open()
@@ -59,17 +61,32 @@ class STM:
                 if flag_match:
                     break
 
-            message = self.message_head + self.ser.read(self.message_length - len(self.message_head))
+            message = self.message_head + self.ser.read(
+                self.message_length - len(self.message_head)
+            )
 
             if self.protocol == 128:
-                ...  # TODO
+                encoder = (
+                unpack("<h", self.stm_input[68:70])[0],
+                unpack("<h", self.stm_input[36:38])[0],
+                )
+                tick = (
+                    unpack("<I", self.stm_input[64:68])[0],
+                    unpack("<I", self.stm_input[32:36])[0],
+                )
             elif self.protocol == 127:
-                encoder = (unpack("<h", message[11:13])[0], unpack("<h", message[5:7])[0])
-                tick = (unpack("<I", message[7:11])[0], unpack("<I", message[1:5])[0])
-                unpacked_message[0] += tick[0]
-                unpacked_message[1] += tick[1]
-                unpacked_message[2] += encoder[0]
-                unpacked_message[3] += encoder[1]
+                encoder = (
+                    unpack("<h", message[11:13])[0],
+                    unpack("<h", message[5:7])[0],
+                )
+                tick = (
+                    unpack("<I", message[7:11])[0],
+                    unpack("<I", message[1:5])[0],
+                )
+            unpacked_message[0] += tick[0]
+            unpacked_message[1] += tick[1]
+            unpacked_message[2] += encoder[0]
+            unpacked_message[3] += encoder[1]
 
             # print("Message from STM32:", message.hex(" "))
 
@@ -105,8 +122,18 @@ class STM:
         if encoder_2 >= 2**15:
             encoder_2 -= 2**16
 
-        velocity_1 = encoder_1 * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND) * np.tau * WHEEL_RADIUS
-        velocity_2 = encoder_2 * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND) * np.tau * WHEEL_RADIUS
+        velocity_1 = (
+            encoder_1
+            * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND)
+            * np.tau
+            * WHEEL_RADIUS
+        )
+        velocity_2 = (
+            encoder_2
+            * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND)
+            * np.tau
+            * WHEEL_RADIUS
+        )
 
         return velocity_1, velocity_2, ultrasonic_1, ultrasonic_2
 
