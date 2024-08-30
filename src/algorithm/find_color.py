@@ -40,9 +40,7 @@ def get_color_mask(
             cv2.inRange(x, color_range_list[1][0], color_range_list[1][1]),
         )
     else:
-        x = np.max(
-            np.stack([cv2.inRange(x, color_range[0], color_range[1]) for color_range in color_range_list]), 0
-        )
+        x = np.max(np.stack([cv2.inRange(x, color_range[0], color_range[1]) for color_range in color_range_list]), 0)
 
     # x = cv2.erode(x, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)), iterations=1)
     # x = cv2.dilate(x, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)), iterations=1)

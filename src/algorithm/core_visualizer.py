@@ -143,19 +143,11 @@ class Visualizer:
 
         draw_alpha.line(self.screen, WHITE, (MARGIN, MARGIN), (MARGIN + ROOM_SIZE[0], MARGIN), 2)
         draw_alpha.line(
-            self.screen,
-            WHITE,
-            (MARGIN, MARGIN + ROOM_SIZE[1]),
-            (MARGIN + ROOM_SIZE[0], MARGIN + ROOM_SIZE[1]),
-            2,
+            self.screen, WHITE, (MARGIN, MARGIN + ROOM_SIZE[1]), (MARGIN + ROOM_SIZE[0], MARGIN + ROOM_SIZE[1]), 2
         )
         draw_alpha.line(self.screen, WHITE, (MARGIN, MARGIN), (MARGIN, MARGIN + ROOM_SIZE[1]), 2)
         draw_alpha.line(
-            self.screen,
-            WHITE,
-            (MARGIN + ROOM_SIZE[0], MARGIN),
-            (MARGIN + ROOM_SIZE[0], MARGIN + ROOM_SIZE[1]),
-            2,
+            self.screen, WHITE, (MARGIN + ROOM_SIZE[0], MARGIN), (MARGIN + ROOM_SIZE[0], MARGIN + ROOM_SIZE[1]), 2
         )
 
         for item, v in self.core.predicted_items.items():
@@ -166,9 +158,7 @@ class Visualizer:
                 core.MERGE_RADIUS / UNIT / 2,
             )
             if v[2] > 0:
-                draw_alpha.circle(
-                    self.screen, (255, 255, 255, 128), real2window(item), core.MERGE_RADIUS / UNIT / 2
-                )
+                draw_alpha.circle(self.screen, (255, 255, 255, 128), real2window(item), core.MERGE_RADIUS / UNIT / 2)
 
         if self.core.camera_input is not None:
             self.walls = self.core.camera_input[3]
@@ -177,12 +167,8 @@ class Visualizer:
             draw_alpha.line(
                 self.screen,
                 (0, 128, 255, 128),
-                real2window(
-                    core.vec_add(self.core.predicted_cords, core.rotated(wall[0], self.core.predicted_angle))
-                ),
-                real2window(
-                    core.vec_add(self.core.predicted_cords, core.rotated(wall[1], self.core.predicted_angle))
-                ),
+                real2window(core.vec_add(self.core.predicted_cords, core.rotated(wall[0], self.core.predicted_angle))),
+                real2window(core.vec_add(self.core.predicted_cords, core.rotated(wall[1], self.core.predicted_angle))),
                 1,
             )
 

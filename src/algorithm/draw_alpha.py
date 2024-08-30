@@ -37,9 +37,7 @@ def line(surface: pygame.Surface, color: tuple, start_pos: tuple, end_pos: tuple
     target_rect = pygame.Rect(min_x, min_y, max_x - min_x, max_y - min_y).inflate((width, width))
     a, b = target_rect.x, target_rect.y
     shape_surf = pygame.Surface(target_rect.size, pygame.SRCALPHA)
-    pygame.draw.line(
-        shape_surf, color, (start_pos[0] - a, start_pos[1] - b), (end_pos[0] - a, end_pos[1] - b), width
-    )
+    pygame.draw.line(shape_surf, color, (start_pos[0] - a, start_pos[1] - b), (end_pos[0] - a, end_pos[1] - b), width)
     surface.blit(shape_surf, target_rect)
 
 

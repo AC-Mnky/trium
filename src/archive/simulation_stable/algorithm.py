@@ -74,9 +74,7 @@ class Algorithm:
         self.back_open_output = False
 
     def position_predictable(self) -> bool:
-        return (
-            self.predicted_angle is not None and self.predicted_x is not None and self.predicted_y is not None
-        )
+        return self.predicted_angle is not None and self.predicted_x is not None and self.predicted_y is not None
 
     def predicted_position(self) -> Vec2d:
         return Vec2d(self.predicted_x, self.predicted_y)
@@ -128,18 +126,10 @@ class Algorithm:
             if self.position_predictable():
                 for x in camera_input[0]:
                     pos = x.rotated(self.predicted_angle) + Vec2d(self.predicted_x, self.predicted_y)
-                    self.predicted_collectables[pos] = [
-                        self.predicted_collectables.get(pos, (0, 0))[0] + 2,
-                        0,
-                        0,
-                    ]
+                    self.predicted_collectables[pos] = [self.predicted_collectables.get(pos, (0, 0))[0] + 2, 0, 0]
                 for y in camera_input[1]:
                     pos = y.rotated(self.predicted_angle) + Vec2d(self.predicted_x, self.predicted_y)
-                    self.predicted_collectables[pos] = [
-                        self.predicted_collectables.get(pos, (0, 1))[0] + 3,
-                        1,
-                        0,
-                    ]
+                    self.predicted_collectables[pos] = [self.predicted_collectables.get(pos, (0, 1))[0] + 3, 1, 0]
 
                 merge_collectable_prediction(self.predicted_collectables)
 

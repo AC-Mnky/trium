@@ -22,17 +22,9 @@ class CameraState:
 
         self.ax = np.array(
             (
-                (
-                    np.cos(self.phi) * np.sin(self.theta),
-                    np.sin(self.phi) * np.sin(self.theta),
-                    np.cos(self.theta),
-                ),
+                (np.cos(self.phi) * np.sin(self.theta), np.sin(self.phi) * np.sin(self.theta), np.cos(self.theta)),
                 (-np.sin(self.phi), np.cos(self.phi), 0),
-                (
-                    -np.cos(self.phi) * np.cos(self.theta),
-                    -np.sin(self.phi) * np.cos(self.theta),
-                    np.sin(self.theta),
-                ),
+                (-np.cos(self.phi) * np.cos(self.theta), -np.sin(self.phi) * np.cos(self.theta), np.sin(self.theta)),
             )
         )
 
