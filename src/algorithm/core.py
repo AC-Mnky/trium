@@ -133,8 +133,8 @@ class Core:
         self.brush = False
         self.back_open = False
         self.motor_PID = [
-            [15, 10, 40, 10, 0, 10, 5, 0],
-            [15, 10, 40, 10, 0, 10, 5, 0],
+            [15, 10, 40, 1, 0, 10, 5, 0],
+            [15, 10, 40, 1, 0, 10, 5, 0],
         ].copy()
         self.stm_input = bytes((1,) * 96) if input_protocol == 128 else bytes((1,) * 13)
         self.unpacked_stm_input = None
