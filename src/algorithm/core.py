@@ -97,7 +97,7 @@ def calc_weight(
     """
     Calculate the weight based on the given parameters.
 
-    Parameters:
+    Args:
         cord_difference (float): The difference in coordinates.
         angle_difference (float): The difference in angles.
         distance_to_wall (float): The distance to the wall.
