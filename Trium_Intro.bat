@@ -120,7 +120,7 @@ goto choose_exit
 :test
 echo.
 echo Play Music!
-start %cd%\assets\music_test\10th_symphony_type-MOON.mp3
+start %cd%\assets\music\10th_symphony_type-MOON.mp3
 echo.
 pause
 goto choose_intro

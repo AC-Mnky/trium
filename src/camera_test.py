@@ -24,6 +24,7 @@ else:
 MODE = "camera", "file", "adjust"
 """
 MODE = "camera"
+
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
@@ -60,6 +61,7 @@ def process(img, show: bool = False):
     if show and DRAW_GRID:
         draw_grid(img, (255, 255, 255, 255), 300, 2000, 100, -500, 500, 100)
 
+    # switch to a new line
     print()
 
     for p in points_red:
