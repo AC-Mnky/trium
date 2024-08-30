@@ -17,8 +17,8 @@ class Camera:
     def get_image_bgr(self) -> cv2.UMat | None:
         if time.time() - self.start_time < START_WAIT_TIME:
             return None
-        #return cv2.cvtColor(self.cam.capture_array("main"), cv2.COLOR_RGB2BGR)
-        _ , frame = self.cam.read()
+        # return cv2.cvtColor(self.cam.capture_array("main"), cv2.COLOR_RGB2BGR)
+        _, frame = self.cam.read()
         # frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         return frame
 

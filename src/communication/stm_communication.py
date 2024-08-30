@@ -59,21 +59,13 @@ class STM:
                 if flag_match:
                     break
 
-            message = self.message_head + self.ser.read(
-                self.message_length - len(self.message_head)
-            )
+            message = self.message_head + self.ser.read(self.message_length - len(self.message_head))
 
             if self.protocol == 128:
                 ...  # TODO
             elif self.protocol == 127:
-                encoder = (
-                    unpack("<h", message[11:13])[0],
-                    unpack("<h", message[5:7])[0],
-                )
-                tick = (
-                    unpack("<I", message[7:11])[0],
-                    unpack("<I", message[1:5])[0],
-                )
+                encoder = (unpack("<h", message[11:13])[0], unpack("<h", message[5:7])[0])
+                tick = (unpack("<I", message[7:11])[0], unpack("<I", message[1:5])[0])
                 unpacked_message[0] += tick[0]
                 unpacked_message[1] += tick[1]
                 unpacked_message[2] += encoder[0]
@@ -113,18 +105,8 @@ class STM:
         if encoder_2 >= 2**15:
             encoder_2 -= 2**16
 
-        velocity_1 = (
-            encoder_1
-            * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND)
-            * np.tau
-            * WHEEL_RADIUS
-        )
-        velocity_2 = (
-            encoder_2
-            * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND)
-            * np.tau
-            * WHEEL_RADIUS
-        )
+        velocity_1 = encoder_1 * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND) * np.tau * WHEEL_RADIUS
+        velocity_2 = encoder_2 * (ENCODER_READ_FREQUENCY / ENCODER_PULSE_EACH_ROUND) * np.tau * WHEEL_RADIUS
 
         return velocity_1, velocity_2, ultrasonic_1, ultrasonic_2
 

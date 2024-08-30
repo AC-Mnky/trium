@@ -54,15 +54,11 @@ def process(img, show: bool = False):
         s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -12.5)
         if s:
             if show and SHOW_RED:
-                cv2.rectangle(
-                    img, (p[0] - 10, p[1] - 10, 20, 20), (255, 255, 255, 255), 2
-                )
+                cv2.rectangle(img, (p[0] - 10, p[1] - 10, 20, 20), (255, 255, 255, 255), 2)
             print((x, y), "red")
         else:
             if SHOW_RED:
-                cv2.rectangle(
-                    img, (p[0] - 10, p[1] - 10, 20, 20), (128, 128, 128, 255), 1
-                )
+                cv2.rectangle(img, (p[0] - 10, p[1] - 10, 20, 20), (128, 128, 128, 255), 1)
 
     for p in points_yellow:
         s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -15)
@@ -96,7 +92,7 @@ def process(img, show: bool = False):
 
     if show:
         cv2.imshow("image", img)
-        print('no shit')
+        print("no shit")
 
 
 def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
@@ -117,35 +113,19 @@ def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
 
     overlay = np.minimum(
         overlay,
-        np.repeat(
-            (255 - find_color.get_color_mask(img, [find_color.RED1]))[:, :, np.newaxis],
-            3,
-            axis=2,
-        ),
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.RED1]))[:, :, np.newaxis], 3, axis=2),
     )
     overlay = np.minimum(
         overlay,
-        np.repeat(
-            (255 - find_color.get_color_mask(img, [find_color.RED2]))[:, :, np.newaxis],
-            3,
-            axis=2,
-        ),
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.RED2]))[:, :, np.newaxis], 3, axis=2),
     )
     overlay = np.minimum(
         overlay,
-        np.repeat(
-            (255 - find_color.get_color_mask(img, [find_color.YELLOW]))[:, :, np.newaxis],
-            3,
-            axis=2,
-        ),
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.YELLOW]))[:, :, np.newaxis], 3, axis=2),
     )
     overlay = np.minimum(
         overlay,
-        np.repeat(
-            (255 - find_color.get_color_mask(img, [find_color.BLUE]))[:, :, np.newaxis],
-            3,
-            axis=2,
-        ),
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.BLUE]))[:, :, np.newaxis], 3, axis=2),
     )
 
     cv2.add(overlay, img, img)
@@ -156,14 +136,7 @@ if __name__ == "__main__":
     repository_path = os.path.dirname(os.path.realpath(__file__)) + "/.."
     if MODE == "file":
         for image_index in range(100):
-            filename = (
-                repository_path
-                + "/assets/openCV_pic/"
-                + READ_DIR
-                + "/"
-                + str(image_index)
-                + ".jpg"
-            )
+            filename = repository_path + "/assets/openCV_pic/" + READ_DIR + "/" + str(image_index) + ".jpg"
             if not os.path.isfile(filename):
                 print("cannot open " + filename)
                 continue
@@ -226,7 +199,7 @@ if __name__ == "__main__":
         target_dir = repository_path + "/assets/openCV_pic/" + WRITE_DIR + "/"
         if os.path.isdir(target_dir):
             if not FORCE_OVERWRITE:
-                print('Directory', target_dir, 'exists. Consider enabling FORCE_OVERWRITE.')
+                print("Directory", target_dir, "exists. Consider enabling FORCE_OVERWRITE.")
                 exit(0)
         else:
             os.mkdir(target_dir)
@@ -237,16 +210,12 @@ if __name__ == "__main__":
             time.sleep(max(time_last_capture + 0.5 - time.time(), 0))
             image = c.get_image_bgr()
             time_last_capture = time.time()
-            filename = (
-                target_dir
-                + str(image_index)
-                + ".jpg"
-            )
-            
+            filename = target_dir + str(image_index) + ".jpg"
+
             if image is not None:
                 cv2.imwrite(filename, image)
                 process(image, GLOBAL_SHOW)
-                
+
             else:
                 print("shit")
             cv2.waitKey(200)

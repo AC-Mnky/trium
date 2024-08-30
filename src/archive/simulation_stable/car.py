@@ -38,9 +38,7 @@ class Car:
 
     camera_capturing = False
 
-    def __init__(
-        self, room: Room, color, x, y, angle, camera_state: camera_convert.CameraState
-    ):
+    def __init__(self, room: Room, color, x, y, angle, camera_state: camera_convert.CameraState):
         self.room = room
 
         self.body = pymunk.Body(mass=self.mass, moment=self.moment)
@@ -54,27 +52,10 @@ class Car:
 
         self.shapes = [
             pymunk.Poly(
-                self.body,
-                [
-                    (-lc, -w0 / 2),
-                    (-lc, w0 / 2),
-                    (-lc + l - l0, w0 / 2),
-                    (-lc + l - l0, -w0 / 2),
-                ],
+                self.body, [(-lc, -w0 / 2), (-lc, w0 / 2), (-lc + l - l0, w0 / 2), (-lc + l - l0, -w0 / 2)]
             ),
-            pymunk.Poly(
-                self.body,
-                [(-lc, -w / 2), (-lc, -w0 / 2), (-lc + l, -w0 / 2), (-lc + l, -w / 2)],
-            ),
-            pymunk.Poly(
-                self.body,
-                [
-                    (-lc, w / 2),
-                    (-lc, w0 / 2),
-                    (-lc + l, w0 / 2),
-                    (-lc + l, w / 2),
-                ],
-            ),
+            pymunk.Poly(self.body, [(-lc, -w / 2), (-lc, -w0 / 2), (-lc + l, -w0 / 2), (-lc + l, -w / 2)]),
+            pymunk.Poly(self.body, [(-lc, w / 2), (-lc, w0 / 2), (-lc + l, w0 / 2), (-lc + l, w / 2)]),
         ]
 
         for s in self.shapes:
@@ -86,13 +67,7 @@ class Car:
         self.body.angle = angle
 
         self.brush = pymunk.Poly(
-            self.body,
-            [
-                (-lc + l - e, -w0 / 2),
-                (-lc + l - e, w0 / 2),
-                (-lc + l, w0 / 2),
-                (-lc + l, -w0 / 2),
-            ],
+            self.body, [(-lc + l - e, -w0 / 2), (-lc + l - e, w0 / 2), (-lc + l, w0 / 2), (-lc + l, -w0 / 2)]
         )
         self.brush.sensor = True
 
@@ -117,9 +92,7 @@ class Car:
                 cy3 + (cy3 - cy2) / np.sqrt((cx3 - cx2) ** 2 + (cy3 - cy2) ** 2) * 800,
             )
 
-        self.camera_range = pymunk.Poly(
-            self.body, [(cx1, cy1), (cx2, cy2), (cx3, cy3), (cx4, cy4)]
-        )
+        self.camera_range = pymunk.Poly(self.body, [(cx1, cy1), (cx2, cy2), (cx3, cy3), (cx4, cy4)])
 
         self.camera_range.color = (255, 255, 255, 32)
         self.camera_range.sensor = True
@@ -130,28 +103,16 @@ class Car:
         self.room.cars.append(self)
 
     def physics(self):
-        left_wheel_relative_velocity, right_wheel_relative_velocity = (
-            self.get_relative_velocity()
-        )
+        left_wheel_relative_velocity, right_wheel_relative_velocity = self.get_relative_velocity()
 
         self.body.apply_impulse_at_local_point(
-            (
-                self.left_wheel_force
-                - self.parallel_drag * left_wheel_relative_velocity[0]
-            )
-            * Vec2d(1, 0)
-            + (-self.perpendicular_drag * left_wheel_relative_velocity[1])
-            * Vec2d(0, 1),
+            (self.left_wheel_force - self.parallel_drag * left_wheel_relative_velocity[0]) * Vec2d(1, 0)
+            + (-self.perpendicular_drag * left_wheel_relative_velocity[1]) * Vec2d(0, 1),
             self.left_wheel,
         )
         self.body.apply_impulse_at_local_point(
-            (
-                self.right_wheel_force
-                - self.parallel_drag * right_wheel_relative_velocity[0]
-            )
-            * Vec2d(1, 0)
-            + (-self.perpendicular_drag * right_wheel_relative_velocity[1])
-            * Vec2d(0, 1),
+            (self.right_wheel_force - self.parallel_drag * right_wheel_relative_velocity[0]) * Vec2d(1, 0)
+            + (-self.perpendicular_drag * right_wheel_relative_velocity[1]) * Vec2d(0, 1),
             self.right_wheel,
         )
 
@@ -166,14 +127,9 @@ class Car:
                 self.body.apply_impulse_at_world_point(-force, x.body.position)
 
     def output(self, wheel_outputs: tuple[float, float], back_open: bool):
-        left_wheel_relative_velocity, right_wheel_relative_velocity = (
-            self.get_relative_velocity()
-        )
+        left_wheel_relative_velocity, right_wheel_relative_velocity = self.get_relative_velocity()
 
-        left_speed_diff = (
-            left_wheel_relative_velocity[0]
-            - self.left_wheel_max_speed * wheel_outputs[0]
-        )
+        left_speed_diff = left_wheel_relative_velocity[0] - self.left_wheel_max_speed * wheel_outputs[0]
         if left_speed_diff < -0.1 * self.left_wheel_max_speed:
             self.left_wheel_force = self.left_wheel_max_force
         elif left_speed_diff > 0.1 * self.left_wheel_max_speed:
@@ -181,10 +137,7 @@ class Car:
         else:
             self.left_wheel_force = 0
 
-        right_speed_diff = (
-            right_wheel_relative_velocity[0]
-            - self.right_wheel_max_speed * wheel_outputs[1]
-        )
+        right_speed_diff = right_wheel_relative_velocity[0] - self.right_wheel_max_speed * wheel_outputs[1]
         if right_speed_diff < -0.1 * self.right_wheel_max_speed:
             self.right_wheel_force = self.right_wheel_max_force
         elif right_speed_diff > 0.1 * self.right_wheel_max_speed:
@@ -197,9 +150,7 @@ class Car:
     def get_relative_velocity(self):
         return self.body.velocity.rotated(
             -self.body.angle
-        ) + self.body.angular_velocity * self.left_wheel.rotated_degrees(
-            90
-        ), self.body.velocity.rotated(
+        ) + self.body.angular_velocity * self.left_wheel.rotated_degrees(90), self.body.velocity.rotated(
             -self.body.angle
         ) + self.body.angular_velocity * self.right_wheel.rotated_degrees(
             90

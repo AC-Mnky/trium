@@ -19,24 +19,10 @@ class Room:
     def make_walls(self, wall_width, friction, elasticity):
         r = self.rect
         self.walls = [
-            pymunk.Segment(
-                self.space.static_body, (r.left, r.bottom), (r.left, r.top), wall_width
-            ),
-            pymunk.Segment(
-                self.space.static_body,
-                (r.right, r.top),
-                (r.right, r.bottom),
-                wall_width,
-            ),
-            pymunk.Segment(
-                self.space.static_body, (r.left, r.top), (r.right, r.top), wall_width
-            ),
-            pymunk.Segment(
-                self.space.static_body,
-                (r.left, r.bottom),
-                (r.right, r.bottom),
-                wall_width,
-            ),
+            pymunk.Segment(self.space.static_body, (r.left, r.bottom), (r.left, r.top), wall_width),
+            pymunk.Segment(self.space.static_body, (r.right, r.top), (r.right, r.bottom), wall_width),
+            pymunk.Segment(self.space.static_body, (r.left, r.top), (r.right, r.top), wall_width),
+            pymunk.Segment(self.space.static_body, (r.left, r.bottom), (r.right, r.bottom), wall_width),
         ]
         for wall in self.walls:
             wall.friction = friction
