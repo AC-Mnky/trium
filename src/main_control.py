@@ -41,7 +41,7 @@ DEBUG_RESET = False
 core.CORE_TIME_DEBUG = True  # False
 
 FORCE_STOP_MESSAGE = bytes(
-    (128, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0)
+    (128, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0)
 )
 
 def real_time() -> float:

@@ -51,7 +51,7 @@ GOOD_SEEN_WALL_LENGTH = 500
 
 MERGE_RADIUS = 75
 CONTACT_CENTER_TO_BACK = 100
-CONTACT_RADIUS = 40
+CONTACT_RADIUS = 80
 SEEN_ITEMS_DECAY_EXPONENTIAL = 0.5
 ALL_ITEMS_DECAY_EXPONENTIAL = 1
 DELETE_VALUE = 0.2
@@ -61,7 +61,7 @@ AIM_ANGLE = 0.4
 NO_AIM_ANGLE = 0.2
 ROOM_MARGIN = -1000000
 ANGLE_TYPICAL = 0.2
-LENGTH_TYPICAL = 0.0005
+LENGTH_TYPICAL = 0.002
 WALL_SLOW_MARGIN = 300
 
 MOTOR_SPEED = 0.5
@@ -314,15 +314,16 @@ class Core:
                     print("Core: Rotating right for", t)
                     yield
 
-                t = 0
-                while t < 15:
-                    t += self.dt
-                    self.motor = [-0.1, 0.1]
-                    print("Core: Rotating left for", t)
-                    yield
+            #     t = 0
+            #     while t < 15:
+            #         t += self.dt
+            #         self.motor = [-0.1, 0.1]
+            #         print('Core: Rotating left for', t)
+            #         yield
 
-            while get_length(vec_sub(self.predicted_cords, HOME)) < 50:
-                self.target_toward_cords(rotation_spot)
+
+            while get_length(vec_sub(self.predicted_cords, HOME)) > 50:
+                self.target_toward_cords(HOME)
                 yield
 
             while not -0.1 < angle_subtract(self.predicted_angle, HOME_ANGLE) < 0.1:
@@ -334,13 +335,13 @@ class Core:
                     yield
 
             t = 0
-            while t < 5:
+            while t < 2:
                 t += self.dt
                 self.motor = [-0.1, -0.1]
                 yield
 
             t = 0
-            while t < 2:
+            while t < 0.5:
                 t += self.dt
                 self.back_open = True
                 self.motor = [0.0, 0.0]
@@ -351,16 +352,17 @@ class Core:
                 t += self.dt
                 self.back_open = True
                 self.motor = [0.9, 0.9]
+                yield
 
             t = 0
-            while t < 2:
+            while t < 2.5:
                 t += self.dt
                 self.back_open = True
                 self.motor = [0.0, 0.0]
                 yield
 
             t = 0
-            while t < 2:
+            while t < 0.5:
                 t += self.dt
                 self.back_open = False
                 self.motor = [0.0, 0.0]
@@ -380,8 +382,11 @@ class Core:
         cords = self.absolute2relative(cords)
         length = get_length(cords)
         angle = get_angle(cords)
-        diff = -ANGLE_TYPICAL * angle
-        sum = LENGTH_TYPICAL * length * np.cos(np.clip(angle / 3, -np.pi / 2, np.pi / 2))
+        diff = ANGLE_TYPICAL * angle
+        print('diff:', diff)
+        sum = LENGTH_TYPICAL * length * \
+            np.cos(np.clip(angle / 4, -np.pi / 2, np.pi / 2)) * \
+            np.clip(self.distance_to_wall() / WALL_SLOW_MARGIN, 0, 1)
         self.set_motor_output(diff, sum)
         # if -50 < cords[0] < 300 and -30 < cords[1] < 30:
         #     self.motor = [0.5, 0.5]
@@ -416,10 +421,14 @@ class Core:
         #     self.motor = [-0.5, 0.5]
 
     def set_motor_output(self, diff: float, sum: float) -> None:
+        print(diff, sum)
         self.motor = [(sum + diff) / 2, (sum - diff) / 2]
-        k = np.minimum(np.abs(np.max(self.motor)) / 0.9, 1)
+
+        k = np.maximum(np.abs(np.max(self.motor)) / 0.9, 1)
+
         self.motor[0] /= k
         self.motor[1] /= k
+        print(self.motor)
 
     # Get realtime data from other modules
     def update(
@@ -454,7 +463,8 @@ class Core:
             self.unpacked_stm_input = unpacked_stm32_input
         if imu_input is not None:
             (self.imu_acceleration_g, self.imu_angular_speed_deg_s, self.imu_angle_deg) = imu_input
-            if self.imu_input is None:
+            if self.status_code == 1:
+                # print('reset start angle')
                 self.start_angle = np.radians(self.imu_angle_deg[2])
             self.imu_input = imu_input
         if camera_input is not None:
@@ -475,8 +485,9 @@ class Core:
         self.predicted_angle += self.dt * inferred_angular_speed
 
         if self.imu_input is not None:
+            # print(np.radians(self.imu_angle_deg[2]), 'yes')
             self.predicted_angle = INITIAL_ANGLE + self.start_angle - np.radians(self.imu_angle_deg[2])
-
+        # print(self.start_angle, 'no')
         # print(self.predicted_angle)
         # if self.imu_input is not None:
         #     print([np.radians(x) for x in self.imu_angle_deg], "yee")
@@ -589,46 +600,50 @@ class Core:
             self.predicted_items[item][2] = min(
                 self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
             )
-            cords = self.absolute2relative(item)
-            angle = get_angle(cords)
+            
+            self.target_toward_cords(item)
+            
+            # cords = self.absolute2relative(item)
+            # angle = get_angle(cords)
 
-            if -50 < cords[0] < 300 and -30 < cords[1] < 30:
-                self.motor = [0.5, 0.5]
-            elif get_length(cords) < 175:
-                self.predicted_items.pop(item)  # to close. who knows where the thing goes?
-                self.motor = [0, 0]
-            elif 0 < cords[0] and -30 < cords[1] < 30:
-                self.motor = [0.8, 0.8]
-            elif 0 < angle < 0.2:
-                if get_length(cords) > 300:
-                    self.motor = [0.5, 0.4]
-                else:
-                    self.motor = [0.2, 0.1]
-            elif -0.2 < angle < 0:
-                if get_length(cords) > 300:
-                    self.motor = [0.4, 0.5]
-                else:
-                    self.motor = [0.1, 0.2]
-            elif 0 < angle < 0.5:
-                if get_length(cords) > 300:
-                    self.motor = [0.6, 0.4]
-                else:
-                    self.motor = [0.1, -0.1]
-            elif -0.5 < angle < 0:
-                if get_length(cords) > 300:
-                    self.motor = [0.4, 0.6]
-                else:
-                    self.motor = [-0.1, 0.1]
-            elif 0 < angle:
-                if get_length(cords) > 300:
-                    self.motor = [0.3, -0.3]
-                else:
-                    self.motor = [0.3, -0.3]
-            elif angle < 0:
-                self.motor = [-0.3, 0.3]
+            # if -50 < cords[0] < 300 and -30 < cords[1] < 30:
+            #     self.motor = [0.5, 0.5]
+            # elif get_length(cords) < 175:
+            #     self.predicted_items.pop(item)  # to close. who knows where the thing goes?
+            #     self.motor = [0, 0]
+            # elif 0 < cords[0] and -30 < cords[1] < 30:
+            #     self.motor = [0.8, 0.8]
+            # elif 0 < angle < 0.2:
+            #     if get_length(cords) > 300:
+            #         self.motor = [0.5, 0.4]
+            #     else:
+            #         self.motor = [0.2, 0.1]
+            # elif -0.2 < angle < 0:
+            #     if get_length(cords) > 300:
+            #         self.motor = [0.4, 0.5]
+            #     else:
+            #         self.motor = [0.1, 0.2]
+            # elif 0 < angle < 0.5:
+            #     if get_length(cords) > 300:
+            #         self.motor = [0.6, 0.4]
+            #     else:
+            #         self.motor = [0.1, -0.1]
+            # elif -0.5 < angle < 0:
+            #     if get_length(cords) > 300:
+            #         self.motor = [0.4, 0.6]
+            #     else:
+            #         self.motor = [-0.1, 0.1]
+            # elif 0 < angle:
+            #     if get_length(cords) > 300:
+            #         self.motor = [0.3, -0.3]
+            #     else:
+            #         self.motor = [0.3, -0.3]
+            # elif angle < 0:
+            #     self.motor = [-0.3, 0.3]
+                
+        if(CORE_TIME_DEBUG):
+            print('Core: Action decided, used time:', next(self.time_tracker))
 
-        if CORE_TIME_DEBUG:
-            print("Core: Action decided, used time:", next(self.time_tracker))
 
             # if angle > AIM_ANGLE or angle > NO_AIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
             #     self.motor = [0.2, -0.2]

@@ -2,6 +2,7 @@ import time
 
 import serial
 
+DATA_LENGTH = 33
 
 class IMU:
     """
@@ -29,7 +30,10 @@ class IMU:
         Returns:
             tuple (tuple | None): A tuple containing the acceleration, angular velocity, and angle values.
         """
-        datahex = self.ser_imu.read(33)
+        while True:
+            datahex = self.ser_imu.read(DATA_LENGTH)
+            if self.ser_imu.inWaiting() < DATA_LENGTH:
+                break 
         return self._process_input_data(datahex)
 
     def _extract_acceleration(self, datahex: bytes) -> tuple[float, float, float]:
@@ -151,9 +155,9 @@ class IMU:
         frame_state = 0  # 通过0x后面的值判断属于哪一种情况
         byte_num = 0  # 读取到这一段的第几位
         check_sum = 0  # 求和校验位
-        acceleration = [0.0] * 3
-        angular_velocity = [0.0] * 3
-        angle = [0.0] * 3
+        acceleration = (0.0, ) * 3
+        angular_velocity = (0.0, ) * 3
+        angle = (0.0, ) * 3
 
         for data in inputdata:  # 在输入的数据进行遍历
             if frame_state == 0:  # 当未确定状态的时候，进入以下判断
@@ -226,6 +230,6 @@ if __name__ == "__main__":
     # Test the IMU class
     imu = IMU()
     st = time.time()
-    imu.get_imu_input()
+    print(imu.get_imu_input())
     ed = time.time()
     print("Time:", ed - st)
