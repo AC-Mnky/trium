@@ -17,7 +17,7 @@ class CameraState:
         resolution: tuple[int, int],
     ) -> None:
         """
-        Initializes the CameraState object.
+        Initialize the CameraState object.
 
         Args:
             camera_xyz (tuple[float, float, float]): The XYZ coordinates of the camera.
@@ -120,7 +120,7 @@ class CameraState:
 
 def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) -> tuple[bool, float, float]:
     """
-    Converts image coordinates to 3D space coordinates.
+    Convert image coordinates to 3D space coordinates.
 
     Args:
         camera_state (CameraState): The camera state object.
@@ -151,7 +151,7 @@ def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) ->
 
 def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> tuple[bool, int, int]:
     """
-    Converts 3D coordinates in space to image coordinates based on the camera state.
+    Convert 3D coordinates in space to image coordinates based on the camera state.
 
     Args:
         camera_state (CameraState): The state of the camera.

@@ -27,7 +27,19 @@ SHOW_LINE = True
 
 def get_color_mask(
     image: np.ndarray, color_range_list: list[np.ndarray], show: bool = False, color_name: str = "color"
-):
+) -> np.ndarray:
+    """
+    Generate a color mask for the given image based on the specified color range list.
+
+    Args:
+        image (np.ndarray): The input image.
+        color_range_list (list[np.ndarray]): A list of color ranges in the HSV color space.
+        show (bool, optional): Whether to display the color mask. Defaults to False.
+        color_name (str, optional): The name of the color. Defaults to "color".
+
+    Returns:
+        output (np.ndarray): The color mask.
+    """
     x = image
     # x = cv2.GaussianBlur(image, (3, 3), 0)
     x = cv2.cvtColor(x, cv2.COLOR_BGR2HSV)
@@ -57,6 +69,18 @@ def get_color_mask(
 def find_color(
     image: np.ndarray, color_range_list: list[np.ndarray], show: bool = False, color_name: str = "color"
 ) -> list[(int, int)]:
+    """
+    Find the coordinates of colored objects in an image.
+
+    Args:
+        image (np.ndarray): The input image.
+        color_range_list (list[np.ndarray]): A list of color ranges to search for in the image.
+        show (bool, optional): Whether to display intermediate images. Defaults to False.
+        color_name (str, optional): The name of the color being searched for. Defaults to "color".
+
+    Returns:
+        points (list[(int, int)]): A list of coordinates (x, y) of the colored objects found in the image.
+    """
     output = get_color_mask(image, color_range_list, show, color_name)
 
     contours = cv2.findContours(output, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
@@ -80,7 +104,7 @@ def find_red(image: np.ndarray, show: bool = False) -> list[(int, int)]:
         show (bool, optional): Whether to display the image with red pixels highlighted. Default is False.
 
     Returns:
-        list (list[(int, int)]): A list of coordinates (row, column) of red pixels in the image.
+        points (list[(int, int)]): A list of coordinates (row, column) of red pixels in the image.
     """
     return find_color(image, [RED1, RED2], show, "red")
 
@@ -94,7 +118,7 @@ def find_yellow(image: np.ndarray, show: bool = False) -> list[(int, int)]:
         show (bool, optional): Whether to display the image with yellow pixels highlighted. Default is False.
 
     Returns:
-        list (list[(int, int)]): A list of coordinates (row, column) of yellow pixels in the image.
+        points (list[(int, int)]): A list of coordinates (row, column) of yellow pixels in the image.
     """
     return find_color(image, [YELLOW], show, "yellow")
 
@@ -126,6 +150,16 @@ def show_white(image: np.ndarray) -> None:
 
 
 def find_wall_bottom(image: np.ndarray, show: bool = False):
+    """
+    Find the bottom of the given walls in an image, cv2.HoughLines() version.
+
+    Args:
+        image (np.ndarray): The input image.
+        show (bool, optional): Whether to display intermediate images. Defaults to False.
+
+    Returns:
+        lines: The detected lines using Hough transform.
+    """
     blue = get_color_mask(image, [BLUE])
     white = get_color_mask(image, [WHITE])
 
@@ -165,6 +199,16 @@ def find_wall_bottom(image: np.ndarray, show: bool = False):
 
 
 def find_wall_bottom_p(image: np.ndarray, show: bool = False):
+    """
+    Find the bottom of wall lines in an image, cv2.HoughLinesP() version.
+
+    Args:
+        image (np.ndarray): The input image.
+        show (bool, optional): Whether to display intermediate images. Defaults to False.
+
+    Returns:
+        lines: A list of line coordinates (x1, y1, x2, y2) if lines are found, None otherwise.
+    """
     blue = get_color_mask(image, [BLUE])
     white = get_color_mask(image, [WHITE])
 
