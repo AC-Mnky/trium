@@ -1,4 +1,3 @@
-import math
 from struct import unpack
 
 import pygame
