@@ -1,6 +1,6 @@
 # Main Program of STM32F103VET6
 
-> [!INFO]
+> [!TIP]
 > This is the main program of STM32F103VET6 written in C language and compiled using STM32CubeIDE.
 
 ## File Structure
