@@ -4,8 +4,8 @@
 #include "PID.h"
 
 const uint8_t Encoder_Pulse_Every_round = 44; // ppr = 11, four times frequency
-//const int32_t Motor_Reduction_Ration = 20; // 20.4 actually
-const uint8_t Motor_Max_Velocity = 90; //RPS, before velocity decrease
+// const int32_t Motor_Reduction_Ration = 20; // 20.4 actually
+const uint8_t Motor_Max_Velocity = 90; // RPS, before velocity decrease
 const uint8_t PWM_Period = 100;
 // const int32_t Encoder_Read_freq = 500; //s^-1
 const int32_t real_tick_freq = 72000000;
