@@ -75,6 +75,15 @@ CAMERA_MARGIN_V = 30  # 60
 
 
 def time_since_last_call(mul: int = 1000):
+    """
+    Calculates the time elapsed since the last function call using a generator.
+
+    Args:
+        mul (int, optional): Multiplier for the elapsed time. Defaults to 1000.
+
+    Yields:
+        int: The elapsed time multiplied by the multiplier.
+    """
     last_call = 0
     while True:
         temp = time.time() - last_call
@@ -85,6 +94,18 @@ def time_since_last_call(mul: int = 1000):
 def calc_weight(
     cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
 ) -> float:
+    """
+    Calculate the weight based on the given parameters.
+
+    Parameters:
+        cord_difference (float): The difference in coordinates.
+        angle_difference (float): The difference in angles.
+        distance_to_wall (float): The distance to the wall.
+        seen_wall_length (float): The length of the wall seen.
+
+    Returns:
+        wright (float): The calculated weight.
+    """
     weight = 0.1
     if np.abs(cord_difference) > MAX_CORD_DIFFERENCE:
         return 0
@@ -99,6 +120,16 @@ def calc_weight(
 
 # k = key, v = value
 def merge_item_prediction(dictionary) -> None:
+    """
+    Merge items in the given dictionary based on certain conditions.
+
+    Args:
+        dictionary (dict): The dictionary containing items to be merged.
+
+    Returns:
+        None
+    """
+    # Rest of the code...
     while True:
         substitution = None
 
