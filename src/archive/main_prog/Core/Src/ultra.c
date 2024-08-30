@@ -16,19 +16,20 @@ void TIM7_Delay_us(uint16_t n_us) {
 
 uint8_t get_distance_single(int num) {
 	int CSB_value = 0;
-	GPIO_TypeDef * trig_port = GPIOD;
-	GPIO_TypeDef * echo_port = GPIOD;
-	uint16_t trig_pin = (num==1) ? Trig_L_Pin : Trig_R_Pin;
-	uint16_t echo_pin = (num==1) ? Echo_L_Pin : Echo_R_Pin;
-//	if (num == 1)
-//	{
-	if(ultra_debug_print) HAL_UART_Transmit(&huart1, (uint8_t*)"before trigger", 14, 100);
+	GPIO_TypeDef *trig_port = GPIOD;
+	GPIO_TypeDef *echo_port = GPIOD;
+	uint16_t trig_pin = (num == 1) ? Trig_L_Pin : Trig_R_Pin;
+	uint16_t echo_pin = (num == 1) ? Echo_L_Pin : Echo_R_Pin;
+
+	if (ultra_debug_print)
+		HAL_UART_Transmit(&huart1, (uint8_t*) "before trigger", 14, 100);
 
 	HAL_GPIO_WritePin(trig_port, trig_pin, GPIO_PIN_SET);
 	TIM7_Delay_us(15);
 	HAL_GPIO_WritePin(trig_port, trig_pin, GPIO_PIN_RESET);
 
-	if(ultra_debug_print) HAL_UART_Transmit(&huart1, (uint8_t*)"after trigger", 13, 100);
+	if (ultra_debug_print)
+		HAL_UART_Transmit(&huart1, (uint8_t*) "after trigger", 13, 100);
 
 	__HAL_TIM_ENABLE(&htim7);
 
@@ -39,10 +40,12 @@ uint8_t get_distance_single(int num) {
 			__HAL_TIM_DISABLE(&htim7);
 			return 127;
 		};
-		if(ultra_debug_print) HAL_UART_Transmit(&huart1, (uint8_t*)"wait1", 5, 100);
+		if (ultra_debug_print)
+			HAL_UART_Transmit(&huart1, (uint8_t*) "wait1", 5, 100);
 	};
 
-	if(ultra_debug_print) HAL_UART_Transmit(&huart1, (uint8_t*)"between", 7, 100);
+	if (ultra_debug_print)
+		HAL_UART_Transmit(&huart1, (uint8_t*) "between", 7, 100);
 
 	//接收完全后不再为高电平，即当接收引脚变成低电平后，停止计时，获取计数时间
 	__HAL_TIM_SetCounter(&htim7, 0);
@@ -51,7 +54,8 @@ uint8_t get_distance_single(int num) {
 			__HAL_TIM_DISABLE(&htim7);
 			return 127;
 		}
-		if(ultra_debug_print) HAL_UART_Transmit(&huart1, (uint8_t*)"wait2", 5, 100);
+		if (ultra_debug_print)
+			HAL_UART_Transmit(&huart1, (uint8_t*) "wait2", 5, 100);
 	}
 
 	CSB_value = __HAL_TIM_GetCounter(&htim7);
@@ -89,14 +93,12 @@ void get_distance(uint8_t *distance) {
 	//等待两侧接收引脚变成高电平，某边变高就开始记时
 	while (check_1 == 0 || check_2 == 0) {
 
-		if (HAL_GPIO_ReadPin(Echo_L_GPIO_Port, Echo_L_Pin) == 1
-				&& Past_turn_L == 0) {
+		if (HAL_GPIO_ReadPin(Echo_L_GPIO_Port, Echo_L_Pin) == 1 && Past_turn_L == 0) {
 			start_time_L = __HAL_TIM_GetCounter(&htim7);
 			check_1 = 1;
 		}
 
-		if (HAL_GPIO_ReadPin(Echo_R_GPIO_Port, Echo_R_Pin) == 1
-				&& Past_turn_R == 0) {
+		if (HAL_GPIO_ReadPin(Echo_R_GPIO_Port, Echo_R_Pin) == 1 && Past_turn_R == 0) {
 			start_time_R = __HAL_TIM_GetCounter(&htim7);
 			check_2 = 1;
 		}
@@ -122,14 +124,12 @@ void get_distance(uint8_t *distance) {
 	//接收完全后不再为高电平，即当接收引脚变成低电平后，停止计时，获取计数时间
 	while (check_3 == 0 && check_4 == 0) {
 
-		if (HAL_GPIO_ReadPin(Echo_L_GPIO_Port, Echo_L_Pin) == 0
-				&& Past_turn_L_2 == 1) {
+		if (HAL_GPIO_ReadPin(Echo_L_GPIO_Port, Echo_L_Pin) == 0 && Past_turn_L_2 == 1) {
 			end_time_L = __HAL_TIM_GetCounter(&htim7);
 			check_3 = 1;
 		}
 
-		if (HAL_GPIO_ReadPin(Echo_R_GPIO_Port, Echo_R_Pin) == 0
-				&& Past_turn_R_2 == 1) {
+		if (HAL_GPIO_ReadPin(Echo_R_GPIO_Port, Echo_R_Pin) == 0 && Past_turn_R_2 == 1) {
 			end_time_R = __HAL_TIM_GetCounter(&htim7);
 			check_4 = 1;
 		}
