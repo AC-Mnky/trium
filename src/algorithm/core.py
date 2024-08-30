@@ -17,6 +17,7 @@ except ModuleNotFoundError:
     import vision
 
 ENABLE_INFER_POSITION_FROM_WALLS = True  # True
+CORE_TIME_DEBUG = False
 
 
 
@@ -26,7 +27,7 @@ PWM_PERIOD = 100
 DISTANCE_PER_ENCODER = 33 * np.tau / 44 / 20.4
 WIDTH = 154
 LENGTH = 205
-CM_TO_CAR_BACK = 87  # center of mass to car back
+CM_TO_CAR_BACK = 98  # 87  # center of mass to car back
 WIDTH_WITH_WHEELS = 208
 # hole_width = 68
 WHEEL_X_OFFSET = -CM_TO_CAR_BACK + 98
@@ -306,13 +307,13 @@ class Core:
                     yield
 
                 t = 0
-                while t < 10:
+                while t < 5:
                     t += dt
                     self.motor = [0.3, -0.3]
                     yield
 
                 t = 0
-                while t < 30:
+                while t < 15:
                     t += dt
                     self.motor = [-0.1, 0.1]
                     yield
