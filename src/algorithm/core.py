@@ -75,6 +75,15 @@ CAMERA_MARGIN_V = 30  # 60
 
 
 def time_since_last_call(mul: int = 1000):
+    """
+    Calculates the time elapsed since the last function call using a generator.
+
+    Args:
+        mul (int, optional): Multiplier for the elapsed time. Defaults to 1000.
+
+    Yields:
+        int: The elapsed time multiplied by the multiplier.
+    """
     last_call = 0
     while True:
         temp = time.time() - last_call
@@ -83,8 +92,23 @@ def time_since_last_call(mul: int = 1000):
 
 
 def calc_weight(
-    cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
+    cord_difference: float,
+    angle_difference: float,
+    distance_to_wall: float,
+    seen_wall_length: float,
 ) -> float:
+    """
+    Calculate the weight based on the given parameters.
+
+    Parameters:
+        cord_difference (float): The difference in coordinates.
+        angle_difference (float): The difference in angles.
+        distance_to_wall (float): The distance to the wall.
+        seen_wall_length (float): The length of the wall seen.
+
+    Returns:
+        wright (float): The calculated weight.
+    """
     weight = 0.1
     if np.abs(cord_difference) > MAX_CORD_DIFFERENCE:
         return 0
@@ -99,6 +123,16 @@ def calc_weight(
 
 # k = key, v = value
 def merge_item_prediction(dictionary) -> None:
+    """
+    Merge items in the given dictionary based on certain conditions.
+
+    Args:
+        dictionary (dict): The dictionary containing items to be merged.
+
+    Returns:
+        None
+    """
+    # Rest of the code...
     while True:
         substitution = None
 
@@ -200,11 +234,13 @@ class Core:
     def infer_velocity(self) -> tuple[float, tuple[float, float]]:
         """
         infer current relative movement from encoder.
-        "inferred_angular_speed" = speed of rotating around the center of the car
-        "inferred_relative_velocity" = speed of the center of the car
 
-        paras have to be modified: WHEEL_X_OFFSET
-        angular_speed can use data from imu directly
+        - "inferred_angular_speed" = speed of rotating around the center of the car
+        - "inferred_relative_velocity" = speed of the center of the car
+
+        TODO:
+        - paras have to be modified: WHEEL_X_OFFSET
+        - angular_speed can use data from imu directly
         """
 
         if self.unpacked_stm_input is not None:
@@ -212,10 +248,19 @@ class Core:
             tick = self.unpacked_stm_input[0:2]
         else:
             if self.protocol == 128:
-                encoder = (unpack("<h", self.stm_input[68:70])[0], unpack("<h", self.stm_input[36:38])[0])
-                tick = (unpack("<I", self.stm_input[64:68])[0], unpack("<I", self.stm_input[32:36])[0])
+                encoder = (
+                    unpack("<h", self.stm_input[68:70])[0],
+                    unpack("<h", self.stm_input[36:38])[0],
+                )
+                tick = (
+                    unpack("<I", self.stm_input[64:68])[0],
+                    unpack("<I", self.stm_input[32:36])[0],
+                )
             else:
-                encoder = (unpack("<h", self.stm_input[11:13])[0], unpack("<h", self.stm_input[5:7])[0])
+                encoder = (
+                    unpack("<h", self.stm_input[11:13])[0],
+                    unpack("<h", self.stm_input[5:7])[0],
+                )
                 tick = (unpack("<I", self.stm_input[7:11])[0], unpack("<I", self.stm_input[1:5])[0])
         try:
             wheel_speed = (
@@ -298,7 +343,17 @@ class Core:
         self.start_angle += angle_diff_average
 
     def act_when_there_is_no_item(self):
+        """
+        Perform a series of actions when there is no item present.
 
+        - This method executes a sequence of actions to be performed when there is no item present.
+        - It includes rotating towards specific coordinates, rotating left and right for a certain duration,
+        returning home, rotating at home until a specific angle is reached, backing up, opening a door,
+        dumping items, waiting for items to drop, and closing the door.
+
+        Yields:
+            None: This method is a generator and yields None at each step.
+        """
         while True:
 
             current_cords = self.predicted_cords
@@ -382,6 +437,12 @@ class Core:
                 yield
 
     def distance_to_wall(self) -> float:
+        """
+        Calculates the minimum distance from the current position to the nearest wall in the room.
+
+        Returns:
+            distance (float): The minimum distance to the nearest wall.
+        """
         return np.min(
             (
                 self.predicted_cords[0],
@@ -392,15 +453,31 @@ class Core:
         )
 
     def distance_before_crashing_into_wall(self) -> float:
+        """
+        Calculates the distance before the object crashes into a wall.
+
+        Returns:
+            distance (float): The minimum distance before crashing into a wall.
+        """
         cos = np.cos(self.predicted_angle)
         sin = np.sin(self.predicted_angle)
         crash_left = np.inf if cos >= 0 else self.predicted_cords[0] / (-cos)
         crash_top = np.inf if sin >= 0 else self.predicted_cords[1] / (-sin)
         crash_right = np.inf if cos <= 0 else (ROOM_X - self.predicted_cords[0]) / cos
         crash_bottom = np.inf if cos >= 0 else (ROOM_Y - self.predicted_cords[1]) / sin
+
         return np.min((crash_left, crash_top, crash_right, crash_bottom))
 
     def target_toward_cords(self, cords: tuple[float, float]) -> None:
+        """
+        Sets the target coordinates for the vision system and calculates the motor output.
+
+        Args:
+            cords (tuple[float, float]): The target coordinates in absolute units.
+
+        Returns:
+            None
+        """
         self.vision_target_cords = cords
         cords = self.absolute2relative(cords)
         length = get_length(cords)
@@ -411,11 +488,22 @@ class Core:
         self.set_motor_output(diff, summ)
 
     def set_motor_output(self, diff: float, summ: float) -> None:
+        """
+        Sets the motor output based on the difference and sum of inputs.
+
+        Args:
+            diff (float): The difference input.
+            summ (float): The sum input.
+
+        Returns:
+            None
+        """
         diff = np.clip(diff, -0.9, 0.9)
         summ = np.clip(summ, -0.9 - diff, 0.9 - diff)
         summ = np.clip(summ, -0.9 + diff, 0.9 + diff)
         max_summ = np.clip(
-            np.sqrt(self.distance_to_wall() * self.distance_before_crashing_into_wall()) / WALL_SLOW_MARGIN,
+            np.sqrt(self.distance_to_wall() * self.distance_before_crashing_into_wall())
+            / WALL_SLOW_MARGIN,
             0.1,
             0.9,
         )
@@ -437,7 +525,10 @@ class Core:
         stm32_input: bytes,
         unpacked_stm32_input: list[int],
         imu_input: (
-            tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None
+            tuple[
+                tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]
+            ]
+            | None
         ),
         camera_input: (
             tuple[
@@ -449,7 +540,21 @@ class Core:
             | None
         ),
     ) -> None:
+        """
+        Updates the state of the algorithm based on the input data.
 
+        Args:
+            time (float): The current time.
+            stm32_input (bytes): The input from the STM32 device.
+            unpacked_stm32_input (list): The unpacked input from the STM32 device.
+            imu_input (tuple | None):
+                The input from the IMU device, containing acceleration, angular speed, and angle.
+            camera_input (tuple | None):
+                The input from the camera device, containing time, red blocks, yellow blocks, and wall coordinates.
+
+        Returns:
+            None
+        """
         if CORE_TIME_DEBUG:
             next(self.time_tracker)
         # calculate the time interval between two updates
@@ -486,7 +591,9 @@ class Core:
 
         if self.imu_input is not None:
             # print(np.radians(self.imu_angle_deg[2]), 'yes')
-            self.predicted_angle = INITIAL_ANGLE + self.start_angle - np.radians(self.imu_angle_deg[2])
+            self.predicted_angle = (
+                INITIAL_ANGLE + self.start_angle - np.radians(self.imu_angle_deg[2])
+            )
         # print(self.start_angle, 'no')
         # print(self.predicted_angle)
         # if self.imu_input is not None:
@@ -511,7 +618,13 @@ class Core:
             (3, (vision.CAMERA_STATE.res_h, 0)),
             (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
             (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+            (
+                6,
+                (
+                    vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H,
+                    vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V,
+                ),
+            ),
             (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
         ):
             self.predicted_camera_vertices[i] = self.relative2absolute(
@@ -524,8 +637,8 @@ class Core:
         # analyze camera input
         if camera_input is not None:
             """
-            "camera_reds", "camera_yellows" are cords of red blocks and yellow blocks
-            "camera_walls" are pairs of cords of the walls' end points
+            "camera_reds", "camera_yellows" are cords of red blocks and yellow blocks.
+            "camera_walls" are pairs of cords of the walls' end points.
             """
             camera_time, camera_reds, camera_yellows, camera_walls = camera_input
 
@@ -563,7 +676,10 @@ class Core:
             for item, v in self.predicted_items.items():
                 relative_cords = self.absolute2relative(item)
                 _, i, j = camera_convert.space2img(
-                    vision.CAMERA_STATE, relative_cords[0], relative_cords[1], -12.5 if v[1] == RED else -15
+                    vision.CAMERA_STATE,
+                    relative_cords[0],
+                    relative_cords[1],
+                    -12.5 if v[1] == RED else -15,
                 )
                 if (
                     0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H
@@ -817,4 +933,15 @@ def rotated(vec: tuple[float, float], angle_radians: float) -> tuple[float, floa
 
 
 def get_str(vec: tuple[float, float]) -> str:
+    """
+    Converts a tuple of floats into a string representation.
+
+    Args:
+        vec (tuple[float, float]): The input tuple containing two float values.
+
+    Returns:
+        str (string):
+            The string representation of the input tuple, with each float value converted
+            to an integer and separated by a comma.
+    """
     return str(int(vec[0])) + ", " + str(int(vec[1]))
