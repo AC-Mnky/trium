@@ -4,12 +4,25 @@ import time
 import cv2
 import numpy as np
 
-from algorithm import camera_convert, find_color, vision
 from communication.camera import Camera
 
-MODE = "file"
+try:
+    from algorithm import camera_convert, find_color, vision
+except ModuleNotFoundError:
+    import os
+    import sys
+
+    work_path = os.getcwd()
+    print(work_path)
+    sys.path.append(f"{work_path}/../algorithm")
+    from algorithm import camera_convert, find_color, vision
+
+else:
+    ...
+
+# MODE = "file"
 # MODE = 'adjust'
-# MODE = 'camera'
+MODE = 'camera'
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True

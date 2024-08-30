@@ -158,6 +158,7 @@ class Core:
         self.walls: list[tuple[tuple[float, float], tuple[float, float]]] = []
 
         self.action_no_item = self.act_when_there_is_no_item(0)
+        next(self.action_no_item)
 
         # !There is no reset function. When you want to reset the _core, just create a new object.
 
@@ -277,7 +278,9 @@ class Core:
         self.predicted_angle += angle_diff_average
         self.start_angle += angle_diff_average
 
-    def act_when_there_is_no_item(self, dt):
+    def act_when_there_is_no_item(self, dt: float):
+        yield
+        
         while True:
 
             current_cords = self.predicted_cords
@@ -529,6 +532,7 @@ class Core:
             self.action_no_item.send(dt)
         else:
             self.action_no_item = self.act_when_there_is_no_item(0)
+            next(self.action_no_item)
 
             self.predicted_items[item][2] = min(
                 self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
