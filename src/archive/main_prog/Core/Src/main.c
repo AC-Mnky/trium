@@ -319,7 +319,7 @@ int main(void) {
 			PID_obj_2.integral = 0;
 		}
 
-		// debug message of pid control
+		// debug message of pid integral zeroing
 		if (debug_print) {
 			HAL_UART_Transmit(&huart1, (uint8_t*) "pid integral set\n", 17, 400);
 		}
@@ -347,7 +347,7 @@ int main(void) {
 		__HAL_TIM_SET_COUNTER(&htim6, 0);
 
 		if (debug_print) {
-			HAL_UART_Transmit(&huart1, (uint8_t*) "timer ended\n", 12, 600);
+			HAL_UART_Transmit(&huart1, (uint8_t*) "timer ended\n", 12, 400);
 		}
 
 		// use blink to test whether the loop is conducted properly
