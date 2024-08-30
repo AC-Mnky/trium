@@ -20,8 +20,9 @@ except ModuleNotFoundError:
 else:
     ...
 
-# MODE = "file"
-# MODE = 'adjust'
+"""
+MODE = "camera", "file", "adjust"
+"""
 MODE = "camera"
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
@@ -45,9 +46,6 @@ SHOW_WALL = True
 DRAW_GRID = True
 
 USE_HOUGH_P = True
-
-# if MODE == "camera":
-#     # from camera_ori import Camera
 
 
 def process(img, show: bool = False):
