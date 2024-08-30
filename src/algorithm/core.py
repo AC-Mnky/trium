@@ -40,7 +40,7 @@ INITIAL_CORD_X = 100
 INITIAL_CORD_Y = 150
 INITIAL_ANGLE = 0
 
-HOME = (500, 200)
+HOME = (400, ROOM_Y - 200)
 HOME_ANGLE = 0
 
 MAX_CORD_DIFFERENCE = 1000
@@ -394,14 +394,10 @@ class Core:
     def distance_before_crashing_into_wall(self) -> float:
         cos = np.cos(self.predicted_angle)
         sin = np.sin(self.predicted_angle)
-        crash_left = np.inf if np.cos(self.predicted_cords) >= 0 else \
-            self.predicted_cords[0] / (-np.cos(self.predicted_cords))
-        crash_top = np.inf if np.sin(self.predicted_cords) >= 0 else \
-            self.predicted_cords[1] / (-np.sin(self.predicted_cords))
-        crash_right = np.inf if np.cos(self.predicted_cords) <= 0 else \
-            (ROOM_X - self.predicted_cords[0]) / np.cos(self.predicted_cords)
-        crash_bottom = np.inf if np.cos(self.predicted_cords) >= 0 else \
-            (ROOM_Y - self.predicted_cords[1]) / np.sin(self.predicted_cords)
+        crash_left = np.inf if cos >= 0 else self.predicted_cords[0] / (-cos)
+        crash_top = np.inf if sin >= 0 else self.predicted_cords[1] / (-sin)
+        crash_right = np.inf if cos <= 0 else (ROOM_X - self.predicted_cords[0]) / cos
+        crash_bottom = np.inf if cos >= 0 else (ROOM_Y - self.predicted_cords[1]) / sin
         return np.min((crash_left, crash_top, crash_right, crash_bottom))
 
     def target_toward_cords(self, cords: tuple[float, float]) -> None:
