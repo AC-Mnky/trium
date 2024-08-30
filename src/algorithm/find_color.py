@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 
-RED1 = np.array(((0, 100, 50), (10, 255, 255)))
-RED2 = np.array(((165, 100, 50), (180, 255, 255)))
+RED1 = np.array(((0, 75, 50), (10, 255, 255)))
+RED2 = np.array(((165, 75, 50), (180, 255, 255)))
 
 YELLOW = np.array(((10, 100, 50), (35, 255, 255)))
 

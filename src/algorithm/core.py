@@ -2,10 +2,9 @@ from struct import unpack
 
 import numpy as np
 
-from algorithm import vision
-
 try:
     import camera_convert
+    import vision
 
 except ModuleNotFoundError:
     import os
@@ -14,6 +13,7 @@ except ModuleNotFoundError:
     work_path = os.getcwd()
     sys.path.append(f"{work_path}/algorithm")
     import camera_convert
+    import vision
 
 ENABLE_INFER_POSITION_FROM_WALLS = True  # True
 
@@ -52,7 +52,7 @@ DELETE_VALUE = 0.2
 INTEREST_ADDITION = 5
 INTEREST_MAXIMUM = 30
 AIM_ANGLE = 0.4
-UNAIM_ANGLE = 0.2
+NO_AIM_ANGLE = 0.2
 ROOM_MARGIN = -1000000
 
 MOTOR_SPEED = 0.5
@@ -155,15 +155,10 @@ class Core:
             [(0.0, 0.0), (0.0, 0.0)],
             [(0.0, 0.0), (0.0, 0.0)],
         ].copy()
-        self.predicted_camera_vertices = (
-            [
-                (0.0, 0.0),
-            ]
-            * 8
-        ).copy()
+        self.predicted_camera_vertices = ([(0.0, 0.0), ] * 8).copy()
         self.contact_center = (0, 0)
         """
-        Keys are the items' coords. 
+        Keys are the items' cords. 
         First element of the list is the decay term,  
         second is the tag to identify red/yellow blocks
         third is the interest of an item
@@ -230,7 +225,8 @@ class Core:
         print(inferred_angular_speed)
         # if self.imu_input is not None:
         #     ass = self.imu_angular_speed_deg_s
-        #     inferred_angular_speed = np.radians(np.sqrt(ass[0] ** 2 + ass[1] ** 2 + ass[2] ** 2)) * (1 if ass[2] > 0 else -1)
+        #     inferred_angular_speed =
+        #     np.radians(np.sqrt(ass[0] ** 2 + ass[1] ** 2 + ass[2] ** 2)) * (1 if ass[2] > 0 else -1)
         #     print(inferred_angular_speed)
 
         inferred_relative_velocity = (
@@ -244,7 +240,7 @@ class Core:
         Infers the position of an object based on the walls in the environment.
 
         This method modifies the predicted position of the car by analyzing the walls in the environment.
-        It uses the distances and angles between thecar and the walls to modify predictions.
+        It uses the distances and angles between the car and the walls to modify predictions.
 
         Returns:
             None
@@ -368,31 +364,25 @@ class Core:
             for j in 0, 1:
                 self.predicted_vertices[i][j] = self.relative2absolute((i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH))
 
-        for i, camera_point in (
-            (0, (0, 0)),
-            (1, (0, vision.CAMERA_STATE.res_v)),
-            (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
-            (3, (vision.CAMERA_STATE.res_h, 0)),
-            (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
-            (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (
-                6,
-                (
-                    vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H,
-                    vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V,
-                ),
-            ),
-            (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
-        ):
+        for i, camera_point in ((0, (0, 0)),
+                                (1, (0, vision.CAMERA_STATE.res_v)),
+                                (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
+                                (3, (vision.CAMERA_STATE.res_h, 0)),
+                                (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                                (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                                (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H,
+                                     vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                                (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                                ):
             self.predicted_camera_vertices[i] = self.relative2absolute(
-                camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3]
-            )
+
+                camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3])
 
         # analyze camera input
         if camera_input is not None:
             """
-            "camera_reds", "camera_yellows" are coords of red blocks and yellow blocks
-            "camera_walls" are pairs of coords of the walls' end points
+            "camera_reds", "camera_yellows" are cords of red blocks and yellow blocks
+            "camera_walls" are pairs of cords of the walls' end points
             """
             camera_time, camera_reds, camera_yellows, camera_walls = camera_input
 
@@ -423,16 +413,10 @@ class Core:
             # decay seen items
             for item, v in self.predicted_items.items():
                 relative_cords = self.absolute2relative(item)
-                _, i, j = camera_convert.space2img(
-                    vision.CAMERA_STATE,
-                    relative_cords[0],
-                    relative_cords[1],
-                    -12.5 if v[1] == RED else -15,
-                )
-                if (
-                    0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H
-                    and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V
-                ):
+                _, i, j = camera_convert.space2img(vision.CAMERA_STATE, relative_cords[0], relative_cords[1],
+                                                -12.5 if v[1] == RED else -15)
+                if 0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H \
+                        and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V:
                     v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
 
         # decay all items and delete items with low value
@@ -453,28 +437,45 @@ class Core:
             self.predicted_items[item][2] = min(self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM)
             cords = self.absolute2relative(item)
             item_angle = angle_subtract(get_angle(cords), 0)
-
-            if cords[0] > -50 and -30 < cords[1] < 30:
+            
+            if -50 < cords[0] < 300 and -30 < cords[1] < 30:
                 self.motor = [0.5, 0.5]
-            elif get_length(cords) < 150:
+            elif get_length(cords) < 175:
                 self.predicted_items.pop(item)  # to close. who knows where the thing goes?
                 self.motor = [0, 0]
+            elif 0 < cords[0] and -30 < cords[1] < 30:
+                self.motor = [0.8, 0.8]
             elif 0 < item_angle < 0.2:
-                self.motor = [0.5, 0.2]
+                if get_length(cords) > 300:
+                    self.motor = [0.6, 0.4]
+                else:
+                    self.motor = [0.2, 0.0]    
             elif -0.2 < item_angle < 0:
-                self.motor = [0.2, 0.5]
-            elif 0 < item_angle < 1:
-                self.motor = [0.2, 0]
-            elif -1 < item_angle < 0:
-                self.motor = [0, 0.2]
+                if get_length(cords) > 300:
+                    self.motor = [0.4, 0.6]
+                else:
+                    self.motor = [0.0, 0.2] 
+            elif 0 < item_angle < 0.5:
+                if get_length(cords) > 300:
+                    self.motor = [0.6, 0.4]
+                else:
+                    self.motor = [0, -0.2]    
+            elif -0.5 < item_angle < 0:
+                if get_length(cords) > 300:
+                    self.motor = [0.4, 0.6]
+                else:
+                    self.motor = [-0.2, 0]
             elif 0 < item_angle:
-                self.motor = [0.5, -0.5]
+                if get_length(cords) > 300:
+                    self.motor = [0.5, -0.5]
+                else:
+                    self.motor = [0.5, -0.5]    
             elif item_angle < 0:
                 self.motor = [-0.5, 0.5]
 
-            # if item_angle > AIM_ANGLE or item_angle > UNAIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
+            # if item_angle > AIM_ANGLE or item_angle > NO_AIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
             #     self.motor = [0.2, -0.2]
-            # elif item_angle < -AIM_ANGLE or item_angle < -UNAIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
+            # elif item_angle < -AIM_ANGLE or item_angle < -NO_AIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
             #     self.motor = [-0.2, 0.2]
             # else:
             #     self.motor = [0.5, 0.5]
