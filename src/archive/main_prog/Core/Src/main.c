@@ -96,7 +96,7 @@ int main(void) {
 
 	/* USER CODE BEGIN 1 */
 	const uint8_t transmit_protocol = 127;
-	const int32_t urgent_count_init = 1;
+	const uint8_t urgent_count_init = 1;
 	const uint8_t max_attempt = 30;
 	/* USER CODE END 1 */
 
@@ -154,7 +154,7 @@ int main(void) {
 //	const uint32_t dangerous_distance = 20;
 //	uint8_t distance[2];
 	uint8_t urgent_flag = 0;
-	int32_t urgent_count = urgent_count_init;
+	uint8_t urgent_count = urgent_count_init;
 
 	// initialization
 	motor_init();
