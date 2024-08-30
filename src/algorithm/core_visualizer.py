@@ -41,7 +41,7 @@ class Visualizer:
         self.mouse_pos = 0
 
         self.core = _core
-        
+
         self.brush = False
         self.back_open = False
 
@@ -119,11 +119,8 @@ class Visualizer:
             elif keys[pygame.K_RIGHT]:
                 self.core.motor = [1, -1]
 
-            self.core.motor = [
-                self.core.motor[0] * SPEED_CONTROL,
-                self.core.motor[1] * SPEED_CONTROL,
-            ]
-            
+            self.core.motor = [self.core.motor[0] * SPEED_CONTROL, self.core.motor[1] * SPEED_CONTROL]
+
             self.core.brush = self.brush
             self.core.back_open = self.back_open
 
@@ -144,9 +141,7 @@ class Visualizer:
         """
         self.screen.fill(BACK)
 
-        draw_alpha.line(
-            self.screen, WHITE, (MARGIN, MARGIN), (MARGIN + ROOM_SIZE[0], MARGIN), 2
-        )
+        draw_alpha.line(self.screen, WHITE, (MARGIN, MARGIN), (MARGIN + ROOM_SIZE[0], MARGIN), 2)
         draw_alpha.line(
             self.screen,
             WHITE,
@@ -154,9 +149,7 @@ class Visualizer:
             (MARGIN + ROOM_SIZE[0], MARGIN + ROOM_SIZE[1]),
             2,
         )
-        draw_alpha.line(
-            self.screen, WHITE, (MARGIN, MARGIN), (MARGIN, MARGIN + ROOM_SIZE[1]), 2
-        )
+        draw_alpha.line(self.screen, WHITE, (MARGIN, MARGIN), (MARGIN, MARGIN + ROOM_SIZE[1]), 2)
         draw_alpha.line(
             self.screen,
             WHITE,
@@ -174,10 +167,7 @@ class Visualizer:
             )
             if v[2] > 0:
                 draw_alpha.circle(
-                    self.screen,
-                    (255, 255, 255, 128),
-                    real2window(item),
-                    core.MERGE_RADIUS / UNIT / 2,
+                    self.screen, (255, 255, 255, 128), real2window(item), core.MERGE_RADIUS / UNIT / 2
                 )
 
         if self.core.camera_input is not None:
@@ -192,40 +182,26 @@ class Visualizer:
         draw_alpha.polygon(
             self.screen,
             CAR,
-            [
-                real2window(v)
-                for v in self.core.predicted_vertices[0]
-                + self.core.predicted_vertices[1][::-1]
-            ],
+            [real2window(v) for v in self.core.predicted_vertices[0] + self.core.predicted_vertices[1][::-1]],
         )
-        
+
         camera_color = CAMERA if self.core.camera_has_input else CAMERA_SHOT
         draw_alpha.polygon(
-            self.screen,
-            camera_color,
-            [
-                real2window(v)
-                for v in self.core.predicted_camera_vertices[0:4]
-            ],
+            self.screen, camera_color, [real2window(v) for v in self.core.predicted_camera_vertices[0:4]]
         )
         draw_alpha.polygon(
-            self.screen,
-            camera_color,
-            [
-                real2window(v)
-                for v in self.core.predicted_camera_vertices[4:8]
-            ],
+            self.screen, camera_color, [real2window(v) for v in self.core.predicted_camera_vertices[4:8]]
         )
         draw_alpha.circle(self.screen, WHITE, real2window(self.core.predicted_cords), 2)
         draw_alpha.circle(
             self.screen, (0, 0, 255, 64), real2window(self.core.contact_center), core.CONTACT_RADIUS / UNIT
         )
-        
+
         self.core.get_output()
-        
-        text = self.font.render(self.core.output.hex(' '), True, WHITE)
+
+        text = self.font.render(self.core.output.hex(" "), True, WHITE)
         self.screen.blit(text, (0, 0))
-        text = self.font.render(self.core.stm_input.hex(' '), True, WHITE)
+        text = self.font.render(self.core.stm_input.hex(" "), True, WHITE)
         self.screen.blit(text, (0, 20))
 
         pygame.display.flip()
