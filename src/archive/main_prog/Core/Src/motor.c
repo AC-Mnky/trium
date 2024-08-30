@@ -67,7 +67,7 @@ void set_motor_speed(int num, int pulse) {
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
 		}
 	} else {
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET); // Show errors}
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET); // Show errors
 	}
 }
 
@@ -96,8 +96,13 @@ uint16_t get_encoder_CNT(int num, uint32_t *out_real_tick_elapsed) {
 	return iTimEncoder;
 }
 
+/* @brief Get the direction of the encoder
+ * @param num: 1, 2, 3 (notion of motor)
+ * @retval direction_flag (int): 1 (down), 0 (up)
+ * @note This function is never used (?)
+ * */
 uint8_t get_encoder_direction(int num) {
-	uint16_t iTimEncoder = 0;
+	uint8_t direction_flag = 0;
 	if (num == 1) {
 		iTimEncoder = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim5) ? 1 : 0;
 	} else if (num == 2) {
@@ -107,7 +112,7 @@ uint8_t get_encoder_direction(int num) {
 	} else {
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET); // Show errors
 	}
-	return iTimEncoder;
+	return direction_flag;
 }
 
 // Period = 2000, 20ms, pulse width = 0.5 ~ 2.5 ms
