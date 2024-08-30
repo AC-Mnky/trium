@@ -62,6 +62,7 @@ AIM_ANGLE = 0.4
 NO_AIM_ANGLE = 0.2
 ROOM_MARGIN = -1000000
 ANGLE_TYPICAL = 0.2
+ANGLE_STANDARD_DEVIATION = 0.1
 LENGTH_TYPICAL = 0.002
 WALL_SLOW_MARGIN = 300
 
@@ -374,55 +375,26 @@ class Core:
         return np.min((self.predicted_cords[0], self.predicted_cords[1],
                        ROOM_X - self.predicted_cords[0], ROOM_Y - self.predicted_cords[1]))
     
-    def target_toward_cords(self, cords: tuple[int, int]) -> None:
+    def target_toward_cords(self, cords: tuple[float, float]) -> None:
         cords = self.absolute2relative(cords)
         length = get_length(cords)
         angle = get_angle(cords)
         diff = ANGLE_TYPICAL * angle
         print('diff:', diff)
         sum = LENGTH_TYPICAL * length * \
-            np.cos(np.clip(angle / 4, -np.pi / 2, np.pi / 2)) * \
-            np.clip(self.distance_to_wall() / WALL_SLOW_MARGIN, 0, 1)
+            np.exp(- (angle / ANGLE_STANDARD_DEVIATION) ** 2 / 2)
         self.set_motor_output(diff, sum)
-        # if -50 < cords[0] < 300 and -30 < cords[1] < 30:
-        #     self.motor = [0.5, 0.5]
-        # elif 0 < cords[0] and -30 < cords[1] < 30:
-        #     self.motor = [0.8, 0.8]
-        # elif 0 < angle < 0.2:
-        #     if get_length(cords) > 300:
-        #         self.motor = [0.6, 0.4]
-        #     else:
-        #         self.motor = [0.2, 0.0]
-        # elif -0.2 < angle < 0:
-        #     if get_length(cords) > 300:
-        #         self.motor = [0.4, 0.6]
-        #     else:
-        #         self.motor = [0.0, 0.2]
-        # elif 0 < angle < 0.5:
-        #     if get_length(cords) > 300:
-        #         self.motor = [0.6, 0.4]
-        #     else:
-        #         self.motor = [0, -0.2]
-        # elif -0.5 < angle < 0:
-        #     if get_length(cords) > 300:
-        #         self.motor = [0.4, 0.6]
-        #     else:
-        #         self.motor = [-0.2, 0]
-        # elif 0 < angle:
-        #     if get_length(cords) > 300:
-        #         self.motor = [0.5, -0.5]
-        #     else:
-        #         self.motor = [0.5, -0.5]
-        # elif angle < 0:
-        #     self.motor = [-0.5, 0.5]
 
     def set_motor_output(self, diff: float, sum: float) -> None:
-        print(diff, sum)
+        # print(diff, sum)
         self.motor = [(sum + diff) / 2, (sum - diff) / 2]
-        k = np.maximum(np.abs(np.max(self.motor)) / 0.9, 1)
-        self.motor[0] /= k
-        self.motor[1] /= k
-        print(self.motor)
+
+        self.motor[0] = np.clip(self.motor[0], -0.9, 0.9)
+
+        # k = np.maximum(np.abs(np.max(self.motor)) / 0.9, 1)
+        # self.motor[0] /= k
+        # self.motor[1] /= k
+        # print(self.motor)
 
     # Get realtime data from other modules
     def update(
@@ -596,46 +568,8 @@ class Core:
             )
             
             self.target_toward_cords(item)
-            
-            # cords = self.absolute2relative(item)
-            # angle = get_angle(cords)
-
-            # if -50 < cords[0] < 300 and -30 < cords[1] < 30:
-            #     self.motor = [0.5, 0.5]
-            # elif get_length(cords) < 175:
-            #     self.predicted_items.pop(item)  # to close. who knows where the thing goes?
-            #     self.motor = [0, 0]
-            # elif 0 < cords[0] and -30 < cords[1] < 30:
-            #     self.motor = [0.8, 0.8]
-            # elif 0 < angle < 0.2:
-            #     if get_length(cords) > 300:
-            #         self.motor = [0.5, 0.4]
-            #     else:
-            #         self.motor = [0.2, 0.1]
-            # elif -0.2 < angle < 0:
-            #     if get_length(cords) > 300:
-            #         self.motor = [0.4, 0.5]
-            #     else:
-            #         self.motor = [0.1, 0.2]
-            # elif 0 < angle < 0.5:
-            #     if get_length(cords) > 300:
-            #         self.motor = [0.6, 0.4]
-            #     else:
-            #         self.motor = [0.1, -0.1]
-            # elif -0.5 < angle < 0:
-            #     if get_length(cords) > 300:
-            #         self.motor = [0.4, 0.6]
-            #     else:
-            #         self.motor = [-0.1, 0.1]
-            # elif 0 < angle:
-            #     if get_length(cords) > 300:
-            #         self.motor = [0.3, -0.3]
-            #     else:
-            #         self.motor = [0.3, -0.3]
-            # elif angle < 0:
-            #     self.motor = [-0.3, 0.3]
                 
-        if(CORE_TIME_DEBUG):
+        if CORE_TIME_DEBUG:
             print('Core: Action decided, used time:', next(self.time_tracker))
 
             # if angle > AIM_ANGLE or angle > NO_AIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
