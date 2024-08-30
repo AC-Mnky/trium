@@ -50,7 +50,7 @@ def real_time() -> float:
     return time.time() - start_time
 
 
-def time_since_last_call(mul: int = 1000, start_time = time.time()):
+def time_since_last_call(mul: int = 1000, start_time: int = 0):
     last_call = start_time
     while True:
         temp = time.time() - last_call
