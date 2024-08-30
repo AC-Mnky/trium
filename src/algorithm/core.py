@@ -480,7 +480,7 @@ class Core:
 
     def target_toward_cords(self, cords: tuple[float, float]) -> None:
         """
-        Sets the target coordinates for the vision system and calculates the motor output.
+        Set the target coordinates for the vision system and calculates the motor output.
 
         Args:
             cords (tuple[float, float]): The target coordinates in absolute units.
@@ -499,7 +499,7 @@ class Core:
 
     def set_motor_output(self, diff: float, summ: float) -> None:
         """
-        Sets the motor output based on the difference and sum of inputs.
+        Set the motor output based on the difference and sum of inputs.
 
         Args:
             diff (float): The difference input.
@@ -528,7 +528,6 @@ class Core:
         # self.motor[1] /= k
         # print(self.motor)
 
-    # Get realtime data from other modules
     def update(
         self,
         time: float,
@@ -551,16 +550,16 @@ class Core:
         ),
     ) -> None:
         """
-        Updates the state of the algorithm based on the input data.
+        Get realtime data from other modules, thus updating the state of the algorithm.
 
         Args:
             time (float): The current time.
-            stm32_input (bytes): The input from the STM32 device.
-            unpacked_stm32_input (list): The unpacked input from the STM32 device.
+            stm32_input (bytes): The input from STM32.
+            unpacked_stm32_input (list): The unpacked input from STM32.
             imu_input (tuple | None):
-                The input from the IMU device, containing acceleration, angular speed, and angle.
+                The input from the IMU, containing acceleration, angular speed, and angle.
             camera_input (tuple | None):
-                The input from the camera device, containing time, red blocks, yellow blocks, and wall coordinates.
+                The input from the camera, containing time, red blocks, yellow blocks, and wall coordinates.
 
         Returns:
             None
