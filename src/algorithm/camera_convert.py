@@ -129,7 +129,7 @@ def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) ->
         target_z (float, optional): The target z-coordinate. Defaults to 0.
 
     Returns:
-        tuple (tuple[bool, float, float]): A tuple containing the following:
+        tuple (tuple[bool, float, float]): A tuple containing the following.
             - on_the_ground (bool): True if the point is on the ground, False otherwise.
             - x (float): The x-coordinate in 3D space.
             - y (float): The y-coordinate in 3D space.
@@ -160,7 +160,7 @@ def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> tu
         z (float, optional): The z-coordinate in space. Defaults to 0.
 
     Returns:
-        tuple (tuple[bool, int, int]): A tuple containing the following:
+        tuple (tuple[bool, int, int]): A tuple containing the following.
             - can_be_seen (bool): True if the point can be seen in the camera's view.
             - i (int(i)): The corresponding image x-coordinates (forced cast to int).
             - j (int(j)): The corresponding image j-coordinates (forced cast to int).

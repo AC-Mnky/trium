@@ -11,8 +11,10 @@ class IMU:
 
     def __init__(self):
         """
-        Initializes the IMU class with the port and baud rate.
-        Current IMU retrieval rate: 200Hz.
+        Initialize the IMU class with the port and baud rate.
+        
+        Notes:
+        - Current IMU retrieval rate: 200Hz.
         """
         # self.port = "COM6"  # PC
         self.port = "/dev/ttyAMA5"  # Pi 4B -> UART5
@@ -25,7 +27,7 @@ class IMU:
         self,
     ) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None:
         """
-        Reads IMU data from a serial port.
+        Read IMU data from a serial port.
 
         Returns:
             tuple (tuple | None): A tuple containing the acceleration, angular velocity, and angle values.
@@ -38,7 +40,7 @@ class IMU:
 
     def _extract_acceleration(self, datahex: bytes) -> tuple[float, float, float]:
         """
-        Calculates the acceleration values from the given hexadecimal data.
+        Calculate the acceleration values from the given hexadecimal data.
 
         Args:
             datahex (bytes): The input data in hexadecimal format.
@@ -70,7 +72,7 @@ class IMU:
 
     def _extract_angular_velocity(self, datahex: bytes) -> tuple[float, float, float]:
         """
-        Calculates the angular velocity from the given hexadecimal data.
+        Calculate the angular velocity from the given hexadecimal data.
 
         Args:
             datahex (bytes): The input data in hexadecimal format.
@@ -102,7 +104,7 @@ class IMU:
 
     def _extract_angle(self, datahex: bytes) -> tuple[float, float, float]:
         """
-        Calculates the angles from the given hexadecimal data.
+        Calculate the angles from the given hexadecimal data.
 
         Args:
             datahex (bytes): The input data in hexadecimal format.
