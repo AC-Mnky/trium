@@ -18,6 +18,8 @@ class IMU:
         self.port = "/dev/ttyAMA5"  # Pi 4B -> UART5
         self.baud = 115200
         self.ser_imu = serial.Serial(self.port, self.baud, timeout=0.5)
+        if not self.ser_imu.is_open:
+            self.ser_imu.open()
 
     def get_imu_input(
         self,
