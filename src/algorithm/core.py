@@ -1,6 +1,7 @@
 from struct import unpack
 
 import numpy as np
+import time
 
 try:
     import camera_convert
@@ -16,6 +17,8 @@ except ModuleNotFoundError:
     import vision
 
 ENABLE_INFER_POSITION_FROM_WALLS = True  # True
+
+CORE_TIME_DEBUG = True  # False
 
 np.tau = 2 * np.pi
 
@@ -67,6 +70,13 @@ CAMERA_MARGIN_H = 40  # 80
 CAMERA_MARGIN_V = 30  # 60
 
 
+def time_since_last_call(mul: int = 1000):
+    last_call = 0
+    while True:
+        temp = time.time() - last_call
+        last_call += temp
+        yield int(mul * temp)
+        
 def calc_weight(
     cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
 ) -> float:
@@ -159,6 +169,8 @@ class Core:
 
         self.action_no_item = self.act_when_there_is_no_item(0)
         next(self.action_no_item)
+        self.time_tracker = time_since_last_call()
+        next(self.time_tracker)
 
         # !There is no reset function. When you want to reset the _core, just create a new object.
 

@@ -21,8 +21,8 @@ else:
     ...
 
 # MODE = "file"
-# MODE = 'adjust'
-MODE = 'camera'
+MODE = 'adjust'
+# MODE = 'camera'
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
