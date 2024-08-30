@@ -76,7 +76,7 @@ CAMERA_MARGIN_V = 30  # 60
 
 def time_since_last_call(mul: int = 1000):
     """
-    Calculates the time elapsed since the last function call using a generator.
+    Calculate the time elapsed since the last function call using a generator.
 
     Args:
         mul (int, optional): Multiplier for the elapsed time. Defaults to 1000.
@@ -197,10 +197,12 @@ class Core:
         self.contact_center = (0, 0)
 
         """
-        Keys are the items' cords. 
-        First element of the list is the decay term,  
-        second is the tag to identify red/yellow blocks
-        third is the interest of an item
+        Description:
+            Keys are the items' cords.
+
+            - First element of the list is the decay term.
+            - Second is the tag to identify red/yellow blocks.
+            - Third is the interest of an item.
         """
         self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
 
@@ -217,10 +219,10 @@ class Core:
 
     def get_closest_item(self) -> tuple[float, float] | None:
         """
-        Finds the closest item to the predicted coordinates.
+        Find the closest item to the predicted coordinates.
 
         Returns:
-            tuple (tuple[float, float] | None): The coordinates of the closest item, or None if no items are found.
+            closet (tuple[float, float] | None): The coordinates of the closest item, or None if no items are found.
         """
         closest = None
         closest_distance = np.inf
@@ -233,7 +235,7 @@ class Core:
 
     def infer_velocity(self) -> tuple[float, tuple[float, float]]:
         """
-        infer current relative movement from encoder.
+        Infer current relative movement from encoder.
 
         - "inferred_angular_speed" = speed of rotating around the center of the car
         - "inferred_relative_velocity" = speed of the center of the car
@@ -285,10 +287,11 @@ class Core:
 
     def infer_position_from_walls(self) -> None:
         """
-        Infers the position of an object based on the walls in the environment.
+        Infer the position of an object based on the walls in the environment.
 
-        This method modifies the predicted position of the car by analyzing the walls in the environment.
-        It uses the distances and angles between the car and the walls to modify predictions.
+        - This method modifies the predicted position of the car by analyzing the walls in the environment.
+        - It uses the distances and angles between the car and the walls to modify predictions.
+        - Voting is used as main algorithm.
 
         Returns:
             None
