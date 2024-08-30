@@ -32,6 +32,7 @@ class STM:
             
         for i in range(10):
             
+            # read messages until it gets the correct message_head
             while True:
                 flag_match = True
                 for b in self.message_head:
@@ -41,6 +42,7 @@ class STM:
                 if flag_match:
                     break
 
+            # reproduce the message
             message = self.message_head + self.ser.read(
                 self.message_length - len(self.message_head)
             )
