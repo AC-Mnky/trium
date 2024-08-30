@@ -350,7 +350,7 @@ class Core:
         Perform a series of actions when there is no item captured.
 
         - This method executes a sequence of actions to be performed when there is no item in sight.
-        - It includes the following actions:
+        - It includes the following actions ordered in time sequence:
             - rotating towards specific coordinates
             - rotating left and right for a certain duration
             - returning home
@@ -448,7 +448,7 @@ class Core:
 
     def distance_to_wall(self) -> float:
         """
-        Calculates the minimum distance from the current position to the nearest wall in the room.
+        Calculate the minimum distance from the current position to the nearest wall in the area.
 
         Returns:
             distance (float): The minimum distance to the nearest wall.
@@ -464,7 +464,7 @@ class Core:
 
     def distance_before_crashing_into_wall(self) -> float:
         """
-        Calculates the distance before the object crashes into a wall.
+        Calculate the distance before the car crashes into a wall.
 
         Returns:
             distance (float): The minimum distance before crashing into a wall.
