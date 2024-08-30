@@ -76,7 +76,7 @@ CAMERA_MARGIN_V = 30  # 60
 
 def time_since_last_call(mul: int = 1000):
     """
-    Calculates the time elapsed since the last function call using a generator.
+    Calculate the time elapsed since the last function call using a generator.
 
     Args:
         mul (int, optional): Multiplier for the elapsed time. Defaults to 1000.
@@ -107,7 +107,7 @@ def calc_weight(
         seen_wall_length (float): The length of the wall seen.
 
     Returns:
-        wright (float): The calculated weight.
+        weight (float): The calculated weight.
     """
     weight = 0.1
     if np.abs(cord_difference) > MAX_CORD_DIFFERENCE:
@@ -197,10 +197,12 @@ class Core:
         self.contact_center = (0, 0)
 
         """
-        Keys are the items' cords. 
-        First element of the list is the decay term,  
-        second is the tag to identify red/yellow blocks
-        third is the interest of an item
+        Description:
+            Keys are the items' cords.
+
+            - First element of the list is the decay term.
+            - Second is the tag to identify red/yellow blocks.
+            - Third is the interest of an item.
         """
         self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
 
@@ -217,10 +219,10 @@ class Core:
 
     def get_closest_item(self) -> tuple[float, float] | None:
         """
-        Finds the closest item to the predicted coordinates.
+        Find the closest item to the predicted coordinates.
 
         Returns:
-            tuple (tuple[float, float] | None): The coordinates of the closest item, or None if no items are found.
+            closet (tuple[float, float] | None): The coordinates of the closest item, or None if no items are found.
         """
         closest = None
         closest_distance = np.inf
@@ -233,7 +235,7 @@ class Core:
 
     def infer_velocity(self) -> tuple[float, tuple[float, float]]:
         """
-        infer current relative movement from encoder.
+        Infer current relative movement from encoder.
 
         - "inferred_angular_speed" = speed of rotating around the center of the car
         - "inferred_relative_velocity" = speed of the center of the car
@@ -285,10 +287,11 @@ class Core:
 
     def infer_position_from_walls(self) -> None:
         """
-        Infers the position of an object based on the walls in the environment.
+        Infer the position of an object based on the walls in the environment.
 
-        This method modifies the predicted position of the car by analyzing the walls in the environment.
-        It uses the distances and angles between the car and the walls to modify predictions.
+        - This method modifies the predicted position of the car by analyzing the walls in the environment.
+        - It uses the distances and angles between the car and the walls to modify predictions.
+        - Voting is used as main algorithm.
 
         Returns:
             None
@@ -344,12 +347,19 @@ class Core:
 
     def act_when_there_is_no_item(self):
         """
-        Perform a series of actions when there is no item present.
+        Perform a series of actions when there is no item captured.
 
-        - This method executes a sequence of actions to be performed when there is no item present.
-        - It includes rotating towards specific coordinates, rotating left and right for a certain duration,
-        returning home, rotating at home until a specific angle is reached, backing up, opening a door,
-        dumping items, waiting for items to drop, and closing the door.
+        - This method executes a sequence of actions to be performed when there is no item in sight.
+        - It includes the following actions ordered in time sequence:
+            - rotating towards specific coordinates
+            - rotating left and right for a certain duration
+            - returning home
+            - rotating at home until a specific angle is reached
+            - backing up
+            - opening a door
+            - dumping items
+            - waiting for items to drop
+            - closing the door
 
         Yields:
             None: This method is a generator and yields None at each step.
@@ -438,7 +448,7 @@ class Core:
 
     def distance_to_wall(self) -> float:
         """
-        Calculates the minimum distance from the current position to the nearest wall in the room.
+        Calculate the minimum distance from the current position to the nearest wall in the area.
 
         Returns:
             distance (float): The minimum distance to the nearest wall.
@@ -454,7 +464,7 @@ class Core:
 
     def distance_before_crashing_into_wall(self) -> float:
         """
-        Calculates the distance before the object crashes into a wall.
+        Calculate the distance before the car crashes into a wall.
 
         Returns:
             distance (float): The minimum distance before crashing into a wall.
@@ -470,7 +480,7 @@ class Core:
 
     def target_toward_cords(self, cords: tuple[float, float]) -> None:
         """
-        Sets the target coordinates for the vision system and calculates the motor output.
+        Set the target coordinates for the vision system and calculates the motor output.
 
         Args:
             cords (tuple[float, float]): The target coordinates in absolute units.
@@ -489,7 +499,7 @@ class Core:
 
     def set_motor_output(self, diff: float, summ: float) -> None:
         """
-        Sets the motor output based on the difference and sum of inputs.
+        Set the motor output based on the difference and sum of inputs.
 
         Args:
             diff (float): The difference input.
@@ -518,7 +528,6 @@ class Core:
         # self.motor[1] /= k
         # print(self.motor)
 
-    # Get realtime data from other modules
     def update(
         self,
         time: float,
@@ -541,16 +550,16 @@ class Core:
         ),
     ) -> None:
         """
-        Updates the state of the algorithm based on the input data.
+        Get realtime data from other modules, thus updating the state of the algorithm.
 
         Args:
             time (float): The current time.
-            stm32_input (bytes): The input from the STM32 device.
-            unpacked_stm32_input (list): The unpacked input from the STM32 device.
+            stm32_input (bytes): The input from STM32.
+            unpacked_stm32_input (list): The unpacked input from STM32.
             imu_input (tuple | None):
-                The input from the IMU device, containing acceleration, angular speed, and angle.
+                The input from the IMU, containing acceleration, angular speed, and angle.
             camera_input (tuple | None):
-                The input from the camera device, containing time, red blocks, yellow blocks, and wall coordinates.
+                The input from the camera, containing time, red blocks, yellow blocks, and wall coordinates.
 
         Returns:
             None
@@ -742,10 +751,10 @@ class Core:
 
     def get_output(self) -> bytes:
         """
-        Returns the message to be sent to STM32 as a bytes object.
+        Return the message to be sent to STM32 as a bytes object.
 
         Returns:
-            bytes: The output as a bytes object.
+            output (bytes): The output as a bytes object.
         """
         output = (
             [
@@ -772,7 +781,7 @@ class Core:
 
     def absolute2relative(self, vec: tuple[float, float]) -> tuple[float, float]:
         """
-        Converts an absolute vector to a relative vector based on the predicted coordinates and angle.
+        Convert an absolute vector to a relative vector based on the predicted coordinates and angle.
 
         Args:
             vec (tuple[float, float]): The absolute vector to be converted.
@@ -784,7 +793,7 @@ class Core:
 
     def relative2absolute(self, vec: tuple[float, float]) -> tuple[float, float]:
         """
-        Converts a relative vector to an absolute vector based on the predicted angle and coordinates.
+        Convert a relative vector to an absolute vector based on the predicted angle and coordinates.
 
         Args:
             vec (tuple[float, float]): The relative vector to be converted.
@@ -797,7 +806,7 @@ class Core:
 
 def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> float:
     """
-    Calculate the distance between two points in a two-dimensional space.
+    Calculate the distance between two points in a 2D-space.
 
     Args:
         point1 (tuple[float, float]): The coordinates of the first point.
@@ -811,10 +820,10 @@ def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> fl
 
 def get_length(vec: tuple[float, float]) -> float:
     """
-    Calculate the length of a 2D vector.
+    Calculate the length of a 2D-vector.
 
     Args:
-        vec (tuple[float, float]): The 2D vector represented as a tuple of floats.
+        vec (tuple[float, float]): The 2D-vector represented as a tuple of floats.
 
     Returns:
         length (float): The length of the vector.
@@ -839,7 +848,7 @@ def get_angle(vec: tuple[float, float]) -> float:
 
 def vec_add(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
     """
-    Adds two vectors together.
+    Add two vectors together.
 
     Args:
         vec1 (tuple[float, float]): The first vector.
@@ -881,7 +890,7 @@ def vec_mul(vec: tuple[float, float], k: float) -> tuple[float, float]:
 
 def angle_subtract(angle1: float, angle2: float) -> float:
     """
-    Calculates the difference between two angles.
+    Calculate the difference between two angles.
 
     Args:
         angle1 (float): The first angle in radians.
@@ -897,7 +906,7 @@ def angle_subtract(angle1: float, angle2: float) -> float:
 
 def projection(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[float, float]:
     """
-    Calculates the projection of vec1 onto vec2.
+    Calculate the projection of vec1 onto vec2.
 
     Args:
         vec1 (tuple[float, float]): The first vector.
@@ -916,7 +925,7 @@ def projection(vec1: tuple[float, float], vec2: tuple[float, float]) -> tuple[fl
 
 def rotated(vec: tuple[float, float], angle_radians: float) -> tuple[float, float]:
     """
-    Rotates a 2D vector by a given angle in radians.
+    Rotate a 2D vector by a given angle in radians.
 
     Args:
         vec (tuple[float, float]): The 2D vector to be rotated.
@@ -934,7 +943,7 @@ def rotated(vec: tuple[float, float], angle_radians: float) -> tuple[float, floa
 
 def get_str(vec: tuple[float, float]) -> str:
     """
-    Converts a tuple of floats into a string representation.
+    Convert a tuple of floats into a string representation.
 
     Args:
         vec (tuple[float, float]): The input tuple containing two float values.
