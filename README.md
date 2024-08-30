@@ -24,7 +24,7 @@
   - [main_prog](src/main_prog) -- STM32主程序。由于STM32工程的代码相对较为繁杂，此处存放的又为完整工程文件，因此CubeIDE端的同步请手动进行操作。在CubeIDE中进行更改后，请将完整工程文件夹拷贝至此处替换。 -->
   - [`algorithm`](src/algorithm/) -- 一些算法，部署于树莓派4B。
   - [`communication`](src/communication/) -- 通信相关的代码，如串口、摄像头等。
-  - [`archive`](src/archive/) -- 代码存档，包括有趣的尝试和备份代码。
+  - [`archive`](src/archive/) -- 代码存档，包括有趣的尝试和备份代码。关于STM32部分的代码请参考[`README.md`](src/archive/main_prog/README.md)。
 
 ## Mnky
 
