@@ -51,7 +51,9 @@ class Car:
         e = self.brush_effective_length
 
         self.shapes = [
-            pymunk.Poly(self.body, [(-lc, -w0 / 2), (-lc, w0 / 2), (-lc + l - l0, w0 / 2), (-lc + l - l0, -w0 / 2)]),
+            pymunk.Poly(
+                self.body, [(-lc, -w0 / 2), (-lc, w0 / 2), (-lc + l - l0, w0 / 2), (-lc + l - l0, -w0 / 2)]
+            ),
             pymunk.Poly(self.body, [(-lc, -w / 2), (-lc, -w0 / 2), (-lc + l, -w0 / 2), (-lc + l, -w / 2)]),
             pymunk.Poly(self.body, [(-lc, w / 2), (-lc, w0 / 2), (-lc + l, w0 / 2), (-lc + l, w / 2)]),
         ]

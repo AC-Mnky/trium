@@ -33,10 +33,18 @@ class CameraState:
             ((np.cos(self.phi), np.sin(self.phi), 0), (-np.sin(self.phi), np.cos(self.phi), 0), (0, 0, 1))
         )
         self.trans_theta = np.array(
-            ((np.sin(self.theta), 0, np.cos(self.theta)), (0, 1, 0), (-np.cos(self.theta), 0, np.sin(self.theta)))
+            (
+                (np.sin(self.theta), 0, np.cos(self.theta)),
+                (0, 1, 0),
+                (-np.cos(self.theta), 0, np.sin(self.theta)),
+            )
         )
         self.trans_omega = np.array(
-            ((1, 0, 0), (0, np.cos(self.omega), -np.sin(self.omega)), (0, np.sin(self.omega), np.cos(self.omega)))
+            (
+                (1, 0, 0),
+                (0, np.cos(self.omega), -np.sin(self.omega)),
+                (0, np.sin(self.omega), np.cos(self.omega)),
+            )
         )
 
         self.trans = np.dot(np.dot(self.trans_phi, self.trans_theta), self.trans_omega)
@@ -79,10 +87,18 @@ class CameraState:
             ((np.cos(self.phi), np.sin(self.phi), 0), (-np.sin(self.phi), np.cos(self.phi), 0), (0, 0, 1))
         )
         self.trans_theta = np.array(
-            ((np.sin(self.theta), 0, np.cos(self.theta)), (0, 1, 0), (-np.cos(self.theta), 0, np.sin(self.theta)))
+            (
+                (np.sin(self.theta), 0, np.cos(self.theta)),
+                (0, 1, 0),
+                (-np.cos(self.theta), 0, np.sin(self.theta)),
+            )
         )
         self.trans_omega = np.array(
-            ((1, 0, 0), (0, np.cos(self.omega), -np.sin(self.omega)), (0, np.sin(self.omega), np.cos(self.omega)))
+            (
+                (1, 0, 0),
+                (0, np.cos(self.omega), -np.sin(self.omega)),
+                (0, np.sin(self.omega), np.cos(self.omega)),
+            )
         )
 
         self.trans = np.dot(np.dot(self.trans_phi, self.trans_theta), self.trans_omega)

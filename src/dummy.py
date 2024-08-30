@@ -227,7 +227,9 @@ class Dummy:
                         text = self.font.render(str(self.motor_PID[i][2 * j + 1]), True, BACK, FRONT)
                     self.screen.blit(text, offset)
 
-                text = self.font.render(str(unpack("<i", self.stm_input[52 + 32 * i : 56 + 32 * i])[0]), True, ACTUAL)
+                text = self.font.render(
+                    str(unpack("<i", self.stm_input[52 + 32 * i : 56 + 32 * i])[0]), True, ACTUAL
+                )
                 rect = text.get_rect()
                 offset = (0.75 * UNIT + 2.5 * UNIT * i - rect.centerx, 1.3 * UNIT - rect.centery)
                 self.screen.blit(text, offset)
@@ -255,20 +257,32 @@ class Dummy:
             if self.unpacked_stm_input is None:
                 self.drawn_rect(
                     1.5 * UNIT,
-                    unpack("<h", self.stm_input[5:7])[0] * 72000000 / 44 / unpack("<I", self.stm_input[1:5])[0] / 90,
+                    unpack("<h", self.stm_input[5:7])[0]
+                    * 72000000
+                    / 44
+                    / unpack("<I", self.stm_input[1:5])[0]
+                    / 90,
                     ACTUAL,
                 )
                 self.drawn_rect(
                     2.5 * UNIT,
-                    unpack("<h", self.stm_input[11:13])[0] * 72000000 / 44 / unpack("<I", self.stm_input[7:11])[0] / 90,
+                    unpack("<h", self.stm_input[11:13])[0]
+                    * 72000000
+                    / 44
+                    / unpack("<I", self.stm_input[7:11])[0]
+                    / 90,
                     ACTUAL,
                 )
             else:
                 self.drawn_rect(
-                    1.5 * UNIT, self.unpacked_stm_input[3] * 72000000 / 44 / self.unpacked_stm_input[1] / 90, ACTUAL
+                    1.5 * UNIT,
+                    self.unpacked_stm_input[3] * 72000000 / 44 / self.unpacked_stm_input[1] / 90,
+                    ACTUAL,
                 )
                 self.drawn_rect(
-                    2.5 * UNIT, self.unpacked_stm_input[2] * 72000000 / 44 / self.unpacked_stm_input[0] / 90, ACTUAL
+                    2.5 * UNIT,
+                    self.unpacked_stm_input[2] * 72000000 / 44 / self.unpacked_stm_input[0] / 90,
+                    ACTUAL,
                 )
 
         if self.enabled:

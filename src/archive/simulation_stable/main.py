@@ -71,7 +71,9 @@ if __name__ == "__main__":
                 running = False
 
         for c in room.cars:
-            c.algorithm.update(c.camera.get_input(), c.encoder.get_input(), c.imu.get_input(), c.ultrasonic.get_input())
+            c.algorithm.update(
+                c.camera.get_input(), c.encoder.get_input(), c.imu.get_input(), c.ultrasonic.get_input()
+            )
 
         # player control
         keys = pygame.key.get_pressed()
@@ -147,7 +149,10 @@ if __name__ == "__main__":
                 draw_alpha.polygon(
                     screen,
                     (255, 255, 255, 128) if c.camera_capturing else (255, 255, 255, 32),
-                    [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in c.camera_range.get_vertices()],
+                    [
+                        (v.rotated(c.body.angle) + c.body.position).int_tuple
+                        for v in c.camera_range.get_vertices()
+                    ],
                 )
                 draw_alpha.polygon(
                     screen,
@@ -157,14 +162,18 @@ if __name__ == "__main__":
 
         if display_algorithm:
             for x, v in room.cars[0].algorithm.predicted_collectables.items():
-                draw_alpha.circle(screen, (255, 255 if v[1] == 1 else 0, 0, 16 * np.minimum(v[0], 8)), x, merge_radius)
+                draw_alpha.circle(
+                    screen, (255, 255 if v[1] == 1 else 0, 0, 16 * np.minimum(v[0], 8)), x, merge_radius
+                )
                 if v[2] > 0:
                     draw_alpha.circle(screen, (255, 255, 255, 128), x, merge_radius)
 
         for c in room.cars:
             for s in c.shapes:
                 draw_alpha.polygon(
-                    screen, s.color, [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in s.get_vertices()]
+                    screen,
+                    s.color,
+                    [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in s.get_vertices()],
                 )
         for r in room.reds:
             if r is not None:

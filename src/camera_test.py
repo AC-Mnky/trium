@@ -112,16 +112,20 @@ def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
                 cv2.line(overlay, (i1, j1), (i2, j2), color, 1)
 
     overlay = np.minimum(
-        overlay, np.repeat((255 - find_color.get_color_mask(img, [find_color.RED1]))[:, :, np.newaxis], 3, axis=2)
+        overlay,
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.RED1]))[:, :, np.newaxis], 3, axis=2),
     )
     overlay = np.minimum(
-        overlay, np.repeat((255 - find_color.get_color_mask(img, [find_color.RED2]))[:, :, np.newaxis], 3, axis=2)
+        overlay,
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.RED2]))[:, :, np.newaxis], 3, axis=2),
     )
     overlay = np.minimum(
-        overlay, np.repeat((255 - find_color.get_color_mask(img, [find_color.YELLOW]))[:, :, np.newaxis], 3, axis=2)
+        overlay,
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.YELLOW]))[:, :, np.newaxis], 3, axis=2),
     )
     overlay = np.minimum(
-        overlay, np.repeat((255 - find_color.get_color_mask(img, [find_color.BLUE]))[:, :, np.newaxis], 3, axis=2)
+        overlay,
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.BLUE]))[:, :, np.newaxis], 3, axis=2),
     )
 
     cv2.add(overlay, img, img)

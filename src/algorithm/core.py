@@ -205,7 +205,10 @@ class Core:
         #     np.radians(np.sqrt(ass[0] ** 2 + ass[1] ** 2 + ass[2] ** 2)) * (1 if ass[2] > 0 else -1)
         #     print(inferred_angular_speed)
 
-        inferred_relative_velocity = ((wheel_speed[0] + wheel_speed[1]) / 2, -inferred_angular_speed * WHEEL_X_OFFSET)
+        inferred_relative_velocity = (
+            (wheel_speed[0] + wheel_speed[1]) / 2,
+            -inferred_angular_speed * WHEEL_X_OFFSET,
+        )
         return inferred_angular_speed, inferred_relative_velocity
 
     def infer_position_from_walls(self) -> None:
@@ -272,7 +275,9 @@ class Core:
         time: float,
         stm32_input: bytes,
         unpacked_stm32_input: list[int],
-        imu_input: tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None,
+        imu_input: (
+            tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None
+        ),
         camera_input: (
             tuple[
                 float,
@@ -324,7 +329,9 @@ class Core:
         # calculate vertices after displacement
         for i in 0, 1:
             for j in 0, 1:
-                self.predicted_vertices[i][j] = self.relative2absolute((i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH))
+                self.predicted_vertices[i][j] = self.relative2absolute(
+                    (i * LENGTH - CM_TO_CAR_BACK, (j - 0.5) * WIDTH)
+                )
 
         for i, camera_point in (
             (0, (0, 0)),
@@ -354,7 +361,10 @@ class Core:
 
             for red in camera_reds:
                 cords = self.relative2absolute(red)  # position of red block
-                if ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
+                if (
+                    ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
+                    and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
+                ):
                     self.predicted_items[cords] = [
                         self.predicted_items.get(cords, (0, 0))[0] + 2,
                         RED,
@@ -363,7 +373,10 @@ class Core:
 
             for yellow in camera_yellows:
                 cords = self.relative2absolute(yellow)  # position of yellow block
-                if ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
+                if (
+                    ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
+                    and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
+                ):
                     self.predicted_items[cords] = [
                         self.predicted_items.get(cords, (0, 1))[0] + 3,
                         YELLOW,
@@ -389,7 +402,10 @@ class Core:
         items_to_delete = []
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
-            if get_distance(item, self.contact_center) < CONTACT_RADIUS or self.predicted_items[item][0] < DELETE_VALUE:
+            if (
+                get_distance(item, self.contact_center) < CONTACT_RADIUS
+                or self.predicted_items[item][0] < DELETE_VALUE
+            ):
                 items_to_delete.append(item)
         for item in items_to_delete:
             self.predicted_items.pop(item)
@@ -399,7 +415,9 @@ class Core:
         if item is None:
             self.motor = [0.2, -0.2]
         else:
-            self.predicted_items[item][2] = min(self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM)
+            self.predicted_items[item][2] = min(
+                self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
+            )
             cords = self.absolute2relative(item)
             item_angle = angle_subtract(get_angle(cords), 0)
 
