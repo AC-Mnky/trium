@@ -38,7 +38,7 @@ class STM:
 
     def get_message(self) -> tuple[bytes, list[int]]:
         """
-        Retrieves a message from the STM32 device.
+        Retrieve a message from STM32.
 
         Returns:
             tuple (tuple[bytes, list[int]]): A tuple containing the message as bytes and the unpacked message
@@ -93,14 +93,14 @@ class STM:
 
     def get_encoder_and_ultrasonic_input(self) -> tuple[float, float, int, int]:
         """
-        Retrieves the encoder and ultrasonic input values from the message.
+        Retrieve the encoder and ultrasonic input values from the message.
 
         Returns:
             tuple (tuple[float, float, int, int]): A tuple containing the following values.
-            - velocity_1 (float): The calculated velocity of encoder 1.
-            - velocity_2 (float): The calculated velocity of encoder 2.
-            - ultrasonic_1 (int): The distance value from ultrasonic sensor 1.
-            - ultrasonic_2 (int): The distance value from ultrasonic sensor 2.
+                - velocity_1 (float): The calculated velocity of encoder 1.
+                - velocity_2 (float): The calculated velocity of encoder 2.
+                - ultrasonic_1 (int): The distance value from ultrasonic sensor 1.
+                - ultrasonic_2 (int): The distance value from ultrasonic sensor 2.
         """
         message: bytes = self.get_message()[0]
         encoder_1: int = int.from_bytes(message[0:2], "big")
@@ -119,7 +119,7 @@ class STM:
 
     def send_message(self, message: bytes, max_length: int) -> None:
         """
-        Sends a message to the STM32 device.
+        Send a message to STM32.
 
         Args:
             message (bytes): The message to be sent.
