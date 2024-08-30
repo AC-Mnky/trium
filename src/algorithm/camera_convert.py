@@ -65,6 +65,7 @@ class CameraState:
     def update(self) -> None:
         """
         Update the camera conversion matrices and mappings.
+
         This method updates the camera conversion matrices and mappings based on the current values of phi,
         theta, omega, half_fov_h, half_fov_v, and resolution.
 

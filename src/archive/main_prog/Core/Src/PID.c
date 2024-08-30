@@ -55,10 +55,6 @@ int32_t PID_vel(struct PID_struct *pid, uint8_t PWM_Pulse, uint16_t Encoder_puls
 
 	pid->actual_val = (real_tick_freq_div256 * PWM_Period >> 8) * Encoder_pulse_short
 			/ ((Encoder_Pulse_Every_round * real_tick_elapsed_div256) * Motor_Max_Velocity >> 16);
-	//give the actual PWM pulse
-
-	//			(PWM_Period * Encoder_pulse_short * Encoder_Read_freq
-//			/ (Encoder_Pulse_Every_round * Motor_Max_Velocity)) << 8; //give the actual PWM pulse
 
 	pid->LastError = pid->Error;
 	pid->Error = pid->actual_val - pid->target_val;
