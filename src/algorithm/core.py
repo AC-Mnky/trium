@@ -231,11 +231,13 @@ class Core:
     def infer_velocity(self) -> tuple[float, tuple[float, float]]:
         """
         infer current relative movement from encoder.
-        "inferred_angular_speed" = speed of rotating around the center of the car
-        "inferred_relative_velocity" = speed of the center of the car
 
-        paras have to be modified: WHEEL_X_OFFSET
-        angular_speed can use data from imu directly
+        - "inferred_angular_speed" = speed of rotating around the center of the car
+        - "inferred_relative_velocity" = speed of the center of the car
+
+        TODO:
+        - paras have to be modified: WHEEL_X_OFFSET
+        - angular_speed can use data from imu directly
         """
 
         if self.unpacked_stm_input is not None:
@@ -329,6 +331,17 @@ class Core:
         self.start_angle += angle_diff_average
 
     def act_when_there_is_no_item(self):
+        """
+        Perform a series of actions when there is no item present.
+
+        - This method executes a sequence of actions to be performed when there is no item present.
+        - It includes rotating towards specific coordinates, rotating left and right for a certain duration,
+        returning home, rotating at home until a specific angle is reached, backing up, opening a door,
+        dumping items, waiting for items to drop, and closing the door.
+
+        Yields:
+            None: This method is a generator and yields None at each step.
+        """
 
         while True:
 
