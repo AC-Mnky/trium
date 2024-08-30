@@ -72,10 +72,7 @@ if __name__ == "__main__":
 
         for c in room.cars:
             c.algorithm.update(
-                c.camera.get_input(),
-                c.encoder.get_input(),
-                c.imu.get_input(),
-                c.ultrasonic.get_input(),
+                c.camera.get_input(), c.encoder.get_input(), c.imu.get_input(), c.ultrasonic.get_input()
             )
 
         # player control
@@ -160,19 +157,13 @@ if __name__ == "__main__":
                 draw_alpha.polygon(
                     screen,
                     (255, 255, 255, 64),
-                    [
-                        (v.rotated(c.body.angle) + c.body.position).int_tuple
-                        for v in c.brush.get_vertices()
-                    ],
+                    [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in c.brush.get_vertices()],
                 )
 
         if display_algorithm:
             for x, v in room.cars[0].algorithm.predicted_collectables.items():
                 draw_alpha.circle(
-                    screen,
-                    (255, 255 if v[1] == 1 else 0, 0, 16 * np.minimum(v[0], 8)),
-                    x,
-                    merge_radius,
+                    screen, (255, 255 if v[1] == 1 else 0, 0, 16 * np.minimum(v[0], 8)), x, merge_radius
                 )
                 if v[2] > 0:
                     draw_alpha.circle(screen, (255, 255, 255, 128), x, merge_radius)
@@ -182,20 +173,14 @@ if __name__ == "__main__":
                 draw_alpha.polygon(
                     screen,
                     s.color,
-                    [
-                        (v.rotated(c.body.angle) + c.body.position).int_tuple
-                        for v in s.get_vertices()
-                    ],
+                    [(v.rotated(c.body.angle) + c.body.position).int_tuple for v in s.get_vertices()],
                 )
         for r in room.reds:
             if r is not None:
                 draw_alpha.polygon(
                     screen,
                     (255, 0, 0, 255),
-                    [
-                        (v.rotated(r.body.angle) + r.body.position).int_tuple
-                        for v in r.shape.get_vertices()
-                    ],
+                    [(v.rotated(r.body.angle) + r.body.position).int_tuple for v in r.shape.get_vertices()],
                 )
         for y in room.yellows:
             if y is not None:
@@ -204,42 +189,22 @@ if __name__ == "__main__":
         draw_alpha.rectangle(
             screen,
             (255, 255, 255, 255),
-            (
-                room.rect.left - 1,
-                room.rect.top - 1,
-                2,
-                room.rect.bottom - room.rect.top + 2,
-            ),
+            (room.rect.left - 1, room.rect.top - 1, 2, room.rect.bottom - room.rect.top + 2),
         )
         draw_alpha.rectangle(
             screen,
             (255, 255, 255, 255),
-            (
-                room.rect.left - 1,
-                room.rect.top - 1,
-                room.rect.right - room.rect.left + 2,
-                2,
-            ),
+            (room.rect.left - 1, room.rect.top - 1, room.rect.right - room.rect.left + 2, 2),
         )
         draw_alpha.rectangle(
             screen,
             (255, 255, 255, 255),
-            (
-                room.rect.right - 1,
-                room.rect.top - 1,
-                2,
-                room.rect.bottom - room.rect.top + 2,
-            ),
+            (room.rect.right - 1, room.rect.top - 1, 2, room.rect.bottom - room.rect.top + 2),
         )
         draw_alpha.rectangle(
             screen,
             (255, 255, 255, 255),
-            (
-                room.rect.left - 1,
-                room.rect.bottom - 1,
-                room.rect.right - room.rect.left + 2,
-                2,
-            ),
+            (room.rect.left - 1, room.rect.bottom - 1, room.rect.right - room.rect.left + 2, 2),
         )
 
         pygame.display.flip()

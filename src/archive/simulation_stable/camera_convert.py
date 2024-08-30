@@ -37,9 +37,7 @@ class CameraState:
         )
 
 
-def img2space(
-    camera_state: CameraState, i: int, j: int, target_z: float = 0
-) -> tuple[bool, float, float]:
+def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) -> tuple[bool, float, float]:
     c = camera_state
 
     h = (2 * i / c.res_h - 1) * np.tan(c.half_fov_h)
@@ -55,9 +53,7 @@ def img2space(
     return on_the_ground, x, y
 
 
-def space2img(
-    camera_state: CameraState, x: float, y: float, z: float = 0
-) -> tuple[bool, int, int]:
+def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> tuple[bool, int, int]:
     c = camera_state
 
     can_be_seen = True

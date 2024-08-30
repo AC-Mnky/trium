@@ -1,10 +1,10 @@
 import pygame
 
 try:
-    from algorithm import core, draw_alpha
-except ModuleNotFoundError:
     import core
     import draw_alpha
+except ModuleNotFoundError:
+    from algorithm import core, draw_alpha
 else:
     ...
 
@@ -22,6 +22,8 @@ FONT_SIZE = 20
 BACK = (0, 0, 0, 0)
 CAR = (255, 128, 0, 128)
 WHITE = (255, 255, 255, 255)
+CAMERA = (255, 255, 255, 32)
+CAMERA_SHOT = (255, 255, 255, 128)
 
 SPEED_CONTROL = 0.5
 
@@ -33,13 +35,13 @@ class Visualizer:
 
         pygame.init()
         pygame.font.init()
-        self.font = pygame.font.SysFont("Cambria", FONT_SIZE)
+        self.font = pygame.font.SysFont("DejaVuSansMono", FONT_SIZE)
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
 
         self.mouse_pos = 0
 
         self.core = _core
-        
+
         self.brush = False
         self.back_open = False
 
@@ -70,13 +72,13 @@ class Visualizer:
                 if event.button == 1:  # left-click
                     self.core.predicted_items[cords] = [
                         self.core.predicted_items.get(cords, (0, 0))[0] + 2,
-                        0,
+                        core.RED,
                         0,
                     ]
                 elif event.button == 3:  # right-click
                     self.core.predicted_items[cords] = [
                         self.core.predicted_items.get(cords, (0, 0))[0] + 3,
-                        1,
+                        core.YELLOW,
                         0,
                     ]
             elif event.type == pygame.KEYDOWN:
@@ -117,11 +119,8 @@ class Visualizer:
             elif keys[pygame.K_RIGHT]:
                 self.core.motor = [1, -1]
 
-            self.core.motor = [
-                self.core.motor[0] * SPEED_CONTROL,
-                self.core.motor[1] * SPEED_CONTROL,
-            ]
-            
+            self.core.motor = [self.core.motor[0] * SPEED_CONTROL, self.core.motor[1] * SPEED_CONTROL]
+
             self.core.brush = self.brush
             self.core.back_open = self.back_open
 
@@ -142,9 +141,7 @@ class Visualizer:
         """
         self.screen.fill(BACK)
 
-        draw_alpha.line(
-            self.screen, WHITE, (MARGIN, MARGIN), (MARGIN + ROOM_SIZE[0], MARGIN), 2
-        )
+        draw_alpha.line(self.screen, WHITE, (MARGIN, MARGIN), (MARGIN + ROOM_SIZE[0], MARGIN), 2)
         draw_alpha.line(
             self.screen,
             WHITE,
@@ -152,9 +149,7 @@ class Visualizer:
             (MARGIN + ROOM_SIZE[0], MARGIN + ROOM_SIZE[1]),
             2,
         )
-        draw_alpha.line(
-            self.screen, WHITE, (MARGIN, MARGIN), (MARGIN, MARGIN + ROOM_SIZE[1]), 2
-        )
+        draw_alpha.line(self.screen, WHITE, (MARGIN, MARGIN), (MARGIN, MARGIN + ROOM_SIZE[1]), 2)
         draw_alpha.line(
             self.screen,
             WHITE,
@@ -166,16 +161,13 @@ class Visualizer:
         for item, v in self.core.predicted_items.items():
             draw_alpha.circle(
                 self.screen,
-                (255, 255 if v[1] == 1 else 0, 0, min(v[0] * 32, 255)),
+                (255, 255 if v[1] == core.YELLOW else 0, 0, min(v[0] * 32, 255)),
                 real2window(item),
                 core.MERGE_RADIUS / UNIT / 2,
             )
             if v[2] > 0:
                 draw_alpha.circle(
-                    self.screen,
-                    (255, 255, 255, 128),
-                    real2window(item),
-                    core.MERGE_RADIUS / UNIT / 2,
+                    self.screen, (255, 255, 255, 128), real2window(item), core.MERGE_RADIUS / UNIT / 2
                 )
 
         if self.core.camera_input is not None:
@@ -183,29 +175,33 @@ class Visualizer:
 
         for wall in self.walls:
             draw_alpha.line(self.screen, (0, 128, 255, 128),
-                            real2window(core.vec_add(self.core.predicted_cords, core.rotated(wall[0], self.core.predicted_angle))),
-                            real2window(core.vec_add(self.core.predicted_cords, core.rotated(wall[1], self.core.predicted_angle))),
+                            real2window(self.core.relative2absolute(wall[0])),
+                            real2window(self.core.relative2absolute(wall[1])),
                             1)
 
         draw_alpha.polygon(
             self.screen,
             CAR,
-            [
-                real2window(v)
-                for v in self.core.predicted_vertices[0]
-                + self.core.predicted_vertices[1][::-1]
-            ],
+            [real2window(v) for v in self.core.predicted_vertices[0] + self.core.predicted_vertices[1][::-1]],
+        )
+
+        camera_color = CAMERA if self.core.camera_has_input else CAMERA_SHOT
+        draw_alpha.polygon(
+            self.screen, camera_color, [real2window(v) for v in self.core.predicted_camera_vertices[0:4]]
+        )
+        draw_alpha.polygon(
+            self.screen, camera_color, [real2window(v) for v in self.core.predicted_camera_vertices[4:8]]
         )
         draw_alpha.circle(self.screen, WHITE, real2window(self.core.predicted_cords), 2)
         draw_alpha.circle(
             self.screen, (0, 0, 255, 64), real2window(self.core.contact_center), core.CONTACT_RADIUS / UNIT
         )
-        
+
         self.core.get_output()
-        
-        text = self.font.render(self.core.output.hex(' '), True, WHITE)
+
+        text = self.font.render(self.core.output.hex(" "), True, WHITE)
         self.screen.blit(text, (0, 0))
-        text = self.font.render(self.core.stm_input.hex(' '), True, WHITE)
+        text = self.font.render(self.core.stm_input.hex(" "), True, WHITE)
         self.screen.blit(text, (0, 20))
 
         pygame.display.flip()
@@ -221,7 +217,7 @@ def real2window(vec: tuple[float, float]) -> tuple[float, float]:
     Returns:
         tuple (tuple[float, float]): The converted window coordinate.
     """
-    return core.vec_add(VEC_MARGIN, core.vec_multiply(vec, 1 / UNIT))
+    return core.vec_add(VEC_MARGIN, core.vec_mul(vec, 1 / UNIT))
 
 
 def window2real(vec: tuple[float, float]) -> tuple[float, float]:
@@ -234,4 +230,4 @@ def window2real(vec: tuple[float, float]) -> tuple[float, float]:
     Returns:
         tuple (tuple[float, float]): The vector in real coordinates.
     """
-    return core.vec_multiply(core.vec_subtract(vec, VEC_MARGIN), UNIT)
+    return core.vec_mul(core.vec_sub(vec, VEC_MARGIN), UNIT)

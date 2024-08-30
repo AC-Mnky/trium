@@ -27,13 +27,7 @@ def merge_collectable_prediction(dictionary):
                     value_sum += v2[0]
                     interest_max = max(interest_max, v2[2])
                 pos_avg = pos_sum / value_sum
-                substitution = (
-                    neighbour_of_k1,
-                    pos_avg,
-                    value_sum,
-                    v1[1],
-                    interest_max,
-                )
+                substitution = (neighbour_of_k1, pos_avg, value_sum, v1[1], interest_max)
                 break
 
         if substitution is None:
@@ -81,9 +75,7 @@ class Algorithm:
 
     def position_predictable(self) -> bool:
         return (
-            self.predicted_angle is not None
-            and self.predicted_x is not None
-            and self.predicted_y is not None
+            self.predicted_angle is not None and self.predicted_x is not None and self.predicted_y is not None
         )
 
     def predicted_position(self) -> Vec2d:
@@ -104,12 +96,9 @@ class Algorithm:
         self.last_update_time = self.car.room.time
 
         # infer current movement from encoder
-        inferred_angular_speed = (
-            encoder_input[0] - encoder_input[1]
-        ) / self.car.distance_between_wheels
+        inferred_angular_speed = (encoder_input[0] - encoder_input[1]) / self.car.distance_between_wheels
         inferred_relative_velocity = Vec2d(
-            (encoder_input[0] + encoder_input[1]) / 2,
-            -inferred_angular_speed * self.car.wheel_x_offset,
+            (encoder_input[0] + encoder_input[1]) / 2, -inferred_angular_speed * self.car.wheel_x_offset
         )
 
         # predict current position and angle
@@ -138,18 +127,14 @@ class Algorithm:
 
             if self.position_predictable():
                 for x in camera_input[0]:
-                    pos = x.rotated(self.predicted_angle) + Vec2d(
-                        self.predicted_x, self.predicted_y
-                    )
+                    pos = x.rotated(self.predicted_angle) + Vec2d(self.predicted_x, self.predicted_y)
                     self.predicted_collectables[pos] = [
                         self.predicted_collectables.get(pos, (0, 0))[0] + 2,
                         0,
                         0,
                     ]
                 for y in camera_input[1]:
-                    pos = y.rotated(self.predicted_angle) + Vec2d(
-                        self.predicted_x, self.predicted_y
-                    )
+                    pos = y.rotated(self.predicted_angle) + Vec2d(self.predicted_x, self.predicted_y)
                     self.predicted_collectables[pos] = [
                         self.predicted_collectables.get(pos, (0, 1))[0] + 3,
                         1,
@@ -161,9 +146,7 @@ class Algorithm:
                 predicted_camera_range = pymunk.Poly(
                     self.car.room.space.static_body,
                     [
-                        (
-                            v.rotated(self.predicted_angle) + self.predicted_position()
-                        ).int_tuple
+                        (v.rotated(self.predicted_angle) + self.predicted_position()).int_tuple
                         for v in self.car.camera_range.get_vertices()
                     ],
                 )
@@ -177,9 +160,9 @@ class Algorithm:
                 print(len(self.predicted_collectables))
 
         if self.position_predictable():
-            contact_center = self.predicted_position() + Vec2d(1, 0).rotated(
-                self.predicted_angle
-            ) * (self.contact_center_to_back - self.car.com_to_car_back)
+            contact_center = self.predicted_position() + Vec2d(1, 0).rotated(self.predicted_angle) * (
+                self.contact_center_to_back - self.car.com_to_car_back
+            )
             to_delete_red = []
             for x in self.predicted_collectables:
                 self.predicted_collectables[x][0] *= self.unseen_decay_exponential
@@ -196,8 +179,7 @@ class Algorithm:
             self.wheel_output = (1, -1)
         else:
             self.predicted_collectables[x][2] = min(
-                self.predicted_collectables[x][2] + self.interest_addition,
-                self.interest_maximum,
+                self.predicted_collectables[x][2] + self.interest_addition, self.interest_maximum
             )
             x_angle = (x - self.predicted_position()).angle - self.predicted_angle
             x_angle -= round(x_angle / np.tau) * np.tau

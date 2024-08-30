@@ -1,14 +1,11 @@
 import os.path
 import time
 
-import numpy as np
 import cv2
+import numpy as np
 
-
-from algorithm import camera_convert
-from algorithm import find_color
+from algorithm import camera_convert, find_color, vision
 from communication.camera import Camera
-
 
 MODE = "file"
 # MODE = 'adjust'
@@ -16,8 +13,8 @@ MODE = "file"
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
-READ_DIR = "test4"
-WRITE_DIR = "test5"
+READ_DIR = "test7"
+WRITE_DIR = "test8"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
@@ -27,9 +24,7 @@ WRITE_DIR = "test5"
 # )
 # (357, 10, -207) [51.7  1.2  1. ]
 # (295, 12, -221) [57.7  1.1  0.3] (np.float64(51.44557864216593), np.float64(51.08994556912829))
-CAMERA_STATE = camera_convert.CameraState(
-    (295, 12, -221), (57.7, 1.1, 0.3), (51.45, 51.09), (640, 480)
-)
+CAMERA_STATE = vision.CAMERA_STATE
 
 SHOW_RED = SHOW_YELLOW = True
 SHOW_WALL = True
@@ -51,7 +46,7 @@ def process(img, show: bool = False):
     )
 
     if show and DRAW_GRID:
-        draw_grid(img, (255, 255, 255, 255), 450, 2000, 50, -1000, 1000, 50)
+        draw_grid(img, (255, 255, 255, 255), 300, 2000, 100, -500, 500, 100)
 
     print()
 
@@ -59,15 +54,11 @@ def process(img, show: bool = False):
         s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -12.5)
         if s:
             if show and SHOW_RED:
-                cv2.rectangle(
-                    img, (p[0] - 10, p[1] - 10, 20, 20), (255, 255, 255, 255), 2
-                )
+                cv2.rectangle(img, (p[0] - 10, p[1] - 10, 20, 20), (255, 255, 255, 255), 2)
             print((x, y), "red")
         else:
             if SHOW_RED:
-                cv2.rectangle(
-                    img, (p[0] - 10, p[1] - 10, 20, 20), (128, 128, 128, 255), 1
-                )
+                cv2.rectangle(img, (p[0] - 10, p[1] - 10, 20, 20), (128, 128, 128, 255), 1)
 
     for p in points_yellow:
         s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -15)
@@ -101,7 +92,7 @@ def process(img, show: bool = False):
 
     if show:
         cv2.imshow("image", img)
-        print('no shit')
+        print("no shit")
 
 
 def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
@@ -122,27 +113,19 @@ def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
 
     overlay = np.minimum(
         overlay,
-        np.repeat(
-            (255 - find_color.get_color_mask(img, find_color.RED))[:, :, np.newaxis],
-            3,
-            axis=2,
-        ),
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.RED1]))[:, :, np.newaxis], 3, axis=2),
     )
     overlay = np.minimum(
         overlay,
-        np.repeat(
-            (255 - find_color.get_color_mask(img, find_color.YELLOW))[:, :, np.newaxis],
-            3,
-            axis=2,
-        ),
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.RED2]))[:, :, np.newaxis], 3, axis=2),
     )
     overlay = np.minimum(
         overlay,
-        np.repeat(
-            (255 - find_color.get_color_mask(img, find_color.BLUE))[:, :, np.newaxis],
-            3,
-            axis=2,
-        ),
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.YELLOW]))[:, :, np.newaxis], 3, axis=2),
+    )
+    overlay = np.minimum(
+        overlay,
+        np.repeat((255 - find_color.get_color_mask(img, [find_color.BLUE]))[:, :, np.newaxis], 3, axis=2),
     )
 
     cv2.add(overlay, img, img)
@@ -153,14 +136,7 @@ if __name__ == "__main__":
     repository_path = os.path.dirname(os.path.realpath(__file__)) + "/.."
     if MODE == "file":
         for image_index in range(100):
-            filename = (
-                repository_path
-                + "/assets/openCV_pic/"
-                + READ_DIR
-                + "/"
-                + str(image_index)
-                + ".jpg"
-            )
+            filename = repository_path + "/assets/openCV_pic/" + READ_DIR + "/" + str(image_index) + ".jpg"
             if not os.path.isfile(filename):
                 print("cannot open " + filename)
                 continue
@@ -223,7 +199,7 @@ if __name__ == "__main__":
         target_dir = repository_path + "/assets/openCV_pic/" + WRITE_DIR + "/"
         if os.path.isdir(target_dir):
             if not FORCE_OVERWRITE:
-                print('Directory', target_dir, 'exists. Consider enabling FORCE_OVERWRITE.')
+                print("Directory", target_dir, "exists. Consider enabling FORCE_OVERWRITE.")
                 exit(0)
         else:
             os.mkdir(target_dir)
@@ -234,16 +210,12 @@ if __name__ == "__main__":
             time.sleep(max(time_last_capture + 0.5 - time.time(), 0))
             image = c.get_image_bgr()
             time_last_capture = time.time()
-            filename = (
-                target_dir
-                + str(image_index)
-                + ".jpg"
-            )
-            
+            filename = target_dir + str(image_index) + ".jpg"
+
             if image is not None:
                 cv2.imwrite(filename, image)
                 process(image, GLOBAL_SHOW)
-                
+
             else:
                 print("shit")
             cv2.waitKey(200)

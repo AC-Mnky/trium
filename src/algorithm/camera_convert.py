@@ -30,11 +30,7 @@ class CameraState:
         self.res_h, self.res_v = resolution
 
         self.trans_phi = np.array(
-            (
-                (np.cos(self.phi), np.sin(self.phi), 0),
-                (-np.sin(self.phi), np.cos(self.phi), 0),
-                (0, 0, 1),
-            )
+            ((np.cos(self.phi), np.sin(self.phi), 0), (-np.sin(self.phi), np.cos(self.phi), 0), (0, 0, 1))
         )
         self.trans_theta = np.array(
             (
@@ -60,15 +56,13 @@ class CameraState:
                 (-np.tan(self.half_fov_v), 0, 2 / self.res_v * np.tan(self.half_fov_v)),
             )
         )
-        self.relative_cords_to_img_mapping = np.linalg.inv(
-            self.img_to_relative_cords_mapping
-        )
+        self.relative_cords_to_img_mapping = np.linalg.inv(self.img_to_relative_cords_mapping)
 
     def update(self) -> None:
         """
         Update the camera conversion matrices and mappings.
-        This method updates the camera conversion matrices and mappings based on the current values of phi, theta, omega,
-        half_fov_h, half_fov_v, and resolution.
+        This method updates the camera conversion matrices and mappings based on the current values of phi,
+        theta, omega, half_fov_h, half_fov_v, and resolution.
 
         The camera conversion matrices are calculated as follows:
         - trans_phi: Rotation matrix around the z-axis (phi angle).
@@ -83,18 +77,14 @@ class CameraState:
         Note:
             The matrices and mappings are stored as attributes of the CameraConvert object.
 
-        Parameters:
+        Args:
             None
 
         Returns:
             None
         """
         self.trans_phi = np.array(
-            (
-                (np.cos(self.phi), np.sin(self.phi), 0),
-                (-np.sin(self.phi), np.cos(self.phi), 0),
-                (0, 0, 1),
-            )
+            ((np.cos(self.phi), np.sin(self.phi), 0), (-np.sin(self.phi), np.cos(self.phi), 0), (0, 0, 1))
         )
         self.trans_theta = np.array(
             (
@@ -120,14 +110,10 @@ class CameraState:
                 (-np.tan(self.half_fov_v), 0, 2 / self.res_v * np.tan(self.half_fov_v)),
             )
         )
-        self.relative_cords_to_img_mapping = np.linalg.inv(
-            self.img_to_relative_cords_mapping
-        )
+        self.relative_cords_to_img_mapping = np.linalg.inv(self.img_to_relative_cords_mapping)
 
 
-def img2space(
-    camera_state: CameraState, i: int, j: int, target_z: float = 0
-) -> tuple[bool, float, float]:
+def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) -> tuple[bool, float, float]:
     """
     Converts image coordinates to 3D space coordinates.
 
@@ -158,9 +144,7 @@ def img2space(
     return on_the_ground, x, y
 
 
-def space2img(
-    camera_state: CameraState, x: float, y: float, z: float = 0
-) -> tuple[bool, int, int]:
+def space2img(camera_state: CameraState, x: float, y: float, z: float = 0) -> tuple[bool, int, int]:
     """
     Converts 3D coordinates in space to image coordinates based on the camera state.
 
@@ -198,9 +182,7 @@ def space2img(
 
 if __name__ == "__main__":
     # Example usage
-    example_camera_state = CameraState(
-        (100, 0, -200), (70, 0, 0), (100, 80), (640, 480)
-    )
+    example_camera_state = CameraState((100, 0, -200), (70, 0, 0), (100, 80), (640, 480))
 
     print(img2space(example_camera_state, 320, 0))
     print(img2space(example_camera_state, 320, 400))

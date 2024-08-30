@@ -13,9 +13,7 @@ class Red:
 
         self.body = pymunk.Body(mass=0.01, moment=0.1)
 
-        self.shape = pymunk.Poly(
-            self.body, [(-2.5, -2.5), (-2.5, 2.5), (2.5, 2.5), (2.5, -2.5)]
-        )
+        self.shape = pymunk.Poly(self.body, [(-2.5, -2.5), (-2.5, 2.5), (2.5, 2.5), (2.5, -2.5)])
         self.shape.color = (255, 0, 0, 255)
         self.shape.friction = self.friction
         self.shape.elasticity = self.elasticity
@@ -26,9 +24,7 @@ class Red:
         self.room.reds.append(self)
 
     def physics(self):
-        self.body.apply_impulse_at_world_point(
-            -self.drag * self.body.velocity, self.body.position
-        )
+        self.body.apply_impulse_at_world_point(-self.drag * self.body.velocity, self.body.position)
         self.body.torque -= self.body.angular_velocity * self.angular_drag
 
 
@@ -55,7 +51,5 @@ class Yellow:
         self.room.yellows.append(self)
 
     def physics(self):
-        self.body.apply_impulse_at_world_point(
-            -self.drag * self.body.velocity, self.body.position
-        )
+        self.body.apply_impulse_at_world_point(-self.drag * self.body.velocity, self.body.position)
         self.body.torque -= self.body.angular_velocity * self.angular_drag

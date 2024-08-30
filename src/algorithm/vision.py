@@ -1,4 +1,5 @@
 import cv2
+
 try:
     import camera_convert
     import find_color
@@ -8,19 +9,36 @@ except ModuleNotFoundError:
 
     work_path = os.getcwd()
     sys.path.append(f"{work_path}/algorithm")
-    import camera_convert
-    import find_color
+    try:
+        import camera_convert
+        import find_color
+    except ModuleNotFoundError:
+
+        work_path = os.getcwd()
+        sys.path.append(f"{work_path}/../algorithm")
+        import camera_convert
+        import find_color
+
 else:
     ...
 
 
 CAMERA_STATE = camera_convert.CameraState(
     # (309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480)
-    (295, 12, -221), (57.7, 1.1, 0.3), (51.45, 51.09), (640, 480)
+    # (295, 12, -221), (57.7, 1.1, 0.3), (51.45, 51.09), (640, 480)
+    # (295, 12, -221), (57.7, 1.1, 0.3), (51.45, 51.09), (640, 480)
+    # (84, 4, -243), (59.4, 1.1, -0.1), (51.45, 51.09), (640, 480)
+    # (78, 13, -164), (69.4, 1., 0.5), (47.66, 33.90), (640, 480)
+    (78, 13, -164),
+    (69.4, 1.0, 0.5),
+    (47.66, 33.90),
+    (320, 240),
 )
 
 
-def process(time: float, image: cv2.UMat | None) -> (
+def process(
+    time: float, image: cv2.UMat | None
+) -> (
     tuple[
         float,
         list[tuple[float, float]],
@@ -34,7 +52,7 @@ def process(time: float, image: cv2.UMat | None) -> (
 
     Args:
         time (float): The time associated with the image.
-        image (cv2.UMat): The image to be processed.
+        image (cv2.UMat | None): The image to be processed.
 
     Returns:
         tuple: A tuple containing the following information or None:
