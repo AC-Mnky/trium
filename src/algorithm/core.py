@@ -3,17 +3,18 @@ from struct import unpack
 
 import numpy as np
 
-from algorithm import vision
-
 try:
     import camera_convert
+    import vision
 
 except ModuleNotFoundError:
     import os
     import sys
+
     work_path = os.getcwd()
     sys.path.append(f"{work_path}/algorithm")
     import camera_convert
+    import vision
 
 ENABLE_INFER_POSITION_FROM_WALLS = True  # True
 
@@ -62,6 +63,7 @@ YELLOW = 1
 
 CAMERA_MARGIN_H = 40  # 80
 CAMERA_MARGIN_V = 30  # 60
+
 
 def calc_weight(
         cord_difference: float,
@@ -153,7 +155,7 @@ class Core:
             [(0.0, 0.0), (0.0, 0.0)],
             [(0.0, 0.0), (0.0, 0.0)],
         ].copy()
-        self.predicted_camera_vertices = ([(0.0, 0.0),] * 8).copy()
+        self.predicted_camera_vertices = ([(0.0, 0.0), ] * 8).copy()
         self.contact_center = (0, 0)
 
         """
@@ -227,8 +229,7 @@ class Core:
         #     ass = self.imu_angular_speed_deg_s
         #     inferred_angular_speed = math.radians(math.sqrt(ass[0] ** 2 + ass[1] ** 2 + ass[2] ** 2)) * (1 if ass[2] > 0 else -1)
         #     print(inferred_angular_speed)
-            
-            
+
         inferred_relative_velocity = (
             (wheel_speed[0] + wheel_speed[1]) / 2,
             -inferred_angular_speed * WHEEL_X_OFFSET
@@ -345,10 +346,10 @@ class Core:
 
         # predict current position
         self.predicted_angle += dt * inferred_angular_speed
-        
+
         if self.imu_input is not None:
             self.predicted_angle = INITIAL_ANGLE + self.start_angle - math.radians(self.imu_angle_deg[2])
-        
+
         print(self.predicted_angle)
         if self.imu_input is not None:
             print([math.radians(x) for x in self.imu_angle_deg], 'yee')
@@ -368,10 +369,12 @@ class Core:
                                 (3, (vision.CAMERA_STATE.res_h, 0)),
                                 (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
                                 (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-                                (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                                (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H,
+                                     vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
                                 (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
                                 ):
-            self.predicted_camera_vertices[i] = self.relative2absolute(camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3])
+            self.predicted_camera_vertices[i] = self.relative2absolute(
+                camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3])
 
         # analyze camera input
         if camera_input is not None:
@@ -414,9 +417,10 @@ class Core:
             # decay seen items
             for item, v in self.predicted_items.items():
                 relative_cords = self.absolute2relative(item)
-                _, i, j =  camera_convert.space2img(vision.CAMERA_STATE, relative_cords[0], relative_cords[1], -12.5 if v[1] == RED else -15)
+                _, i, j = camera_convert.space2img(vision.CAMERA_STATE, relative_cords[0], relative_cords[1],
+                                                   -12.5 if v[1] == RED else -15)
                 if 0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H \
-                    and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V:
+                        and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V:
                     v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
 
         # decay all items and delete items with low value
@@ -442,7 +446,7 @@ class Core:
             )
             cords = self.absolute2relative(item)
             item_angle = angle_subtract(get_angle(cords), 0)
-            
+
             if cords[0] > -50 and -30 < cords[1] < 30:
                 self.motor = [0.5, 0.5]
             elif get_length(cords) < 150:
@@ -460,9 +464,7 @@ class Core:
                 self.motor = [0.5, -0.5]
             elif item_angle < 0:
                 self.motor = [-0.5, 0.5]
-                
-                
-                
+
             # if item_angle > AIM_ANGLE or item_angle > UNAIM_ANGLE and self.motor == [MOTOR_SPEED, -MOTOR_SPEED]:
             #     self.motor = [0.2, -0.2]
             # elif item_angle < -AIM_ANGLE or item_angle < -UNAIM_ANGLE and self.motor == [-MOTOR_SPEED, MOTOR_SPEED]:
@@ -504,12 +506,12 @@ class Core:
         self.output = bytes(output)
 
         return self.output
-    
+
     def absolute2relative(self, vec: tuple[float, float]) -> tuple[float, float]:
         return rotated(vec_sub(vec, self.predicted_cords), -self.predicted_angle)
+
     def relative2absolute(self, vec: tuple[float, float]) -> tuple[float, float]:
         return vec_add(rotated(vec, self.predicted_angle), self.predicted_cords)
-    
 
 
 def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> float:
