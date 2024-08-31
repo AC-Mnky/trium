@@ -134,9 +134,10 @@ if __name__ == "__main__":
     image = []
     for i in range(DATA_NUM):
         pic_path = f"{pic_dir}/{i}.jpg"
-        if not Path(pic_path).is_file():
-            print(f"cannot open {pic_path}")
-        image.append(cv2.imread(pic_path))
+        try:
+            image.append(cv2.imread(pic_path))
+        except FileNotFoundError:
+            print("cannot open", pic_path)
 
     camera_xyz_0 = np.array([295, 12, -112.1])
     camera_rotation_0 = np.array([53.2, 0.9, 0.9])
@@ -176,7 +177,7 @@ if __name__ == "__main__":
 
         # Generate Jacobian matrix (NUM_OF_DATAx16x8)
         J = np.array(
-            [Jacobian(image[j], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8])) for j in range(DATA_NUM)]
+            [Jacobian(image[i], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8])) for i in range(DATA_NUM)]
         ).reshape(-1, 8)
         print(f"Jacobian = {J}")
 
