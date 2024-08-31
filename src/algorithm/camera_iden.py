@@ -102,8 +102,7 @@ def partial_dirivative(
         The partial derivative of the camera parameters with respect to the given change in dt.
 
     Notes:
-        - The function assumes the existence of the CameraState class and the calculate_walls function.
-        - The function uses the DIFF_LEN constant for the change in dt.
+        The function uses the DIFF_LEN constant for the change in dt.
     """
     cam_0 = CameraState(camera_xyz, camera_rotation, fov, (320, 240))
     cam_1 = CameraState(camera_xyz, camera_rotation, fov, (320, 240))
@@ -151,16 +150,16 @@ def Jacobian(
     fov: tuple[float, float],
 ) -> np.matrix:
     """
-    Calculate the Jacobian matrix for a given image, camera position, camera rotation, and field of view.
+    Calculate the Jacobian matrix for a given image with camera position, camera rotation, and field of view.
 
     Args:
-        image (cv2.UMat): A cv2.UMat object representing the image.
-        camera_xyz: A tuple of three floats representing the camera position in 3D space.
-        camera_rotation: A tuple of three floats representing the camera rotation angles (theta, phi, omega).
-        fov: A tuple of two floats representing the field of view angles (half_fov_h, half_fov_v).
+        image (cv2.UMat): The image to be calculated.
+        camera_xyz (tuple): The camera position in 3D space (x, y, z).
+        camera_rotation (tuple): The camera rotation angles (theta, phi, omega).
+        fov (tuple): The field of view angles (half_fov_h, half_fov_v).
 
     Returns:
-        Jacobian: A numpy matrix representing the Jacobian matrix.
+        Jacobian (np.matrix): The Jacobian matrix.
 
     """
     Jacobian = np.asmatrix(
