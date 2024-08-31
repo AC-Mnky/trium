@@ -1,12 +1,12 @@
-from camera_convert import CameraState
-import find_color
-import camera_convert
-import cv2
-import core
-import os
-import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
+
+import camera_convert
+import core
+import cv2
+import find_color
+import matplotlib.pyplot as plt
+import numpy as np
+from camera_convert import CameraState
 
 DIFF_LEN = 0.1
 IDEN_TIMES = 50
@@ -56,7 +56,6 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
     # angles = np.array(angles_raw)
 
     # distances and angles should be 2 elements long
-    # parameters = np.concatenate((distances, angles))
     parameters = distances
 
     return parameters
@@ -140,13 +139,12 @@ if __name__ == "__main__":
     pic_dir = current_dir.parent.parent / "assets" / "openCV_pic/test_pics"
     image = []
     for i in range(NUM_OF_DATA):
-        image_index = i
-        pic_path = f"{pic_dir}/{image_index}.jpg"
-        if not os.path.isfile(pic_path):
+        pic_path = f"{pic_dir}/{i}.jpg"
+        if not Path(pic_path).is_file():
             print(f"cannot open {pic_path}")
         image.append(cv2.imread(pic_path))
 
-    camera_xyz_0 = np.array([295, 12, -221])
+    camera_xyz_0 = np.array([295, 12, -112.1])
     camera_rotation_0 = np.array([53.2, 0.9, 0.9])
     fov_0 = np.array([62.2, 62])
     resolution = (320, 240)
