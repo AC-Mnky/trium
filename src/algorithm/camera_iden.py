@@ -9,8 +9,8 @@ import numpy as np
 from camera_convert import CameraState
 
 
-DIFF_LEN = 0.05
-IDEN_TIMES = 50
+DIFF_LEN = 0.1
+IDEN_TIMES = 100
 DATA_NUM = 8
 MINIMUM_ERROR = 100
 
@@ -152,24 +152,20 @@ if __name__ == "__main__":
 
     for i in range(IDEN_TIMES):
         # Generate camera state objects
-        print("p = ", p)
+        print(f"p = {p}")
         cam = CameraState(tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]), resolution)
 
         # Calculate the ideal position with the current parameters
-        E_cal = calculate_walls(
-            cam, image[0]
-        )  # [2 distances, (2 angels,) 2 distancess, (2 angels,)...], nparray
-        for j in range(1, DATA_NUM):
-            E_cal = np.concatenate((E_cal, calculate_walls(cam, image[j])))
-        print("calculated E = ", E_cal)
+        E_cal = np.array([calculate_walls(cam, image[j]) for j in range(DATA_NUM)]).reshape(-1)
+        print(f"calculated E = {E_cal}")
 
         # Calculate the current error
         d_E = (E_test - E_cal).T
-        print("|dE| = ", np.linalg.norm(d_E))
-        print("dE = ", d_E)
+        print(f"|dE| = {np.linalg.norm(d_E)}")
+        print(f"dE = {d_E}")
 
-        if np.linalg.norm(d_E) > 2500:
-            dE_list.append(2500)
+        if np.linalg.norm(d_E) > 2000:
+            dE_list.append(2000)
         else:
             dE_list.append(np.linalg.norm(d_E))
 
@@ -182,7 +178,7 @@ if __name__ == "__main__":
         J = np.array(
             [Jacobian(image[j], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8])) for j in range(DATA_NUM)]
         ).reshape(-1, 8)
-        print("Jacobian = ", J)
+        print(f"Jacobian = {J}")
 
         # 通过误差和雅可比矩阵解算参数
         if ENABLE_SMOOTH_FACTOR:
@@ -197,7 +193,7 @@ if __name__ == "__main__":
         p += d_p
         p = np.reshape(p, (8,))
 
-        print("p = ", p)
+        print(f"p = {p}")
 
     fig1 = plt.figure()
     ax1 = fig1.add_subplot(111)
