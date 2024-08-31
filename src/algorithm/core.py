@@ -1,7 +1,7 @@
+import time
 from struct import unpack
 
 import numpy as np
-import time
 
 try:
     import camera_convert
@@ -97,7 +97,7 @@ def calc_weight(
     """
     Calculate the weight based on the given parameters.
 
-    Parameters:
+    Args:
         cord_difference (float): The difference in coordinates.
         angle_difference (float): The difference in angles.
         distance_to_wall (float): The distance to the wall.
@@ -163,7 +163,6 @@ def merge_item_prediction(dictionary) -> None:
 class Core:
 
     def __init__(self, time: float, input_protocol: int):
-
         self.start_time = time
         self.last_update_time = time
         self.dt = 0
