@@ -6,6 +6,7 @@ import cv2
 import find_color
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 from camera_convert import CameraState
 
 
@@ -16,7 +17,7 @@ MINIMUM_ERROR = 100
 
 ENABLE_SMOOTH_FACTOR = True
 OVERLAY_DISTANCE = 40  # The distance criterion of endpoints, deciding whether to merge two walls
-LAMBDA = 10
+LAMBDA = 0
 
 
 def calculate_walls(cam: CameraState, image: cv2.UMat) -> np.ndarray:
@@ -71,6 +72,7 @@ def calculate_walls(cam: CameraState, image: cv2.UMat) -> np.ndarray:
             distances_raw[0], distances_raw[1] = distances_raw[1], distances_raw[0]
     else:
         distances_raw.append(distances_raw[0])
+    
     # distances = np.array(distances_raw)
 
     # angles = np.array(angles_raw)
@@ -236,7 +238,11 @@ if __name__ == "__main__":
         else:
             d_p = np.dot(np.linalg.pinv(J), d_E)
 
-        # Compensate the parameters
+        # to avoid p becoming too large
+        d_p = np.array([math.atan(d_p[i]) for i in range(len(d_p))])
+        d_p = d_p/(math.pi/2)
+
+        # 补偿参数
         p = np.reshape(p, (1, 8))
         p += d_p
         p = np.reshape(p, (8,))
