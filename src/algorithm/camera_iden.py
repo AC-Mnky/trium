@@ -179,7 +179,7 @@ if __name__ == "__main__":
         ).reshape(-1, 8)
         print(f"Jacobian = {J}")
 
-        # 通过误差和雅可比矩阵解算参数
+        # Calculate the parameter compensation with the Jacobian matrix and error
         if ENABLE_SMOOTH_FACTOR:
             # Introduce a smooth factor to make the result curve smoother
             J_Tik = np.linalg.inv(J.T @ J + LAMBDA * np.eye(8)) @ J.T
@@ -187,7 +187,7 @@ if __name__ == "__main__":
         else:
             d_p = np.dot(np.linalg.pinv(J), d_E)
 
-        # 补偿参数
+        # Compensate the parameters
         p = np.reshape(p, (1, 8))
         p += d_p
         p = np.reshape(p, (8,))
