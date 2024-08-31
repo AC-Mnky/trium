@@ -170,14 +170,12 @@ if __name__ == "__main__":
         else:
             dE_list.append(np.linalg.norm(d_E))
 
-        # dE_list.append(d_E)
-
         if np.linalg.norm(d_E) < MINIMUM_ERROR:
             break
 
         # Generate Jacobian matrix (NUM_OF_DATAx16x8)
         J = np.array(
-            [Jacobian(image[i], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8])) for i in range(DATA_NUM)]
+            [Jacobian(image[j], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8])) for j in range(DATA_NUM)]
         ).reshape(-1, 8)
         print(f"Jacobian = {J}")
 
@@ -195,6 +193,8 @@ if __name__ == "__main__":
         p = np.reshape(p, (8,))
 
         print(f"p = {p}")
+        print(f"d_p = {d_p}")
+        print(f"loop {i} finished\n")
 
     fig1 = plt.figure()
     ax1 = fig1.add_subplot(111)
