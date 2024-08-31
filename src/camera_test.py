@@ -12,9 +12,8 @@ except ModuleNotFoundError:
     import os
     import sys
 
-    work_path = os.getcwd()
-    print(work_path)
-    sys.path.append(f"{work_path}/../algorithm")
+    current_dir = os.path.dirname(__file__)
+    sys.path.append(f"{current_dir}")
     from algorithm import camera_convert, find_color, vision
 
 else:

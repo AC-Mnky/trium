@@ -4,7 +4,11 @@ try:
     import core
     import draw_alpha
 except ModuleNotFoundError:
-    from algorithm import core, draw_alpha
+    import os
+    import sys
+
+    current_dir = os.path.dirname(__file__)
+    sys.path.append(f"{current_dir}")
 else:
     ...
 
