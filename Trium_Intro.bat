@@ -178,8 +178,9 @@ echo [Current Action] Play Music!
 echo.
 echo Please choose your music (enter letter in square brackets):
 echo [A] 10th Symphony TYPE/MOON  [B] Scar Red
-if %var%==A goto play_10th_symphony
-if %var%==B goto play_scar_red
+set /p music=
+if %music%==A goto play_10th_symphony
+if %music%==B goto play_scar_red
 else echo Invalid input, please try again.
 goto test
 
