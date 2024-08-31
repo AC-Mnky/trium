@@ -9,7 +9,7 @@ import numpy as np
 from camera_convert import CameraState
 
 DIFF_LEN = 0.1
-IDEN_TIMES = 50
+IDEN_TIMES = 500
 DATA_NUM = 8
 MINIMUM_ERROR = 100
 ENABLE_SMOOTH_FACTOR = True
@@ -26,13 +26,15 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
             )
             for wall in walls_in_image
         ]
+        
+    print(len(walls_raw))
 
     walls = [walls_raw[0]]
     # merge near walls
     for w_i in walls_raw:
         if not (
-            core.get_length(core.vec_sub(walls[0][0], w_i[0])) < 50
-            and core.get_length(core.vec_sub(walls[0][1], w_i[1])) < 50
+            core.get_length(core.vec_sub(walls[0][0], w_i[0])) < 40
+            and core.get_length(core.vec_sub(walls[0][1], w_i[1])) < 40
         ):
             walls.append(w_i)
             break
@@ -53,13 +55,13 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
     if distances_raw[1] > distances_raw[0]:
         distances_raw[0], distances_raw[1] = distances_raw[1], distances_raw[0]
 
-    distances = np.array(distances_raw)
+    # distances = np.array(distances_raw)
     # angles = np.array(angles_raw)
 
     # distances and angles should be 2 elements long
-    parameters = distances
+    # parameters = distances
 
-    return parameters
+    return np.array(distances_raw)
 
 
 def partial_dirivative(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: tuple, fov_0: tuple, dt: str):
