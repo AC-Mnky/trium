@@ -30,7 +30,7 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
     print(len(walls_raw))
 
     walls = [walls_raw[0]]
-    # merge near walls
+    # merge walls if they are too close. here two endpoints are used to determine "close".
     for w_i in walls_raw:
         if not (
             core.get_length(core.vec_sub(walls[0][0], w_i[0])) < 40
