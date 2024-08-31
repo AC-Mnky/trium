@@ -20,17 +20,11 @@ except ModuleNotFoundError:
 else:
     ...
 
-<<<<<<< Updated upstream
 """
 MODE = "camera", "file", "adjust"
 """
 MODE = "camera"
 
-=======
-MODE = "file"
-# MODE = 'adjust'
-# MODE = 'camera'
->>>>>>> Stashed changes
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
