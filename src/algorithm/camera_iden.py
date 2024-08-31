@@ -15,6 +15,7 @@ DATA_NUM = 8
 MINIMUM_ERROR = 100
 
 ENABLE_SMOOTH_FACTOR = True
+OVERLAY_DISTANCE = 40  # The distance criterion of endpoints, deciding whether to merge two walls
 LAMBDA = 10
 
 
@@ -36,8 +37,8 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
     # merge walls if they are too close. here two endpoints are used to determine "close".
     for w_i in walls_raw:
         if not (
-            core.get_length(core.vec_sub(walls[0][0], w_i[0])) < 40
-            and core.get_length(core.vec_sub(walls[0][1], w_i[1])) < 40
+            core.get_length(core.vec_sub(walls[0][0], w_i[0])) < OVERLAY_DISTANCE
+            and core.get_length(core.vec_sub(walls[0][1], w_i[1])) < OVERLAY_DISTANCE
         ):
             walls.append(w_i)
             break
@@ -103,8 +104,8 @@ def partial_dirivative(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: 
 
     # dt_A1 = d_parameters[2]/STEP_LEN
     # dt_A2 = d_parameters[3]/STEP_LEN
-
     # return [dt_D1,dt_D2,dt_A1,dt_A2]
+
     del cam_0
     del cam_1
     # return [dt_D1, dt_D2]
