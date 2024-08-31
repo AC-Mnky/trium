@@ -11,6 +11,9 @@
 - 代码要用到的数据请在[`assets`](assets/)创建新文件夹并放入，零碎的数据可放入[`assets/miscellaneous`](assets/miscellaneous/)。（**加工数据时，请不要删除旧的数据，而是创建一个新文件夹并将加工后的数据放入**）
 - 文档类材料请放入[`doc`](doc/)。当系统设计发生增添或删减时，请及时更新文档。如果有值得额外说明的问题，可以在其中增加新文件加以注释。
 
+> [!TIP]
+> 若是深陷迷茫，不妨点击[`Trium_Intro`](Trium_Intro.bat)。
+
 ## About this directory
 
 - [`assets`](assets/) -- 一些图片，以及会在算法中用到的非代码数据。
