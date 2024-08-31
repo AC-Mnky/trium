@@ -12,7 +12,7 @@
 - 文档类材料请放入[`doc`](doc/)。当系统设计发生增添或删减时，请及时更新文档。如果有值得额外说明的问题，可以在其中增加新文件加以注释。
 
 > [!TIP]
-> 若是深陷迷茫，不妨点击[`Trium_Intro`](Trium_Intro.bat)。
+> 若是深陷迷茫，不妨运行[`Trium_Intro`](Trium_Intro.bat)。
 
 ## About this directory
 
