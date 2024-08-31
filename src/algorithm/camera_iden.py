@@ -6,7 +6,6 @@ import cv2
 import find_color
 import matplotlib.pyplot as plt
 import numpy as np
-import math
 from camera_convert import CameraState
 
 
@@ -22,7 +21,7 @@ LAMBDA = 0
 
 def calculate_walls(cam: CameraState, image: cv2.UMat) -> np.ndarray:
     """
-    Using given images to calculate the walls (estimated by the algorithm) in the image.
+    Use given images to calculate the walls estimated by the algorithm.
 
     Args:
         cam (CameraState): The camera state object.
@@ -72,7 +71,7 @@ def calculate_walls(cam: CameraState, image: cv2.UMat) -> np.ndarray:
             distances_raw[0], distances_raw[1] = distances_raw[1], distances_raw[0]
     else:
         distances_raw.append(distances_raw[0])
-    
+
     # distances = np.array(distances_raw)
 
     # angles = np.array(angles_raw)
@@ -101,7 +100,8 @@ def partial_dirivative(
         dt (string): A string representing the parameter to calculate the partial derivative for.
 
     Returns:
-        The partial derivative of the camera parameters with respect to the given change in dt.
+        partial_dirivative (np.ndarray):
+            The partial derivative of the camera parameters with respect to the given change in dt.
 
     Notes:
         The function uses the DIFF_LEN constant for the change in dt.
@@ -239,8 +239,8 @@ if __name__ == "__main__":
             d_p = np.dot(np.linalg.pinv(J), d_E)
 
         # to avoid p becoming too large
-        d_p = np.array([math.atan(d_p[i]) for i in range(len(d_p))])
-        d_p = d_p/(math.pi/2)
+        d_p = np.array([np.atan(d_p[i]) for i in range(len(d_p))])
+        d_p = d_p / (np.pi / 2)
 
         # 补偿参数
         p = np.reshape(p, (1, 8))
