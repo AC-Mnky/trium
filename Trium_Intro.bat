@@ -175,8 +175,25 @@ goto choose_exit
 :test
 echo.
 echo [Current Action] Play Music!
+echo.
+echo Please choose your music (enter letter in square brackets):
+echo [A] 10th Symphony TYPE/MOON  [B] Scar Red
+set /p music=
+if %music%==A goto play_10th_symphony
+if %music%==B goto play_scar_red
+else echo Invalid input, please try again.
+goto test
+
+:play_10th_symphony
 start %cd%\assets\music\10th_symphony_type-MOON.mp3
 echo Current Playing: 10th Symphony TYPE/MOON
+echo.
+pause
+goto choose_intro
+
+:play_scar_red
+start %cd%\assets\music\Scar_Red.mp3
+echo Current Playing: Scar Red
 echo.
 pause
 goto choose_intro

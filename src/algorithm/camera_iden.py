@@ -10,8 +10,8 @@ import math
 from camera_convert import CameraState
 
 
-DIFF_LEN = 0.05
-IDEN_TIMES = 50
+DIFF_LEN = 0.1
+IDEN_TIMES = 100
 DATA_NUM = 8
 MINIMUM_ERROR = 100
 
@@ -73,10 +73,10 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
     return np.array(distances_raw)
 
 
-def partial_dirivative(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: tuple, fov_0: tuple, dt: str):
+def partial_dirivative(image: cv2.UMat, camera_xyz: tuple, camera_rotation: tuple, fov: tuple, dt: str):
 
-    cam_0 = CameraState(camera_xyz_0, camera_rotation_0, fov_0, (320, 240))
-    cam_1 = CameraState(camera_xyz_0, camera_rotation_0, fov_0, (320, 240))
+    cam_0 = CameraState(camera_xyz, camera_rotation, fov, (320, 240))
+    cam_1 = CameraState(camera_xyz, camera_rotation, fov, (320, 240))
 
     if dt == "x":
         cam_1.x += DIFF_LEN
@@ -132,13 +132,14 @@ def Jacobian(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: tuple, fov
 
 if __name__ == "__main__":
     current_dir = Path(__file__).parent
-    pic_dir = current_dir.parent.parent / "assets" / "openCV_pic/test_pics"
+    pic_dir = current_dir.parent.parent / "assets/openCV_pic/test_pics"
     image = []
     for i in range(DATA_NUM):
         pic_path = f"{pic_dir}/{i}.jpg"
-        if not Path(pic_path).is_file():
-            print(f"cannot open {pic_path}")
-        image.append(cv2.imread(pic_path))
+        try:
+            image.append(cv2.imread(pic_path))
+        except FileNotFoundError:
+            print("cannot open", pic_path)
 
     camera_xyz_0 = np.array([295, 12, -112.1])
     camera_rotation_0 = np.array([53.2, 0.9, 0.9])
@@ -154,28 +155,22 @@ if __name__ == "__main__":
 
     for i in range(IDEN_TIMES):
         # Generate camera state objects
-        print("p = ", p)
+        print(f"p = {p}")
         cam = CameraState(tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]), resolution)
 
         # Calculate the ideal position with the current parameters
-        E_cal = calculate_walls(
-            cam, image[0]
-        )  # [2 distances, (2 angels,) 2 distancess, (2 angels,)...], nparray
-        for j in range(1, DATA_NUM):
-            E_cal = np.concatenate((E_cal, calculate_walls(cam, image[j])))
-        print("calculated E = ", E_cal)
+        E_cal = np.array([calculate_walls(cam, image[j]) for j in range(DATA_NUM)]).reshape(-1)
+        print(f"calculated E = {E_cal}")
 
         # Calculate the current error
         d_E = (E_test - E_cal).T
-        print("|dE| = ", np.linalg.norm(d_E))
-        print("dE = ", d_E)
+        print(f"|dE| = {np.linalg.norm(d_E)}")
+        print(f"dE = {d_E}")
 
-        if np.linalg.norm(d_E) > 2500:
-            dE_list.append(2500)
+        if np.linalg.norm(d_E) > 2000:
+            dE_list.append(2000)
         else:
             dE_list.append(np.linalg.norm(d_E))
-
-        # dE_list.append(d_E)
 
         if np.linalg.norm(d_E) < MINIMUM_ERROR:
             break
@@ -184,9 +179,9 @@ if __name__ == "__main__":
         J = np.array(
             [Jacobian(image[j], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8])) for j in range(DATA_NUM)]
         ).reshape(-1, 8)
-        print("Jacobian = ", J)
+        print(f"Jacobian = {J}")
 
-        # 通过误差和雅可比矩阵解算参数
+        # Calculate the parameter compensation with the Jacobian matrix and error
         if ENABLE_SMOOTH_FACTOR:
             # Introduce a smooth factor to make the result curve smoother
             J_Tik = np.linalg.inv(J.T @ J + LAMBDA * np.eye(8)) @ J.T
@@ -210,7 +205,9 @@ if __name__ == "__main__":
         p += d_p
         p = np.reshape(p, (8,))
 
-        print("p = ", p)
+        print(f"p = {p}")
+        print(f"d_p = {d_p}")
+        print(f"loop {i} finished\n")
 
     fig1 = plt.figure()
     ax1 = fig1.add_subplot(111)
