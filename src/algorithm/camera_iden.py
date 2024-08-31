@@ -13,8 +13,9 @@ DIFF_LEN = 0.05
 IDEN_TIMES = 50
 DATA_NUM = 8
 MINIMUM_ERROR = 100
+
 ENABLE_SMOOTH_FACTOR = True
-LAMBDA = 0
+LAMBDA = 10
 
 
 def calculate_walls(cam: CameraState, image: cv2.UMat):
@@ -142,18 +143,18 @@ if __name__ == "__main__":
     resolution = (320, 240)
     E_test = np.array(
         [1180, 350, 1500, 690, 930, 900, 1180, 1100, 1760, 770, 1770, 1300, 2110, 350, 2230, 620]
-    )  # 位置测量值
+    )  # Measured position
     p = np.concatenate((camera_xyz_0, camera_rotation_0, fov_0))
     d_p = np.zeros(8)
 
     dE_list = []
 
     for i in range(IDEN_TIMES):
-        # 生成对象
+        # Generate camera state objects
         print("p = ", p)
         cam = CameraState(tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]), resolution)
 
-        # 根据当前参数计算理想位置
+        # Calculate the ideal position with the current parameters
         E_cal = calculate_walls(
             cam, image[0]
         )  # [2 distances, (2 angels,) 2 distancess, (2 angels,)...], nparray
@@ -184,6 +185,7 @@ if __name__ == "__main__":
 
         # 通过误差和雅可比矩阵解算参数
         if ENABLE_SMOOTH_FACTOR:
+            # Introduce a smooth factor to make the result curve smoother
             J_Tik = np.linalg.inv(J.T @ J + LAMBDA * np.eye(8)) @ J.T
             d_p = np.dot(J_Tik, d_E)
         else:
