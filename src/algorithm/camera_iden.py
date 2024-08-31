@@ -6,7 +6,6 @@ import cv2
 import find_color
 import matplotlib.pyplot as plt
 import numpy as np
-import math
 from camera_convert import CameraState
 
 
@@ -20,7 +19,17 @@ OVERLAY_DISTANCE = 40  # The distance criterion of endpoints, deciding whether t
 LAMBDA = 0
 
 
-def calculate_walls(cam: CameraState, image: cv2.UMat):
+def calculate_walls(cam: CameraState, image: cv2.UMat) -> np.ndarray:
+    """
+    Use given images to calculate the walls estimated by the algorithm.
+
+    Args:
+        cam (CameraState): The camera state object.
+        image (cv2.UMat): The image to be processed.
+
+    Returns:
+        distances (np.ndarray): The distances of the walls in the image.
+    """
     walls_in_image = find_color.find_wall_bottom_p(image)
 
     if walls_in_image is not None:
@@ -62,7 +71,7 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
             distances_raw[0], distances_raw[1] = distances_raw[1], distances_raw[0]
     else:
         distances_raw.append(distances_raw[0])
-    
+
     # distances = np.array(distances_raw)
 
     # angles = np.array(angles_raw)
@@ -73,8 +82,30 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
     return np.array(distances_raw)
 
 
-def partial_dirivative(image: cv2.UMat, camera_xyz: tuple, camera_rotation: tuple, fov: tuple, dt: str):
+def partial_dirivative(
+    image: cv2.UMat,
+    camera_xyz: tuple[float, float, float],
+    camera_rotation: tuple[float, float, float],
+    fov: tuple[float, float],
+    dt: str,
+) -> np.ndarray:
+    """
+    Calculate the partial derivative of the camera parameters with respect to the given change in dt.
 
+    Args:
+        image (cv2.UMat): A cv2.UMat object representing the image.
+        camera_xyz (tuple): A tuple representing the camera's x, y, and z coordinates.
+        camera_rotation (tuple): A tuple representing the camera's rotation angles (theta, phi, omega).
+        fov (tuple): A tuple representing the camera's field of view angles (half_fov_h, half_fov_v).
+        dt (string): A string representing the parameter to calculate the partial derivative for.
+
+    Returns:
+        partial_dirivative (np.ndarray):
+            The partial derivative of the camera parameters with respect to the given change in dt.
+
+    Notes:
+        The function uses the DIFF_LEN constant for the change in dt.
+    """
     cam_0 = CameraState(camera_xyz, camera_rotation, fov, (320, 240))
     cam_1 = CameraState(camera_xyz, camera_rotation, fov, (320, 240))
 
@@ -114,17 +145,35 @@ def partial_dirivative(image: cv2.UMat, camera_xyz: tuple, camera_rotation: tupl
     return (parameters_1 - parameters_0) / DIFF_LEN
 
 
-def Jacobian(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: tuple, fov_0: tuple):
+def Jacobian(
+    image: cv2.UMat,
+    camera_xyz: tuple[float, float, float],
+    camera_rotation: tuple[float, float, float],
+    fov: tuple[float, float],
+) -> np.matrix:
+    """
+    Calculate the Jacobian matrix for a given image with camera position, camera rotation, and field of view.
+
+    Args:
+        image (cv2.UMat): The image to be calculated.
+        camera_xyz (tuple): The camera position in 3D space (x, y, z).
+        camera_rotation (tuple): The camera rotation angles (theta, phi, omega).
+        fov (tuple): The field of view angles (half_fov_h, half_fov_v).
+
+    Returns:
+        Jacobian (np.matrix): The Jacobian matrix.
+
+    """
     Jacobian = np.asmatrix(
         [
-            partial_dirivative(image, camera_xyz_0, camera_rotation_0, fov_0, "x"),
-            partial_dirivative(image, camera_xyz_0, camera_rotation_0, fov_0, "y"),
-            partial_dirivative(image, camera_xyz_0, camera_rotation_0, fov_0, "z"),
-            partial_dirivative(image, camera_xyz_0, camera_rotation_0, fov_0, "theta"),
-            partial_dirivative(image, camera_xyz_0, camera_rotation_0, fov_0, "phi"),
-            partial_dirivative(image, camera_xyz_0, camera_rotation_0, fov_0, "omega"),
-            partial_dirivative(image, camera_xyz_0, camera_rotation_0, fov_0, "half_fov_h"),
-            partial_dirivative(image, camera_xyz_0, camera_rotation_0, fov_0, "half_fov_v"),
+            partial_dirivative(image, camera_xyz, camera_rotation, fov, "x"),
+            partial_dirivative(image, camera_xyz, camera_rotation, fov, "y"),
+            partial_dirivative(image, camera_xyz, camera_rotation, fov, "z"),
+            partial_dirivative(image, camera_xyz, camera_rotation, fov, "theta"),
+            partial_dirivative(image, camera_xyz, camera_rotation, fov, "phi"),
+            partial_dirivative(image, camera_xyz, camera_rotation, fov, "omega"),
+            partial_dirivative(image, camera_xyz, camera_rotation, fov, "half_fov_h"),
+            partial_dirivative(image, camera_xyz, camera_rotation, fov, "half_fov_v"),
         ]
     )
     return Jacobian.T
@@ -190,8 +239,8 @@ if __name__ == "__main__":
             d_p = np.dot(np.linalg.pinv(J), d_E)
 
         # to avoid p becoming too large
-        d_p = np.array([math.atan(d_p[i]) for i in range(len(d_p))])
-        d_p = d_p/(math.pi/2)
+        d_p = np.array([np.atan(d_p[i]) for i in range(len(d_p))])
+        d_p = d_p / (np.pi / 2)
 
         # 补偿参数
         p = np.reshape(p, (1, 8))
