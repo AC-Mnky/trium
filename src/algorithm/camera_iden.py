@@ -90,8 +90,8 @@ def partial_dirivative(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: 
 
     cam_1.update()
     # 1/2 distances or angles calculate with two pairs of elements
-    parameters_1 = calculate_walls(cam_0, image)
-    parameters_2 = calculate_walls(cam_1, image)
+    parameters_0 = calculate_walls(cam_0, image)
+    parameters_1 = calculate_walls(cam_1, image)
 
     # dt_A1 = d_parameters[2]/STEP_LEN
     # dt_A2 = d_parameters[3]/STEP_LEN
@@ -100,7 +100,7 @@ def partial_dirivative(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: 
     del cam_0
     del cam_1
     # return [dt_D1, dt_D2]
-    return (parameters_2 - parameters_1) / DIFF_LEN
+    return (parameters_1 - parameters_0) / DIFF_LEN
 
 
 def Jacobian(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: tuple, fov_0: tuple):
