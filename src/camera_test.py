@@ -22,7 +22,7 @@ else:
 """
 MODE = "camera", "file", "adjust"
 """
-MODE = "camera"
+MODE = "file"
 
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
