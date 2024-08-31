@@ -71,10 +71,10 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
     return np.array(distances_raw)
 
 
-def partial_dirivative(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: tuple, fov_0: tuple, dt: str):
+def partial_dirivative(image: cv2.UMat, camera_xyz: tuple, camera_rotation: tuple, fov: tuple, dt: str):
 
-    cam_0 = CameraState(camera_xyz_0, camera_rotation_0, fov_0, (320, 240))
-    cam_1 = CameraState(camera_xyz_0, camera_rotation_0, fov_0, (320, 240))
+    cam_0 = CameraState(camera_xyz, camera_rotation, fov, (320, 240))
+    cam_1 = CameraState(camera_xyz, camera_rotation, fov, (320, 240))
 
     if dt == "x":
         cam_1.x += DIFF_LEN
