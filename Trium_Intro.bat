@@ -115,6 +115,7 @@ set "PACKAGE_NAME=black"
 %PYTHON_EXE% -c "import %PACKAGE_NAME%; print(%PACKAGE_NAME%)" >nul 2>nul
 if errorlevel 1 (
     echo %PACKAGE_NAME% is not installed. Install %PACKAGE_NAME% to format?
+    :choose_install
     set /p var_install= [y/n]
     if %var_install%==Y (
         echo Installing %PACKAGE_NAME%...
@@ -124,9 +125,16 @@ if errorlevel 1 (
         echo Installing %PACKAGE_NAME%...
         %PYTHON_EXE% -m pip install %PACKAGE_NAME%
         echo %PACKAGE_NAME% is installed. Start formatting.
-    ) else (
+    ) else if %var_install%==N (
         echo Quit formatting.
         goto choose_intro
+    ) else if %var_install%==n (
+        echo Quit formatting.
+        goto choose_intro
+    ) else ( 
+        echo Invalid input, please try again.
+        goto choose_install
+    )
 ) else (
     echo %PACKAGE_NAME% is installed. Start formatting.
 )
