@@ -10,11 +10,11 @@ from camera_convert import CameraState
 
 
 DIFF_LEN = 0.05
-IDEN_TIMES = 400
-NUM_OF_DATA = 8
+IDEN_TIMES = 50
+DATA_NUM = 8
 MINIMUM_ERROR = 100
-LAM = 0
-
+ENABLE_SMOOTH_FACTOR = True
+LAMBDA = 0
 
 
 def calculate_walls(cam: CameraState, image: cv2.UMat):
@@ -28,11 +28,11 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
             )
             for wall in walls_in_image
         ]
-        
-    print(len(walls_raw))
+
+    # print(len(walls_raw))
 
     walls = [walls_raw[0]]
-    # merge near walls
+    # merge walls if they are too close. here two endpoints are used to determine "close".
     for w_i in walls_raw:
         if not (
             core.get_length(core.vec_sub(walls[0][0], w_i[0])) < 40
@@ -54,13 +54,12 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
         distances_raw.append(distance)
         # angles_raw.append(angle)
 
-
-    if(len(distances_raw) > 1):
+    if len(distances_raw) > 1:
         if distances_raw[1] > distances_raw[0]:
             distances_raw[0], distances_raw[1] = distances_raw[1], distances_raw[0]
     else:
         distances_raw.append(distances_raw[0])
-    distances = np.array(distances_raw)
+    # distances = np.array(distances_raw)
 
     # angles = np.array(angles_raw)
 
@@ -167,13 +166,12 @@ if __name__ == "__main__":
         print("|dE| = ", np.linalg.norm(d_E))
         print("dE = ", d_E)
 
-        
         if np.linalg.norm(d_E) > 2500:
             dE_list.append(2500)
         else:
             dE_list.append(np.linalg.norm(d_E))
-        
-        #dE_list.append(d_E)
+
+        # dE_list.append(d_E)
 
         if np.linalg.norm(d_E) < MINIMUM_ERROR:
             break
@@ -184,13 +182,12 @@ if __name__ == "__main__":
         ).reshape(-1, 8)
         print("Jacobian = ", J)
 
-
-
-        
-        #通过误差和雅可比矩阵解算参数
-        J_Tik = np.linalg.inv(J.T@J + lam * np.eye(8)) @ J.T
-        d_p = np.dot(np.linalg.pinv(J), d_E)
-
+        # 通过误差和雅可比矩阵解算参数
+        if ENABLE_SMOOTH_FACTOR:
+            J_Tik = np.linalg.inv(J.T @ J + LAMBDA * np.eye(8)) @ J.T
+            d_p = np.dot(J_Tik, d_E)
+        else:
+            d_p = np.dot(np.linalg.pinv(J), d_E)
 
         # 补偿参数
         p = np.reshape(p, (1, 8))
@@ -203,4 +200,3 @@ if __name__ == "__main__":
     ax1 = fig1.add_subplot(111)
     ax1.plot(dE_list)
     plt.show()
-
