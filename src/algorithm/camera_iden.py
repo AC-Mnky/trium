@@ -189,18 +189,11 @@ if __name__ == "__main__":
         else:
             d_p = np.dot(np.linalg.pinv(J), d_E)
 
-        # 避免dp过大
-
-        #法一
-        # d_p = np.array([math.atan(d_p[i]) for i in range(len(d_p))])
-        # d_p = d_p/(math.pi/2)
+        # to avoid p becoming too large
+        d_p = np.array([math.atan(d_p[i]) for i in range(len(d_p))])
+        d_p = d_p/(math.pi/2)
 
         # 补偿参数
-        p = np.reshape(p, (1, 8))
-        p += d_p
-        p = np.reshape(p, (8,))
-
-        # 法二
         p = np.reshape(p, (1, 8))
         p += d_p
         p = np.reshape(p, (8,))
