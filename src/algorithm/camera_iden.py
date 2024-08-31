@@ -12,6 +12,7 @@ DIFF_LEN = 0.1
 IDEN_TIMES = 50
 NUM_OF_DATA = 8
 MINIMUM_ERROR = 100
+ENABLE_SMOOTH_FACTOR = True
 
 
 def calculate_walls(cam: CameraState, image: cv2.UMat):
@@ -185,11 +186,14 @@ if __name__ == "__main__":
             J = np.concatenate((J, Jacobian(image[j], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]))))
         print("Jacobian = ", J)
 
-        lam = 1
-        # 通过误差和雅可比矩阵解算参数
-        J_Tik = np.linalg.inv(J.T @ J + lam * np.eye(8)) @ J.T
 
-        d_p = np.dot(np.linalg.pinv(J), d_E)
+        if ENABLE_SMOOTH_FACTOR:
+            # 通过误差和雅可比矩阵解算参数
+            lam = 100
+            J_Tik = np.linalg.inv(J.T @ J + lam * np.eye(8)) @ J.T
+            d_p = np.dot(J_Tik, d_E)
+        else:
+            d_p = np.dot(np.linalg.pinv(J), d_E)
 
         # 补偿参数
         p = np.reshape(p, (1, 8))
