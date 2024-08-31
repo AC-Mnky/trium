@@ -130,7 +130,7 @@ def Jacobian(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: tuple, fov
 
 if __name__ == "__main__":
     current_dir = Path(__file__).parent
-    pic_dir = current_dir.parent.parent / "assets" / "openCV_pic/test_pics"
+    pic_dir = current_dir.parent.parent / "assets/openCV_pic/test_pics"
     image = []
     for i in range(DATA_NUM):
         pic_path = f"{pic_dir}/{i}.jpg"
