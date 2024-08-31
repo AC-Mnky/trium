@@ -5,9 +5,10 @@ import cv2
 import core as c
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 
-DIFF_LEN = 10
-IDEN_TIMES = 5
+DIFF_LEN = 0.1
+IDEN_TIMES = 50
 NUM_OF_DATA = 8
 MINIMUM_ERROR = 100
 
@@ -86,9 +87,16 @@ def partial_dirivative(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: 
     else:
         print("ERROR")
 
+    cam_1.update()
     # 1/2 distances or angles calculate with two pairs of elements
     parameters_1 = calculate_walls(cam_0, image)
     parameters_2 = calculate_walls(cam_1, image)
+
+    # if dt == "theta":
+    #     print(cam_0.theta)
+    #     print(cam_1.theta)
+    #     print(cam_0.trans)
+    #     print(cam_1.trans)
     # print(parameters_1)
     # print(parameters_2)
 
@@ -136,7 +144,7 @@ if __name__ == "__main__":
             print("cannot open " + filename)
         image.append(cv2.imread(filename))
 
-    camera_xyz_0 = np.array([891.39, -119.73, -112.10])
+    camera_xyz_0 = np.array([295, 12, -221])
     camera_rotation_0 = np.array([53.2, 0.9, 0.9])
     fov_0 = np.array([62.2, 62])
     resolution = (320, 240)
@@ -145,6 +153,8 @@ if __name__ == "__main__":
     )  # 位置测量值
     p = np.concatenate((camera_xyz_0, camera_rotation_0, fov_0))
     d_p = np.zeros(8)
+
+    dE_list = []
 
     for i in range(IDEN_TIMES):
         # 生成对象
@@ -159,20 +169,28 @@ if __name__ == "__main__":
             E_cal = np.concatenate((E_cal, calculate_walls(cam, image[j])))
         print("calculated E = ", E_cal)
 
-        # 求解当前误差
-        d_E = -(E_test - E_cal).T
+
+        #求解当前误差
+        d_E = (E_test - E_cal).T
+
         print("|dE| = ", np.linalg.norm(d_E))
         print("dE = ", d_E)
+        dE_list.append(d_E)
         if np.linalg.norm(d_E) < MINIMUM_ERROR:
             break
 
-        # 生成雅可比矩阵
-        J = Jacobian(image[0], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]))
+        #生成雅可比矩阵
+        J = Jacobian(image[0], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8])) # 16x8
+
         for j in range(1, NUM_OF_DATA):
             J = np.concatenate((J, Jacobian(image[j], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]))))
         print("Jacobian = ", J)
 
-        # 通过误差和雅可比矩阵解算参数
+
+        lam = 1
+        #通过误差和雅可比矩阵解算参数
+        J_Tik = np.linalg.inv(J.T@J + lam * np.eye(8)) @ J.T
+
         d_p = np.dot(np.linalg.pinv(J), d_E)
 
         # 补偿参数
@@ -181,3 +199,11 @@ if __name__ == "__main__":
         p = np.reshape(p, (8,))
 
         print("p = ", p)
+
+    
+    fig1 = plt.figure()
+    ax1 = fig1.add_subplot(111)
+    ax1.plot(dE_list)
+    fig1.show()
+    input()
+
