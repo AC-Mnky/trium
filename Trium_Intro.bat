@@ -33,7 +33,7 @@ goto choose_intro
 
 :browse_readme
 echo.
-echo Auto open README.md in command line.
+echo [Current Action] Auto open README.md in command line.
 echo.
 echo.
 type %cd%\README.md
@@ -45,7 +45,7 @@ goto choose_exit
 
 :software_design
 echo.
-echo Auto open SoftwareDesign.md in command line.
+echo [Current Action] Auto open SoftwareDesign.md in command line.
 echo.
 echo.
 type %cd%\doc\SoftwareDesign.md
@@ -72,7 +72,7 @@ goto choose_git
 
 :pull
 echo.
-echo Auto pull changes from remote repository.
+echo [Current Action] Auto pull changes from remote repository.
 git pull
 echo Pull success (?)
 goto choose_exit
@@ -80,6 +80,7 @@ goto choose_exit
 
 :commit
 echo.
+echo [Current Action] Auto commit changes to remote repository.
 git add .
 set /p commit_message="Please enter commit message: "
 git commit -m "%commit_message%"
@@ -91,7 +92,7 @@ goto choose_exit
 
 :pull_commit
 echo.
-echo Auto pull changes from remote repository.
+echo [Current Action] Auto pull from remote repository and commit changes.
 git pull
 echo Pull success (?), start to commit changes.
 git add .
@@ -105,7 +106,7 @@ goto choose_exit
 
 :format_codes
 echo.
-echo Auto format all codes in the repository.
+echo [Current Action] Auto format all codes in the repository.
 echo.
 echo Checking whether black is installed...
 
@@ -113,32 +114,31 @@ setlocal
 set "PYTHON_EXE=python"
 set "PACKAGE_NAME=black"
 %PYTHON_EXE% -c "import %PACKAGE_NAME%; print(%PACKAGE_NAME%)" >nul 2>nul
-if errorlevel 1 (
-    echo %PACKAGE_NAME% is not installed. Install %PACKAGE_NAME% to format?
-    :choose_install
-    set /p var_install= [y/n]
-    if %var_install%==Y (
-        echo Installing %PACKAGE_NAME%...
-        %PYTHON_EXE% -m pip install %PACKAGE_NAME%
-        echo %PACKAGE_NAME% is installed. Start formatting.
-    ) else if %var_install%==y (
-        echo Installing %PACKAGE_NAME%...
-        %PYTHON_EXE% -m pip install %PACKAGE_NAME%
-        echo %PACKAGE_NAME% is installed. Start formatting.
-    ) else if %var_install%==N (
-        echo Quit formatting.
-        goto choose_intro
-    ) else if %var_install%==n (
-        echo Quit formatting.
-        goto choose_intro
-    ) else ( 
-        echo Invalid input, please try again.
-        goto choose_install
-    )
-) else (
-    echo %PACKAGE_NAME% is installed. Start formatting.
-)
+if errorlevel 1 goto install_package
+else echo %PACKAGE_NAME% is installed. Start formatting.
 endlocal
+
+:install_package
+echo %PACKAGE_NAME% is not installed. Install %PACKAGE_NAME% to format [y/n]?
+set /p var_install=
+if %var_install%==Y (
+    echo Installing %PACKAGE_NAME%...
+    %PYTHON_EXE% -m pip install %PACKAGE_NAME%
+    echo %PACKAGE_NAME% is installed. Start formatting.
+) else if %var_install%==y (
+    echo Installing %PACKAGE_NAME%...
+    %PYTHON_EXE% -m pip install %PACKAGE_NAME%
+    echo %PACKAGE_NAME% is installed. Start formatting.
+) else if %var_install%==N (
+    echo Quit formatting.
+    goto choose_intro
+) else if %var_install%==n (
+    echo Quit formatting.
+    goto choose_intro
+) else ( 
+    echo Invalid input, please try again.
+    goto format_codes
+)
 
 echo Current formatting settings: [max-line-length=110][skip magic trailing comma].
 @REM TODO: Add code formatter settings into a configuration file.
@@ -174,7 +174,7 @@ goto choose_exit
 
 :test
 echo.
-echo Play Music!
+echo [Current Action] Play Music!
 start %cd%\assets\music\10th_symphony_type-MOON.mp3
 echo Current Playing: 10th Symphony TYPE/MOON
 echo.
