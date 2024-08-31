@@ -132,7 +132,6 @@ def Jacobian(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: tuple, fov
         ]
     )
     return Jacobian.T
-    # return Jacobian
 
 
 if __name__ == "__main__":
@@ -170,7 +169,7 @@ if __name__ == "__main__":
             E_cal = np.concatenate((E_cal, calculate_walls(cam, image[j])))
         print("calculated E = ", E_cal)
 
-        # 求解当前误差
+        # Calculate the current error
         d_E = (E_test - E_cal).T
 
         print("|dE| = ", np.linalg.norm(d_E))
@@ -179,18 +178,17 @@ if __name__ == "__main__":
         if np.linalg.norm(d_E) < MINIMUM_ERROR:
             break
 
-        # 生成雅可比矩阵
+        # Generate Jacobian matrix
         J = Jacobian(image[0], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]))  # 16x8
 
         for j in range(1, NUM_OF_DATA):
             J = np.concatenate((J, Jacobian(image[j], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]))))
         print("Jacobian = ", J)
 
-
         if ENABLE_SMOOTH_FACTOR:
-            # 通过误差和雅可比矩阵解算参数
-            lam = 100
-            J_Tik = np.linalg.inv(J.T @ J + lam * np.eye(8)) @ J.T
+            # Introduce a smooth factor
+            smooth_factor = 100
+            J_Tik = np.linalg.inv(J.T @ J + smooth_factor * np.eye(8)) @ J.T
             d_p = np.dot(J_Tik, d_E)
         else:
             d_p = np.dot(np.linalg.pinv(J), d_E)
