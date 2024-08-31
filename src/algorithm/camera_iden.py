@@ -10,7 +10,7 @@ from camera_convert import CameraState
 
 DIFF_LEN = 0.1
 IDEN_TIMES = 50
-NUM_OF_DATA = 8
+DATA_NUM = 8
 MINIMUM_ERROR = 100
 ENABLE_SMOOTH_FACTOR = True
 
@@ -93,29 +93,14 @@ def partial_dirivative(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: 
     parameters_1 = calculate_walls(cam_0, image)
     parameters_2 = calculate_walls(cam_1, image)
 
-    # if dt == "theta":
-    #     print(cam_0.theta)
-    #     print(cam_1.theta)
-    #     print(cam_0.trans)
-    #     print(cam_1.trans)
-    # print(parameters_1)
-    # print(parameters_2)
-
-    # differences between two distances and angles
-    d_parameters = parameters_2 - parameters_1
-    # print(d_parameters)
-
-    dt_D1 = d_parameters[0] / DIFF_LEN
-    dt_D2 = d_parameters[1] / DIFF_LEN
-
     # dt_A1 = d_parameters[2]/STEP_LEN
     # dt_A2 = d_parameters[3]/STEP_LEN
 
     # return [dt_D1,dt_D2,dt_A1,dt_A2]
     del cam_0
     del cam_1
-
-    return [dt_D1, dt_D2]
+    # return [dt_D1, dt_D2]
+    return (parameters_2 - parameters_1) / DIFF_LEN
 
 
 def Jacobian(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: tuple, fov_0: tuple):
@@ -138,7 +123,7 @@ if __name__ == "__main__":
     current_dir = Path(__file__).parent
     pic_dir = current_dir.parent.parent / "assets" / "openCV_pic/test_pics"
     image = []
-    for i in range(NUM_OF_DATA):
+    for i in range(DATA_NUM):
         pic_path = f"{pic_dir}/{i}.jpg"
         if not Path(pic_path).is_file():
             print(f"cannot open {pic_path}")
@@ -165,7 +150,7 @@ if __name__ == "__main__":
         E_cal = calculate_walls(
             cam, image[0]
         )  # [2 distances, (2 angels,) 2 distancess, (2 angels,)...], nparray
-        for j in range(1, NUM_OF_DATA):
+        for j in range(1, DATA_NUM):
             E_cal = np.concatenate((E_cal, calculate_walls(cam, image[j])))
         print("calculated E = ", E_cal)
 
@@ -178,11 +163,10 @@ if __name__ == "__main__":
         if np.linalg.norm(d_E) < MINIMUM_ERROR:
             break
 
-        # Generate Jacobian matrix
-        J = Jacobian(image[0], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]))  # 16x8
-
-        for j in range(1, NUM_OF_DATA):
-            J = np.concatenate((J, Jacobian(image[j], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]))))
+        # Generate Jacobian matrix (NUM_OF_DATAx16x8)
+        J = np.array(
+            [Jacobian(image[j], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8])) for j in range(DATA_NUM)]
+        ).reshape(-1, 8)
         print("Jacobian = ", J)
 
         if ENABLE_SMOOTH_FACTOR:
