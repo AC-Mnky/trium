@@ -2,10 +2,11 @@ from camera_convert import CameraState
 import find_color
 import camera_convert
 import cv2
-import core as c
+import core
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 DIFF_LEN = 0.1
 IDEN_TIMES = 50
@@ -29,8 +30,8 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
     # merge near walls
     for w_i in walls_raw:
         if not (
-            c.get_length(c.vec_sub(walls[0][0], w_i[0])) < 50
-            and c.get_length(c.vec_sub(walls[0][1], w_i[1])) < 50
+            core.get_length(core.vec_sub(walls[0][0], w_i[0])) < 50
+            and core.get_length(core.vec_sub(walls[0][1], w_i[1])) < 50
         ):
             walls.append(w_i)
             break
@@ -40,9 +41,9 @@ def calculate_walls(cam: CameraState, image: cv2.UMat):
 
     for w in walls:
         point_1, point_2 = (w[0][0], w[0][1]), (w[1][0], w[1][1])
-        line = c.vec_sub(point_2, point_1)
-        perpendicular = c.vec_sub(point_1, c.projection(point_1, line))
-        distance = c.get_length(perpendicular)
+        line = core.vec_sub(point_2, point_1)
+        perpendicular = core.vec_sub(point_1, core.projection(point_1, line))
+        distance = core.get_length(perpendicular)
         # angle = c.get_angle(perpendicular)
 
         distances_raw.append(distance)
@@ -135,14 +136,15 @@ def Jacobian(image: cv2.UMat, camera_xyz_0: tuple, camera_rotation_0: tuple, fov
 
 
 if __name__ == "__main__":
-    read_dir = "test_pics"
+    current_dir = Path(__file__).parent
+    pic_dir = current_dir.parent.parent / "assets" / "openCV_pic/test_pics"
     image = []
     for i in range(NUM_OF_DATA):
         image_index = i
-        filename = "F:/trium/assets/openCV_pic/" + read_dir + "/" + str(image_index) + ".jpg"
-        if not os.path.isfile(filename):
-            print("cannot open " + filename)
-        image.append(cv2.imread(filename))
+        pic_path = f"{pic_dir}/{image_index}.jpg"
+        if not os.path.isfile(pic_path):
+            print(f"cannot open {pic_path}")
+        image.append(cv2.imread(pic_path))
 
     camera_xyz_0 = np.array([295, 12, -221])
     camera_rotation_0 = np.array([53.2, 0.9, 0.9])
@@ -169,27 +171,25 @@ if __name__ == "__main__":
             E_cal = np.concatenate((E_cal, calculate_walls(cam, image[j])))
         print("calculated E = ", E_cal)
 
-
-        #求解当前误差
+        # 求解当前误差
         d_E = (E_test - E_cal).T
 
         print("|dE| = ", np.linalg.norm(d_E))
         print("dE = ", d_E)
-        dE_list.append(d_E)
+        dE_list.append(np.linalg.norm(d_E))
         if np.linalg.norm(d_E) < MINIMUM_ERROR:
             break
 
-        #生成雅可比矩阵
-        J = Jacobian(image[0], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8])) # 16x8
+        # 生成雅可比矩阵
+        J = Jacobian(image[0], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]))  # 16x8
 
         for j in range(1, NUM_OF_DATA):
             J = np.concatenate((J, Jacobian(image[j], tuple(p[0:3]), tuple(p[3:6]), tuple(p[6:8]))))
         print("Jacobian = ", J)
 
-
         lam = 1
-        #通过误差和雅可比矩阵解算参数
-        J_Tik = np.linalg.inv(J.T@J + lam * np.eye(8)) @ J.T
+        # 通过误差和雅可比矩阵解算参数
+        J_Tik = np.linalg.inv(J.T @ J + lam * np.eye(8)) @ J.T
 
         d_p = np.dot(np.linalg.pinv(J), d_E)
 
@@ -200,10 +200,7 @@ if __name__ == "__main__":
 
         print("p = ", p)
 
-    
     fig1 = plt.figure()
     ax1 = fig1.add_subplot(111)
     ax1.plot(dE_list)
-    fig1.show()
-    input()
-
+    plt.show()
