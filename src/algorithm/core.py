@@ -53,13 +53,13 @@ MERGE_RADIUS = 300  # 300
 CONTACT_CENTER_TO_BACK = 90
 CONTACT_RADIUS = 20
 SEEN_ITEMS_DECAY_EXPONENTIAL = 0.5
-ALL_ITEMS_DECAY_TYPICAL_TIME = 5
+ALL_ITEMS_DECAY_TYPICAL_TIME = 10
 DELETE_VALUE = 0.2
 INTEREST_ADDITION = 5
 INTEREST_MAXIMUM = 30
 AIM_ANGLE = 0.4
 NO_AIM_ANGLE = 0.2
-ROOM_MARGIN = 10
+ROOM_MARGIN = 100
 ANGLE_TYPICAL = 0.5
 ANGLE_STANDARD_DEVIATION = 0.15
 LENGTH_TYPICAL = 0.003
@@ -68,6 +68,12 @@ MAX_SPEED = 915
 BASIC_WEIGHT = 0.5
 X_CLIP_MARGIN = 100
 Y_CLIP_MARGIN = 100
+PUSH_WALL_TIME = 5
+HALF_PUSH_WALL_WIDTH = 80
+PUSH_WALL_LENGTH = 200
+PUSH_WALL_MAX_LENGTH = 250
+PUSH_WALL_MAX_ANGLE = 0.05
+
 
 MOTOR_SPEED = 0.5
 
@@ -96,7 +102,7 @@ def time_since_last_call(mul: int = 1000):
 
 
 def calc_weight(
-    cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
+        cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
 ) -> float:
     """
     Calculate the weight based on the given parameters.
@@ -126,7 +132,7 @@ def calc_weight(
 
 # k = key, v = value
 def merge_item_prediction(
-    dictionary: dict[tuple[float, float], list[float, int, float]], to_merge: list[tuple[float, float]]
+        dictionary: dict[tuple[float, float], list[float, int, float, int]], to_merge: list[tuple[float, float]]
 ) -> None:
     """
     Merge items in the given dictionary based on certain conditions.
@@ -156,12 +162,14 @@ def merge_item_prediction(
                 pos_sum = (0, 0)
                 value_sum = 0
                 interest_max = 0
+                tag_max = 0
                 for k2, v2 in neighbour_of_k1.items():
                     pos_sum = vec_add(pos_sum, vec_mul(k2, v2[0]))
                     value_sum += v2[0]
                     interest_max = max(interest_max, v2[2])
+                    tag_max = max(tag_max, v2[2])
                 pos_avg = (pos_sum[0] / value_sum, pos_sum[1] / value_sum)
-                substitution = (neighbour_of_k1, pos_avg, value_sum, v1[1], interest_max)
+                substitution = (neighbour_of_k1, pos_avg, value_sum, v1[1], interest_max, tag_max)
                 break
 
         if substitution is None:
@@ -170,24 +178,6 @@ def merge_item_prediction(
         for k in substitution[0]:
             dictionary.pop(k)
         dictionary[substitution[1]] = list(substitution[2:])
-
-
-def reachable(cords: tuple[float, float]) -> bool:
-    if not ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
-        return False
-    if 0 <= cords[0] <= 300 and ROOM_Y - 400 <= cords[1] <= ROOM_Y:  # my home
-        return False
-    if ROOM_X - 300 <= cords[0] <= ROOM_X and 0 <= cords[1] <= 400:  # opponent home
-        return False
-    if 0 <= cords[0] <= 50 and 0 <= cords[1] <= 200:  # room corner
-        return False
-    if 0 <= cords[0] <= 200 and 0 <= cords[1] <= 50:  # room corner
-        return False
-    if ROOM_X - 50 <= cords[0] <= ROOM_X and ROOM_Y - 200 <= cords[1] <= ROOM_Y:  # room corner
-        return False
-    if ROOM_X - 200 <= cords[0] <= ROOM_X and ROOM_Y - 50 <= cords[1] <= ROOM_Y:  # room corner
-        return False
-    return True
 
 
 class Core:
@@ -229,8 +219,10 @@ class Core:
             - First element of the list is the decay term.
             - Second is the tag to identify red/yellow blocks.
             - Third is the interest of an item.
+            - Fourth is the tag to mark the item's position range.
+              0 is default, 1 is left, 2 is right, 3 is top, 4 is bottom, 5 is corner or base.
         """
-        self.predicted_items: dict[tuple[float, float], list[float, int, float]] = {}
+        self.predicted_items: dict[tuple[float, float], list] = {}
 
         # pairs of walls' endpoints
         self.walls: list[tuple[tuple[float, float], tuple[float, float]]] = []
@@ -240,8 +232,28 @@ class Core:
         next(self.time_tracker)
         self.vision_message = "Initiating."
         self.vision_target_cords = None
+        self.time_already_pushed_wall = 0
 
         # !There is no reset function. When you want to reset the _core, just create a new object.
+
+    def reachable(self, cords: tuple[float, float]) -> bool:
+        is_item = False
+        if cords in self.predicted_items.keys():
+            is_item = True
+            value, color, interest, tag = self.predicted_items[cords]
+            if tag == 5:
+                return False
+        if not 0 < cords[0] < ROOM_X and 0 < cords[1] < ROOM_Y \
+                or 0 <= cords[0] <= 300 and ROOM_Y - 400 <= cords[1] <= ROOM_Y \
+                or ROOM_X - 300 <= cords[0] <= ROOM_X and 0 <= cords[1] <= 400 \
+                or 0 <= cords[0] <= 50 and 0 <= cords[1] <= 200 \
+                or 0 <= cords[0] <= 200 and 0 <= cords[1] <= 50 \
+                or ROOM_X - 50 <= cords[0] <= ROOM_X and ROOM_Y - 200 <= cords[1] <= ROOM_Y \
+                or ROOM_X - 200 <= cords[0] <= ROOM_X and ROOM_Y - 50 <= cords[1] <= ROOM_Y:
+            if is_item:
+                self.predicted_items[cords][3] = 5
+            return False
+        return True
 
     def get_closest_item(self) -> tuple[float, float] | None:
         """
@@ -253,7 +265,7 @@ class Core:
         closest = None
         closest_distance = np.inf
         for x, v in self.predicted_items.items():
-            if not reachable(x):
+            if not self.reachable(x):
                 continue
             x_distance = get_distance(x, self.predicted_cords) - v[2]
             if x_distance < closest_distance:
@@ -268,7 +280,6 @@ class Core:
         - "inferred_angular_speed" = speed of rotating around the center of the car
         - "inferred_relative_velocity" = speed of the center of the car
 
-        TODO:
         - paras have to be modified: WHEEL_X_OFFSET
         - angular_speed can use data from imu directly
         """
@@ -423,7 +434,7 @@ class Core:
                     diff = np.clip(diff, 0.1, 0.5)
                 else:
                     diff = np.clip(diff, -0.5, -0.1)
-                self.set_motor_output(diff, 0)
+                self.set_motor_output(float(diff), 0)
                 self.vision_message = "At home rotating."
                 yield
                 angle = angle_subtract(HOME_ANGLE, self.predicted_angle)
@@ -472,13 +483,79 @@ class Core:
             self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
         )
 
-        self.target_toward_cords(item)
-        self.vision_message = (
-                "Targeting towards "
-                + ("red" if self.predicted_items[item][1] == 0 else "yellow")
-                + " at "
-                + get_str(item)
-        )
+        tag = self.predicted_items[item][3]
+        if item[0] < ROOM_MARGIN:
+            self.predicted_items[item][3] = max(1, tag)
+        if item[0] > ROOM_X - ROOM_MARGIN:
+            self.predicted_items[item][3] = max(2, tag)
+        if item[1] < ROOM_MARGIN:
+            self.predicted_items[item][3] = max(3, tag)
+        if item[1] > ROOM_Y - ROOM_MARGIN:
+            self.predicted_items[item][3] = max(4, tag)
+
+        tag = self.predicted_items[item][3]
+        cords = self.predicted_cords
+        angle = self.predicted_angle
+        if tag == 0:
+            self.target_toward_cords(item)
+            self.vision_message = (
+                    "Targeting towards "
+                    + ("red" if self.predicted_items[item][1] == 0 else "yellow")
+                    + " at "
+                    + get_str(item)
+            )
+        elif tag == 1:
+            if cords[0] < PUSH_WALL_MAX_LENGTH \
+                    and -HALF_PUSH_WALL_WIDTH < item[1] - cords[1] < HALF_PUSH_WALL_WIDTH:
+                if -PUSH_WALL_MAX_ANGLE < angle_subtract(np.pi, angle) < PUSH_WALL_MAX_ANGLE:
+                    self.time_already_pushed_wall += self.dt
+                    if self.time_already_pushed_wall < 5:
+                        self.motor = [0.2, 0.2]
+                        self.vision_message = (
+                                "Pushing wall for "
+                                + ("red" if self.predicted_items[item][1] == 0 else "yellow")
+                                + ' for time '
+                                + str(self.time_already_pushed_wall)
+                        )
+                    elif self.time_already_pushed_wall < 8:
+                        self.motor = [-0.2, -0.2]
+                        self.vision_message = (
+                                "Leaving wall for "
+                                + ("red" if self.predicted_items[item][1] == 0 else "yellow")
+                                + ' for time '
+                                + str(self.time_already_pushed_wall)
+                        )
+                    else:
+                        self.time_already_pushed_wall = 0
+                        self.predicted_items.pop(item)
+                        self.act_when_there_is_no_item()
+                else:
+                    diff = ANGLE_TYPICAL * angle_subtract(np.pi, angle)
+                    if diff > 0:
+                        diff = np.clip(diff, 0.1, 0.5)
+                    else:
+                        diff = np.clip(diff, -0.5, -0.1)
+                    self.set_motor_output(float(diff), 0)
+                    self.vision_message = (
+                        "Rotating at push point for "
+                        + ("red" if self.predicted_items[item][1] == 0 else "yellow")
+                    )
+            else:
+                self.target_toward_cords((PUSH_WALL_LENGTH, item[1]))
+                self.vision_message = (
+                        "Targeting push point for "
+                        + ("red" if self.predicted_items[item][1] == 0 else "yellow")
+                        + " at "
+                        + get_str((PUSH_WALL_LENGTH, item[1]))
+                )
+        elif tag == 2:
+            ...
+        elif tag == 3:
+            ...
+        elif tag == 4:
+            ...
+        elif tag == 5:
+            self.act_when_there_is_no_item()
 
     def distance_to_wall(self) -> float:
         """
@@ -577,28 +654,28 @@ class Core:
 
         self.motor = [(summ + diff) / 2, (summ - diff) / 2]
 
-        # k = np.maximum(np.abs(np.max(self.motor)) / 0.9, 1)
+        # k = max(np.abs(np.max(self.motor)) / 0.9, 1)
         # self.motor[0] /= k
         # self.motor[1] /= k
         # print(self.motor)
 
     def update(
-        self,
-        current_time: float,
-        stm32_input: bytes,
-        unpacked_stm32_input: list[int],
-        imu_input: (
-            tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None
-        ),
-        camera_input: (
-            tuple[
-                float,
-                list[tuple[float, float]],
-                list[tuple[float, float]],
-                list[tuple[tuple[float, float], tuple[float, float]]],
-            ]
-            | None
-        ),
+            self,
+            current_time: float,
+            stm32_input: bytes,
+            unpacked_stm32_input: list[int],
+            imu_input: (
+                    tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None
+            ),
+            camera_input: (
+                    tuple[
+                        float,
+                        list[tuple[float, float]],
+                        list[tuple[float, float]],
+                        list[tuple[tuple[float, float], tuple[float, float]]],
+                    ]
+                    | None
+            ),
     ) -> None:
         """
         Get realtime data from other modules, thus updating the state of the algorithm.
@@ -674,14 +751,14 @@ class Core:
                 )
 
         for i, camera_point in (
-            (0, (0, 0)),
-            (1, (0, vision.CAMERA_STATE.res_v)),
-            (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
-            (3, (vision.CAMERA_STATE.res_h, 0)),
-            (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
-            (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                (0, (0, 0)),
+                (1, (0, vision.CAMERA_STATE.res_v)),
+                (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
+                (3, (vision.CAMERA_STATE.res_h, 0)),
+                (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
         ):
             self.predicted_camera_vertices[i] = self.relative2absolute(
                 camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3]
@@ -703,7 +780,7 @@ class Core:
                 self.infer_position_from_walls()
 
             new_items = []
-            for red in camera_reds:  # TODO
+            for red in camera_reds:
                 cords = self.relative2absolute(red)  # position of red block
                 if 0 < cords[0] < ROOM_X and 0 < cords[1] < ROOM_Y:
                     new_items.append(cords)
@@ -711,6 +788,7 @@ class Core:
                         self.predicted_items.get(cords, (0, 0))[0] + 2,
                         RED,
                         0,
+                        0
                     ]  # let the first element of the value add 2, and let the second element be 0
 
             for yellow in camera_yellows:
@@ -721,6 +799,7 @@ class Core:
                         self.predicted_items.get(cords, (0, 1))[0] + 3,
                         YELLOW,
                         0,
+                        0
                     ]  # let the first element of the value add 3, and let the second element be 1
 
             merge_item_prediction(self.predicted_items, new_items)
@@ -732,8 +811,8 @@ class Core:
                     vision.CAMERA_STATE, relative_cords[0], relative_cords[1], -12.5 if v[1] == RED else -15
                 )
                 if (
-                    0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H
-                    and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V
+                        0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H
+                        and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V
                 ):
                     v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
 
@@ -746,8 +825,8 @@ class Core:
         for item in self.predicted_items:
             self.predicted_items[item][0] *= np.exp(-self.dt / ALL_ITEMS_DECAY_TYPICAL_TIME)
             if (
-                get_distance(item, self.contact_center) < CONTACT_RADIUS
-                or self.predicted_items[item][0] < DELETE_VALUE
+                    get_distance(item, self.contact_center) < CONTACT_RADIUS
+                    or self.predicted_items[item][0] < DELETE_VALUE
             ):
                 items_to_delete.append(item)
         for item in items_to_delete:
@@ -788,18 +867,18 @@ class Core:
             output (bytes): The output as a bytes object.
         """
         output = (
-            [
-                128,
-                self.status_code,
-                int(self.motor[1] * PWM_PERIOD),
-                int(self.motor[0] * PWM_PERIOD),
-                int(self.brush),
-                int(self.back_open),
-                0,
-                0,
-            ]
-            + self.motor_PID[1]
-            + self.motor_PID[0]
+                [
+                    128,
+                    self.status_code,
+                    int(self.motor[1] * PWM_PERIOD),
+                    int(self.motor[0] * PWM_PERIOD),
+                    int(self.brush),
+                    int(self.back_open),
+                    0,
+                    0,
+                ]
+                + self.motor_PID[1]
+                + self.motor_PID[0]
         )
 
         for i in range(len(output)):
