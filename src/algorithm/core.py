@@ -486,10 +486,10 @@ class Core:
 
         self.target_toward_cords(item)
         self.vision_message = (
-                "Targeting towards "
-                + ("red" if self.predicted_items[item][1] == 0 else "yellow")
-                + " at "
-                + get_str(item)
+            "Targeting towards "
+            + ("red" if self.predicted_items[item][1] == 0 else "yellow")
+            + " at "
+            + get_str(item)
         )
 
     def distance_to_wall(self) -> float:
