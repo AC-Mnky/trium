@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import camera_convert
 import core
 import matplotlib.pyplot as plt
@@ -19,12 +17,13 @@ ENABLE_SMOOTH_FACTOR = False
 OVERLAY_DISTANCE = 40  # The distance criterion of endpoints, deciding whether to merge two walls
 LAMBDA = 0
 
+
 def partial_dirivative(
     camera_xyz: tuple[float, float, float],
     camera_rotation: tuple[float, float, float],
     fov: tuple[float, float],
     dt: str,
-    cords: list
+    cords: list,
 ) -> np.ndarray:
     """
     Calculate the partial derivative of the camera parameters with respect to the given change in dt.
@@ -69,16 +68,15 @@ def partial_dirivative(
 
     cam_1.update()
 
-    d_cords = np.array([]) # [dx1, dy1, dz1, dx2, dy2, dz2, ... ]
+    d_cords = np.array([])  # [dx1, dy1, dz1, dx2, dy2, dz2, ... ]
     for i in range(DATA_NUM):
-        _,x1,y1 = camera_convert.img2space(cam_0, cords[i][0], cords[i][1])
-        _,x2,y2 = camera_convert.img2space(cam_1, cords[i][0], cords[i][1])
-        v1 = (x1,y1)
-        v2 = (x2,y2)
+        _, x1, y1 = camera_convert.img2space(cam_0, cords[i][0], cords[i][1])
+        _, x2, y2 = camera_convert.img2space(cam_1, cords[i][0], cords[i][1])
+        v1 = (x1, y1)
+        v2 = (x2, y2)
 
-        d_cords = np.concatenate(
-            (d_cords, np.array(core.vec_sub(v1, v2))))
-    
+        d_cords = np.concatenate((d_cords, np.array(core.vec_sub(v1, v2))))
+
     return d_cords / DIFF_LEN
 
 
@@ -86,7 +84,7 @@ def Jacobian(
     camera_xyz: tuple[float, float, float],
     camera_rotation: tuple[float, float, float],
     fov: tuple[float, float],
-    cords: np.ndarray
+    cords: np.ndarray,
 ) -> np.matrix:
     """
     Calculate the Jacobian matrix for a given image with camera position, camera rotation, and field of view.
@@ -122,11 +120,21 @@ if __name__ == "__main__":
     camera_rotation_0 = np.array([56.3, 0.9, -0.5])
     fov_0 = np.array([51.45, 51.09])
     resolution = (320, 240)
-    
-    cords = [(54,5),(88,22),(158,13),(158,22),(158,37),(221,22),(257,5)] # coords of stuff in pics
-    E_test = np.array([1600,-400, 1200,-200, 1400,00, 1200,0, 1000,0, 1200,200, 1600,400]) # coords of stuff in space
 
-    p = np.concatenate((camera_xyz_0, camera_rotation_0, fov_0)) # array of paras
+    cords = [
+        (54, 5),
+        (88, 22),
+        (158, 13),
+        (158, 22),
+        (158, 37),
+        (221, 22),
+        (257, 5),
+    ]  # coords of stuff in pics
+    E_test = np.array(
+        [1600, -400, 1200, -200, 1400, 00, 1200, 0, 1000, 0, 1200, 200, 1600, 400]
+    )  # coords of stuff in space
+
+    p = np.concatenate((camera_xyz_0, camera_rotation_0, fov_0))  # array of paras
     d_p = np.zeros(8)
 
     dE_list = []
@@ -139,8 +147,8 @@ if __name__ == "__main__":
         # Calculate the ideal position with the current parameters
         E_cal = np.array([])
         for j in range(DATA_NUM):
-            _,x,y = camera_convert.img2space(cam, cords[j][0], cords[j][1])
-            E_cal = np.concatenate((E_cal, np.array([x,y])))
+            _, x, y = camera_convert.img2space(cam, cords[j][0], cords[j][1])
+            E_cal = np.concatenate((E_cal, np.array([x, y])))
 
         E_cal = E_cal.reshape(-1)
         print(f"calculated E = {E_cal}")
@@ -166,12 +174,12 @@ if __name__ == "__main__":
         if ENABLE_SMOOTH_FACTOR:
             # Introduce a smooth factor to make the result curve smoother
             J_Tik = np.linalg.inv(J.T @ J + LAMBDA * np.eye(8)) @ J.T
-            d_p = J_Tik@ d_E
+            d_p = J_Tik @ d_E
         else:
-            d_p = np.linalg.pinv(J)@ d_E
+            d_p = np.linalg.pinv(J) @ d_E
 
         # to avoid p becoming too large
-        d_p_r = np.array([np.atan(d_p[0,j]) for j in range(8)])
+        d_p_r = np.array([np.atan(d_p[0, j]) for j in range(8)])
         d_p_r = MAX_CHANGE * d_p_r / (np.pi / 2)
 
         # compensate the paras

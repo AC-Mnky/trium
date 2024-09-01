@@ -7,7 +7,10 @@ from torch.utils.data import Dataset, DataLoader
 INITIAL_XYZ, INITIAL_ROTATION, INITIAL_FOV, RESOLUTION = (
     # (140.0, -40.0, -220.0), (56.0, 0.0, 0.0), (52, 50), (320, 240)
     # (100.0, -30.0, -200.0), (50.0, 0.0, 0.0), (50.0, 40.0), (320, 240)
-    (142.0, -38.0, -219.0), (56.3, 0.9, -0.5), (51.45, 51.09), (320, 240)
+    (142.0, -38.0, -219.0),
+    (56.3, 0.9, -0.5),
+    (51.45, 51.09),
+    (320, 240),
 )
 
 
@@ -28,31 +31,63 @@ class Model(nn.Module):
         half_fov_h, half_fov_v = half_fov[0], half_fov[1]
         res_h, res_v = self.resolution[0], self.resolution[1]
 
-        trans_phi = torch.stack((
-            torch.cos(phi), -torch.sin(phi), torch.zeros(()),
-            torch.sin(phi), torch.cos(phi), torch.zeros(()),
-            torch.zeros(()), torch.zeros(()), torch.ones(()),
-        )).reshape((3, 3))
+        trans_phi = torch.stack(
+            (
+                torch.cos(phi),
+                -torch.sin(phi),
+                torch.zeros(()),
+                torch.sin(phi),
+                torch.cos(phi),
+                torch.zeros(()),
+                torch.zeros(()),
+                torch.zeros(()),
+                torch.ones(()),
+            )
+        ).reshape((3, 3))
 
-        trans_theta = torch.stack((
-            torch.sin(theta), torch.zeros(()), -torch.cos(theta),
-            torch.zeros(()), torch.ones(()), torch.zeros(()),
-            torch.cos(theta), torch.zeros(()), torch.sin(theta),
-        )).reshape((3, 3))
+        trans_theta = torch.stack(
+            (
+                torch.sin(theta),
+                torch.zeros(()),
+                -torch.cos(theta),
+                torch.zeros(()),
+                torch.ones(()),
+                torch.zeros(()),
+                torch.cos(theta),
+                torch.zeros(()),
+                torch.sin(theta),
+            )
+        ).reshape((3, 3))
 
-        trans_omega = torch.stack((
-            torch.ones(()), torch.zeros(()), torch.zeros(()),
-            torch.zeros(()), torch.cos(omega), torch.sin(omega),
-            torch.zeros(()), -torch.sin(omega), torch.cos(omega),
-        )).reshape((3, 3))
+        trans_omega = torch.stack(
+            (
+                torch.ones(()),
+                torch.zeros(()),
+                torch.zeros(()),
+                torch.zeros(()),
+                torch.cos(omega),
+                torch.sin(omega),
+                torch.zeros(()),
+                -torch.sin(omega),
+                torch.cos(omega),
+            )
+        ).reshape((3, 3))
 
         trans = torch.matmul(torch.matmul(trans_phi, trans_theta), trans_omega)
 
-        img_to_relative_cords_mapping = torch.stack((
-            torch.ones(()), torch.zeros(()), torch.zeros(()),
-            -torch.tan(half_fov_h), 2 / res_h * torch.tan(half_fov_h), torch.zeros(()),
-            -torch.tan(half_fov_v), torch.zeros(()), 2 / res_v * torch.tan(half_fov_v),
-        )).reshape((3, 3))
+        img_to_relative_cords_mapping = torch.stack(
+            (
+                torch.ones(()),
+                torch.zeros(()),
+                torch.zeros(()),
+                -torch.tan(half_fov_h),
+                2 / res_h * torch.tan(half_fov_h),
+                torch.zeros(()),
+                -torch.tan(half_fov_v),
+                torch.zeros(()),
+                2 / res_v * torch.tan(half_fov_v),
+            )
+        ).reshape((3, 3))
 
         self.matrix = torch.matmul(trans, img_to_relative_cords_mapping)
 
@@ -106,24 +141,30 @@ def evaluate(model, dataloader):
             y = model(x)
             loss_sum += torch.sum(criterion(y, target_y), dim=0)
             num += x.shape[0]
-    print('test loss:', float(loss_sum / num))
+    print("test loss:", float(loss_sum / num))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     model = Model()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
     import camera_convert
 
-    camera_state = camera_convert.CameraState((142.0, -38.0, -219.0), (56.3, 0.9, -0.5), (51.45, 51.09), (320, 240))
+    camera_state = camera_convert.CameraState(
+        (142.0, -38.0, -219.0), (56.3, 0.9, -0.5), (51.45, 51.09), (320, 240)
+    )
 
     data = tensor([(i, j) for i in range(0, 320, 10) for j in range(0, 240, 10)])
     labels = tensor(
-        [camera_convert.img2space(camera_state, i, j)[1:3]
-         for i in range(0, 320, 10) for j in range(0, 240, 10)])
+        [
+            camera_convert.img2space(camera_state, i, j)[1:3]
+            for i in range(0, 320, 10)
+            for j in range(0, 240, 10)
+        ]
+    )
 
     all_dataset = NewDataset(data, labels)
-    train_dataset, test_dataset = torch.utils.data.random_split(all_dataset, [32*12, 32*12])
+    train_dataset, test_dataset = torch.utils.data.random_split(all_dataset, [32 * 12, 32 * 12])
     # train_dataset = NewDataset(data[:500], labels[:500])
     # test_dataset = NewDataset(data[500:], labels[500:])
     train_dataloader = DataLoader(train_dataset, batch_size=10, shuffle=True)
@@ -140,5 +181,3 @@ if __name__ == '__main__':
         for para in model.parameters():
             paras.append(tuple(para.tolist()))
         print(tuple(paras))
-
-
