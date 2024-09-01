@@ -115,15 +115,19 @@ uint8_t get_encoder_direction(uint8_t num) {
 	return direction_flag;
 }
 
+void set_servo_angle(uint16_t pulse) {
+	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, pulse);
+}
+
 // Period = 2000, 20ms, pulse width = 0.5 ~ 2.5 ms
 /* @brief Set the angle of the servo motor
  * @param pulse: 50 ~ 250 (250 -> door open | 150 -> door close)
  * @retval None
  * @note The rotation action is set to complete in 10 steps with a 10ms delay per step.
  * */
-void set_servo_angle(uint16_t pulse) {
+void set_servo_angle_delay(uint16_t pulse) {
 	uint16_t current_pulse = __HAL_TIM_GET_COMPARE(&htim8, TIM_CHANNEL_1);
-	uint8_t step_num = 10;
+	uint8_t step_num = 50;
 	int8_t step = (pulse - current_pulse) / step_num;
 	if (step != 0) {
 		for (uint8_t i = 0; i < step_num; i++) {
@@ -132,5 +136,5 @@ void set_servo_angle(uint16_t pulse) {
 			HAL_Delay(10);
 		}
 	}
-//	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, pulse);
 }
+
