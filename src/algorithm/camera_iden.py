@@ -240,8 +240,8 @@ if __name__ == "__main__":
             d_p = np.dot(np.linalg.pinv(J), d_E)
 
         # to avoid p becoming too large
-        d_p = np.array([math.atan(d_p[i]) for i in range(len(d_p))])
-        d_p = MAX_CHANGE * d_p/(math.pi/2)
+        d_p = np.array([np.atan(d_p[i]) for i in range(len(d_p))])
+        d_p = MAX_CHANGE * d_p / (np.pi / 2)
 
         # compensate the paras
         p = np.reshape(p, (1, 8))
