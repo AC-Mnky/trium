@@ -11,10 +11,11 @@ from camera_convert import CameraState
 
 
 DIFF_LEN = 0.1
-IDEN_TIMES = 100
+IDEN_TIMES = 65
 DATA_NUM = 8
 MINIMUM_ERROR = 100
 
+MAX_CHANGE = 3
 ENABLE_SMOOTH_FACTOR = True
 OVERLAY_DISTANCE = 40  # The distance criterion of endpoints, deciding whether to merge two walls
 LAMBDA = 0
@@ -141,9 +142,9 @@ if __name__ == "__main__":
         except FileNotFoundError:
             print("cannot open", pic_path)
 
-    camera_xyz_0 = np.array([295, 12, -112.1])
-    camera_rotation_0 = np.array([53.2, 0.9, 0.9])
-    fov_0 = np.array([62.2, 62])
+    camera_xyz_0 = np.array([282, 14, -440])
+    camera_rotation_0 = np.array([56.1, 1.2, 0.1])
+    fov_0 = np.array([51.45, 51.09])
     resolution = (320, 240)
     E_test = np.array(
         [1180, 350, 1500, 690, 930, 900, 1180, 1100, 1760, 770, 1770, 1300, 2110, 350, 2230, 620]
@@ -167,8 +168,8 @@ if __name__ == "__main__":
         print(f"|dE| = {np.linalg.norm(d_E)}")
         print(f"dE = {d_E}")
 
-        if np.linalg.norm(d_E) > 2000:
-            dE_list.append(2000)
+        if np.linalg.norm(d_E) > 3000:
+            dE_list.append(3000)
         else:
             dE_list.append(np.linalg.norm(d_E))
 
@@ -191,9 +192,9 @@ if __name__ == "__main__":
 
         # to avoid p becoming too large
         d_p = np.array([math.atan(d_p[i]) for i in range(len(d_p))])
-        d_p = d_p/(math.pi/2)
+        d_p = MAX_CHANGE * d_p/(math.pi/2)
 
-        # 补偿参数
+        # compensate the paras
         p = np.reshape(p, (1, 8))
         p += d_p
         p = np.reshape(p, (8,))
