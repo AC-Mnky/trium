@@ -6,15 +6,14 @@ class CameraState:
     Ruleset:
         - 座标架: 车向前为x, 车向右为y, 向下为z (地面对应z=0), 方向与z轴夹角为theta, 右手螺旋向下相对x轴旋转为phi,
         绕入射光方向右手螺旋偏转为omega, 方向指摄像头中央对准的位置
-        - 摄像头必须是竖直对准的
     """
 
     def __init__(
-        self,
-        camera_xyz: tuple[float, float, float],
-        camera_rotation: tuple[float, float, float],
-        fov: tuple[float, float],
-        resolution: tuple[int, int],
+            self,
+            camera_xyz: tuple[float, float, float],
+            camera_rotation: tuple[float, float, float],
+            fov: tuple[float, float],
+            resolution: tuple[int, int],
     ) -> None:
         """
         Initialize the CameraState object.
@@ -34,7 +33,9 @@ class CameraState:
         self.res_h, self.res_v = resolution
 
         self.trans_phi = np.array(
-            ((np.cos(self.phi), np.sin(self.phi), 0), (-np.sin(self.phi), np.cos(self.phi), 0), (0, 0, 1))
+            ((np.cos(self.phi), np.sin(self.phi), 0),
+             (-np.sin(self.phi), np.cos(self.phi), 0),
+             (0, 0, 1))
         )
         self.trans_theta = np.array(
             (
