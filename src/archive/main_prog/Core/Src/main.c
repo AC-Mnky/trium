@@ -359,16 +359,16 @@ int main(void) {
 		 * @note receive_buffer[4] -> brush | reveive_buffer[5] -> servo
 		 * */
 		if (receive_buffer[4]) {
-			set_motor_speed(3, 80);
+			set_motor_speed(3, 60);
 		} else {
 			set_motor_speed(3, 0);
 		}
 
-		/* 250 -> door open | 150 -> door close */
+		/* 200 -> door open | 50 -> door close */
 		if (receive_buffer[5]) {
-			set_servo_angle_delay(250);
+			set_servo_angle_delay(200);
 		} else {
-			set_servo_angle_delay(150);
+			set_servo_angle_delay(50);
 		}
 
 		// debug message of brush & servo
