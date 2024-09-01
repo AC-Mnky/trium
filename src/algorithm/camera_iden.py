@@ -7,7 +7,7 @@ import find_color
 import matplotlib.pyplot as plt
 import numpy as np
 from camera_convert import CameraState
-
+import math
 
 DIFF_LEN = 0.1
 IDEN_TIMES = 65
