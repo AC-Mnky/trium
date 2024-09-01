@@ -9,6 +9,7 @@
 void motor_init() {
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_ALL);
 	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
+	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 50);
 
 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_12, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_13, GPIO_PIN_RESET);
@@ -129,7 +130,7 @@ uint8_t get_encoder_direction(uint8_t num) {
 }
 
 /* @brief Set the angle of the servo motor
- * @param pulse: 50 ~ 250 (250 -> door open | 150 -> door close)
+ * @param pulse: 50 ~ 250 (200 -> door open | 50 -> door close)
  * @retval None
  * @note Period = 2000, 20ms, pulse width = 0.5 ~ 2.5 ms
  * */
@@ -138,7 +139,7 @@ void set_servo_angle(uint16_t pulse) {
 }
 
 /* @brief Set the angle of the servo motor in delay mode
- * @param pulse: 50 ~ 250 (250 -> door open | 150 -> door close)
+ * @param pulse: 50 ~ 250 (200 -> door open | 50 -> door close)
  * @retval None
  * @note Period = 2000, 20ms, pulse width = 0.5 ~ 2.5 ms
  * @note The rotation action is set to complete in 50 steps with a 10ms delay per step.

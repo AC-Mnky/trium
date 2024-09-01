@@ -7,16 +7,15 @@ import find_color
 import matplotlib.pyplot as plt
 import numpy as np
 from camera_convert import CameraState
-import math
 
-DIFF_LEN = 0.1
-IDEN_TIMES = 65
+DIFF_LEN = 0.01
+IDEN_TIMES = 150
 DATA_NUM = 8
 MINIMUM_ERROR = 100
 
 MAX_CHANGE = 1
-CHANGING_RANGE = [5,100,100, 20, 0, 0, 10, 10]
-ORIGIN_VALUE = [85, 18, -442, 55.9, 0.9, 0, 51.45, 51.09]
+CHANGING_RANGE = [5, 100, 100, 20, 0, 0, 10, 10]
+ORIGIN_VALUE = [90, 18, -442, 55.9, 0.9, 0, 51.45, 51.09]
 
 ENABLE_SMOOTH_FACTOR = True
 OVERLAY_DISTANCE = 40  # The distance criterion of endpoints, deciding whether to merge two walls
@@ -194,8 +193,8 @@ if __name__ == "__main__":
         except FileNotFoundError:
             print("cannot open", pic_path)
 
-    camera_xyz_0 = np.array([143, -38, -215])
-    camera_rotation_0 = np.array([56.5, 0.8, -0.5])
+    camera_xyz_0 = np.array([142, -38, -219])
+    camera_rotation_0 = np.array([56.3, 0.9, -0.5])
     fov_0 = np.array([51.45, 51.09])
     resolution = (320, 240)
     E_test = np.array(
