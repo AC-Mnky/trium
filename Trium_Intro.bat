@@ -163,7 +163,7 @@ goto choose_exit
 @REM Submenu 5 - exit
 :choose_exit
 echo.
-echo Wander around for a while longer [y/n]?
+echo Wander around for a while longer? [y/n]
 set /p var_exit=
 if %var_exit%==Y (
     echo Return to main menu.
