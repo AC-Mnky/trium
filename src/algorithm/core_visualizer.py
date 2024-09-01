@@ -32,12 +32,14 @@ CAMERA_SHOT = (255, 255, 255, 128)
 
 SPEED_CONTROL = 0.5
 
+
 class VisualizerInterrupt(Exception):
     def __init__(self):
-        super(VisualizerInterrupt, self).__init__('interrupted')
+        super(VisualizerInterrupt, self).__init__("interrupted")
 
     def __str__(self):
-        return 'interrupted'
+        return "interrupted"
+
 
 class Visualizer:
     def __init__(self, _core: core.Core, control: bool = False):
