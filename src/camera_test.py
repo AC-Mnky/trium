@@ -22,14 +22,14 @@ else:
 """
 MODE = "camera", "file", "adjust"
 """
-MODE = "camera"
+MODE = "adjust"
 
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
-READ_DIR = "grid2"
+READ_DIR = "color_dot_far"
 # naming rule: forward dist first, right dist second
-WRITE_DIR = "color_dot"
+WRITE_DIR = "NANA"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
@@ -48,7 +48,7 @@ DRAW_GRID = True
 USE_HOUGH_P = True
 
 
-def process(img, show: bool = False):
+def process(img, show: bool = False, img_=None):
     points_red = find_color.find_red(img, show and MASK_SHOW)
     points_yellow = find_color.find_yellow(img, show and MASK_SHOW)
     walls = (
@@ -57,31 +57,36 @@ def process(img, show: bool = False):
         else find_color.find_wall_bottom(img, show and MASK_SHOW)
     )
 
-    if show and DRAW_GRID:
-        draw_grid(img, (255, 255, 255, 255), 300, 2000, 50, -500, 500, 50)
-
     # switch to a new line
     print()
+
+    to_draw = img if img_ is None else img_
+    y_shift = 0 if img_ is None else img_.shape[0] - img.shape[0]
+    print(y_shift)
 
     for p in points_red:
         s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -12.5)
         if s:
             if show and SHOW_RED:
-                cv2.rectangle(img, (p[0] - 10, p[1] - 10, 20, 20), (255, 255, 255, 255), 2)
+                cv2.rectangle(to_draw, (p[0] - 10, p[1] + y_shift - 10, 20, 20), (255, 255, 255, 255), 2)
             print((x, y), "red")
         else:
             if SHOW_RED:
-                cv2.rectangle(img, (p[0] - 10, p[1] - 10, 20, 20), (128, 128, 128, 255), 1)
+                cv2.rectangle(to_draw, (p[0] - 10, p[1] + y_shift - 10, 20, 20), (128, 128, 128, 255), 1)
 
     for p in points_yellow:
         s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -15)
         if s:
             if show and SHOW_YELLOW:
-                cv2.circle(img, p, 10, (255, 255, 255, 255), 2)
+                cv2.circle(to_draw, (p[0], p[1] + y_shift), 10, (255, 255, 255, 255), 2)
             print((x, y), "yellow")
         else:
             if show and SHOW_YELLOW:
-                cv2.circle(img, p, 10, (128, 128, 128, 255), 1)
+                cv2.circle(to_draw, (p[0], p[1] + y_shift), 10, (128, 128, 128, 255), 1)
+
+    if show and DRAW_GRID:
+        draw_grid(to_draw, (255, 255, 255, 255), 0, 2000, 200, -400, 400, 200, y_shift)
+        draw_grid(to_draw, (255, 255, 255, 255), 2000, 102000, 100000, -500, 500, 50, y_shift)
 
     if walls is not None:
         for w in walls:
@@ -98,31 +103,31 @@ def process(img, show: bool = False):
                 h2 = int(h0 - 1000 * (-b))
                 v2 = int(v0 - 1000 * a)
             if show and SHOW_WALL:
-                cv2.line(img, (h1, v1), (h2, v2), (255, 255, 255, 255), 1)
+                cv2.line(to_draw, (h1, v1 + y_shift), (h2, v2 + y_shift), (255, 255, 255, 255), 1)
             s1, x1, y1 = camera_convert.img2space(CAMERA_STATE, h1, v1, 0)
             s2, x2, y2 = camera_convert.img2space(CAMERA_STATE, h2, v2, 0)
             print(((x1, y1), (x2, y2)), "wall")
 
     if show:
-        cv2.imshow("image", img)
+        cv2.imshow("image", to_draw)
         print("no shit")
 
 
-def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
+def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step,  y_shift: int = 0):
     overlay = np.zeros(img.shape, np.uint8)
 
     for x in range(x_start, x_stop + x_step, x_step):
         for y in range(y_start, y_stop, y_step):
             s1, i1, j1 = camera_convert.space2img(CAMERA_STATE, x, y)
             s2, i2, j2 = camera_convert.space2img(CAMERA_STATE, x, y + y_step)
-            if s1 or s2:
-                cv2.line(overlay, (i1, j1), (i2, j2), color, 1)
+            # if s1 or s2:
+            cv2.line(overlay, (i1, j1 + y_shift), (i2, j2 + y_shift), color if x != 0 else (0, 0, 255), 1)
     for y in range(y_start, y_stop + y_step, y_step):
         for x in range(x_start, x_stop, x_step):
             s1, i1, j1 = camera_convert.space2img(CAMERA_STATE, x, y)
             s2, i2, j2 = camera_convert.space2img(CAMERA_STATE, x + x_step, y)
-            if s1 or s2:
-                cv2.line(overlay, (i1, j1), (i2, j2), color, 1)
+            # if s1 or s2:
+            cv2.line(overlay, (i1, j1 + y_shift), (i2, j2 + y_shift), color if y != 0 else (0, 0, 255), 1)
 
     overlay = np.minimum(
         overlay,
@@ -160,13 +165,21 @@ if __name__ == "__main__":
 
     if MODE == "adjust":
         filename = repository_path + "/assets/openCV_pic/" + READ_DIR + "/0.jpg"
+        filename_ = repository_path + "/assets/openCV_pic/" + READ_DIR + "/0_.jpg"
         if not os.path.isfile(filename):
             print("cannot open " + filename)
             exit(0)
-        image = cv2.imread(filename)
+        else:
+            image = cv2.imread(filename)
+        if not os.path.isfile(filename_):
+            print("cannot open " + filename_)
+            image_ = None
+        else:
+            image_ = cv2.imread(filename_)
         while True:
             img_temp = image.copy()
-            process(img_temp, True)
+            img__temp = image_.copy()
+            process(img_temp, True, img__temp)
             key = cv2.waitKey()
             print(key)
             if key == ord("a"):
