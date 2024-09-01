@@ -114,8 +114,12 @@ setlocal
 set "PYTHON_EXE=python"
 set "PACKAGE_NAME=black"
 %PYTHON_EXE% -c "import %PACKAGE_NAME%; print(%PACKAGE_NAME%)" >nul 2>nul
-if errorlevel 1 goto install_package
-else echo %PACKAGE_NAME% is installed. Start formatting.
+if errorlevel 1 (
+    goto install_package
+) else (
+    echo %PACKAGE_NAME% is installed. Start formatting.
+    goto format
+)
 endlocal
 
 :install_package
@@ -140,6 +144,7 @@ if %var_install%==Y (
     goto format_codes
 )
 
+:format
 echo Current formatting settings: [max-line-length=110][skip magic trailing comma].
 @REM TODO: Add code formatter settings into a configuration file.
 black . --line-length=110 --skip-magic-trailing-comma
