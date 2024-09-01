@@ -7,7 +7,6 @@ import find_color
 import matplotlib.pyplot as plt
 import numpy as np
 from camera_convert import CameraState
-import math
 
 DIFF_LEN = 0.1
 IDEN_TIMES = 65
@@ -15,7 +14,7 @@ DATA_NUM = 8
 MINIMUM_ERROR = 100
 
 MAX_CHANGE = 1
-CHANGING_RANGE = [5,100,100, 20, 0, 0, 10, 10]
+CHANGING_RANGE = [5, 100, 100, 20, 0, 0, 10, 10]
 ORIGIN_VALUE = [85, 18, -442, 55.9, 0.9, 0, 51.45, 51.09]
 
 ENABLE_SMOOTH_FACTOR = True
