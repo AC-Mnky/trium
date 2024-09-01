@@ -45,7 +45,8 @@ HOME_ANGLE = 0
 
 MAX_CORD_DIFFERENCE = 1000
 MAX_CORD_RELATIVE_DIFFERENCE = 0.5
-MAX_ANGLE_DIFFERENCE = 0.4
+MAX_ANGLE_DIFFERENCE = 0.75
+GOOD_ANGLE_DIFFERENCE = 0.2
 GOOD_SEEN_WALL_LENGTH = 500
 
 RESET_TIME = 1
@@ -117,6 +118,8 @@ def calc_weight(
         return 0
     if np.abs(angle_difference) > MAX_ANGLE_DIFFERENCE:
         return 0
+    if np.abs(angle_difference) > GOOD_ANGLE_DIFFERENCE:
+        weight *= 0.1
     if seen_wall_length < GOOD_SEEN_WALL_LENGTH:
         weight *= seen_wall_length / GOOD_SEEN_WALL_LENGTH
     return weight
@@ -361,7 +364,7 @@ class Core:
         self.predicted_angle += angle_diff_average
         self.start_angle += angle_diff_average
 
-    def act_when_there_is_no_item(self):
+    def act_when_there_is_no_item(self) -> None:
         """
         Perform a series of actions when there is no item captured.
 
@@ -458,6 +461,19 @@ class Core:
                 self.motor = [0.0, 0.0]
                 self.vision_message = "At home closing door."
                 yield
+
+    def act_pursue_item(self, item: tuple[float, float]) -> None:
+        self.predicted_items[item][2] = min(
+            self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
+        )
+
+        self.target_toward_cords(item)
+        self.vision_message = (
+                "Targeting towards "
+                + ("red" if self.predicted_items[item][1] == 0 else "yellow")
+                + " at "
+                + get_str(item)
+        )
 
     def distance_to_wall(self) -> float:
         """
@@ -742,17 +758,7 @@ class Core:
         else:
             self.action_no_item = self.act_when_there_is_no_item()
 
-            self.predicted_items[item][2] = min(
-                self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
-            )
-
-            self.target_toward_cords(item)
-            self.vision_message = (
-                    "Targeting towards "
-                    + ("red" if self.predicted_items[item][1] == 0 else "yellow")
-                    + " at "
-                    + get_str(item)
-            )
+            self.act_pursue_item(item)
 
         if CORE_TIME_DEBUG:
             print("Core: Action decided, used time:", next(self.time_tracker))
