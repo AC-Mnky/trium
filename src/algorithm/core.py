@@ -394,9 +394,10 @@ class Core:
         Yields:
             None: This method is a generator and yields None at each step.
         """
+        
+        current_cords = self.predicted_cords
+        
         while True:
-
-            current_cords = self.predicted_cords
 
             for rotation_spot in (current_cords, (1000, 1000), (2000, 1000)):
 
@@ -447,20 +448,29 @@ class Core:
                 yield
 
             t = 0
-            while t < 0.5:
+            while t < 3:
                 t += self.dt
                 self.back_open = True
                 self.motor = [0.0, 0.0]
                 self.vision_message = "At home opening door."
                 yield
-
+                
             t = 0
-            while t < 2.5:
+            while t < 3:
+                t += self.dt
+                self.back_open = False
+                self.motor = [0.0, 0.0]
+                self.vision_message = "At home closing door."
+                yield
+                
+            t = 0
+            while t < 3:
                 t += self.dt
                 self.back_open = True
                 self.motor = [0.0, 0.0]
-                self.vision_message = "At home waiting for items to drop."
+                self.vision_message = "At home opening door again."
                 yield
+
 
             t = 0
             while t < 0.5:
@@ -475,8 +485,10 @@ class Core:
                 t += self.dt
                 self.back_open = False
                 self.motor = [0.0, 0.0]
-                self.vision_message = "At home closing door."
+                self.vision_message = "At home closing door again."
                 yield
+                
+            current_cords = (1500, 1000)
 
     def act_pursue_item(self, item: tuple[float, float]) -> None:
         self.predicted_items[item][2] = min(
