@@ -1,8 +1,8 @@
 import time
 import argparse
 
-parser = argparse.ArgumentParser(description='No description')
-parser.add_argument('-d', dest='disable', action='store_true', help='Disable core visualization')
+parser = argparse.ArgumentParser(description="No description")
+parser.add_argument("-d", dest="disable", action="store_true", help="Disable core visualization")
 parser.set_defaults(disable=False)
 args = parser.parse_args()
 
@@ -192,5 +192,4 @@ if __name__ == "__main__":
         if stm is not None:
             for i in range(64):
                 stm.send_message(FORCE_STOP_MESSAGE, MAX_MESSAGE_LENGTH)
-            print('\n\nFORCE STOPPED')
-            
+            print("\n\nFORCE STOPPED")

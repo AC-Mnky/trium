@@ -118,7 +118,7 @@ def process(img, show: bool = False, img_=None):
         print("no shit")
 
 
-def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step,  y_shift: int = 0):
+def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step, y_shift: int = 0):
     overlay = np.zeros(img.shape, np.uint8)
 
     for x in range(x_start, x_stop + x_step, x_step):

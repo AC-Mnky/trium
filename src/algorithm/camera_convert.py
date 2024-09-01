@@ -9,11 +9,11 @@ class CameraState:
     """
 
     def __init__(
-            self,
-            camera_xyz: tuple[float, float, float],
-            camera_rotation: tuple[float, float, float],
-            fov: tuple[float, float],
-            resolution: tuple[int, int],
+        self,
+        camera_xyz: tuple[float, float, float],
+        camera_rotation: tuple[float, float, float],
+        fov: tuple[float, float],
+        resolution: tuple[int, int],
     ) -> None:
         """
         Initialize the CameraState object.
@@ -33,9 +33,7 @@ class CameraState:
         self.res_h, self.res_v = resolution
 
         self.trans_phi = np.array(
-            ((np.cos(self.phi), np.sin(self.phi), 0),
-             (-np.sin(self.phi), np.cos(self.phi), 0),
-             (0, 0, 1))
+            ((np.cos(self.phi), np.sin(self.phi), 0), (-np.sin(self.phi), np.cos(self.phi), 0), (0, 0, 1))
         )
         self.trans_theta = np.array(
             (
@@ -119,7 +117,9 @@ class CameraState:
         self.relative_cords_to_img_mapping = np.linalg.inv(self.img_to_relative_cords_mapping)
 
 
-def img2space(camera_state: CameraState, i: float, j: float, target_z: float = 0) -> tuple[bool, float, float]:
+def img2space(
+    camera_state: CameraState, i: float, j: float, target_z: float = 0
+) -> tuple[bool, float, float]:
     """
     Convert image coordinates to 3D space coordinates.
 
