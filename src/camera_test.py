@@ -27,7 +27,7 @@ MODE = "adjust"
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
-READ_DIR = "color_dot"
+READ_DIR = "color_dot_far"
 # naming rule: forward dist first, right dist second
 WRITE_DIR = "NANA"
 
@@ -85,7 +85,7 @@ def process(img, show: bool = False, img_=None):
                 cv2.circle(to_draw, (p[0], p[1] + y_shift), 10, (128, 128, 128, 255), 1)
 
     if show and DRAW_GRID:
-        draw_grid(to_draw, (255, 255, 255, 255), 300, 2000, 50, -500, 500, 50, y_shift)
+        draw_grid(to_draw, (255, 255, 255, 255), 0, 2000, 200, -400, 400, 200, y_shift)
         draw_grid(to_draw, (255, 255, 255, 255), 2000, 102000, 100000, -500, 500, 50, y_shift)
 
     if walls is not None:
