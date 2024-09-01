@@ -117,7 +117,7 @@ class CameraState:
         self.relative_cords_to_img_mapping = np.linalg.inv(self.img_to_relative_cords_mapping)
 
 
-def img2space(camera_state: CameraState, i: int, j: int, target_z: float = 0) -> tuple[bool, float, float]:
+def img2space(camera_state: CameraState, i: float, j: float, target_z: float = 0) -> tuple[bool, float, float]:
     """
     Convert image coordinates to 3D space coordinates.
 
