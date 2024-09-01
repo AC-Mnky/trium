@@ -26,6 +26,7 @@ CAMERA_STATE = camera_convert.CameraState(
     # (1, -1, -11),(53.2, 0.9, 0.9),(62.2, 62),(320, 240)
     # (-508.5,-1724.0,33.9),(52.1,-13.9,9.8),(115.2,78.6),(320,240)
     # (89.6,117.3,-541.3),(36.7,0.9, 0), (60.9, 59.6), (320,240)
+
     # (142, -38, -219), (56.3, 0.9, -0.5), (51.45, 51.09), (320, 240)
     # (143.69091796875, -53.24489974975586, -242.48875427246094), (92.91905975341797, 51.92171859741211, -37.98847198486328), (84.68187713623047, 80.89322662353516), (320, 240)
 # (62.143760681152344, -1.690099835395813, -419.2769775390625), (328.66015625, -58.919437408447266, -195.18653869628906), (65.40367126464844, 400.0306701660156), (320, 240)
@@ -44,15 +45,15 @@ CAMERA_STATE = camera_convert.CameraState(
 
 
 def process(
-        time: float, image: cv2.UMat | None
+        time: float, image: cv2.UMat | np.ndarray | None
 ) -> (
-    tuple[
-        float,
-        list[tuple[float, float]],
-        list[tuple[float, float]],
-        list[tuple[tuple[float, float], tuple[float, float]]],
-    ]
-    | None
+        tuple[
+            float,
+            list[tuple[float, float]],
+            list[tuple[float, float]],
+            list[tuple[tuple[float, float], tuple[float, float]]],
+        ]
+        | None
 ):
     """
     Process the given image to extract relevant information.
