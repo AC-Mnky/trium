@@ -359,7 +359,7 @@ int main(void) {
 		 * @note receive_buffer[4] -> brush | reveive_buffer[5] -> servo
 		 * */
 		if (receive_buffer[4]) {
-			set_motor_speed(3, 80);
+			set_motor_speed(3, 60);
 		} else {
 			set_motor_speed(3, 0);
 		}
