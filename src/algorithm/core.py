@@ -48,6 +48,7 @@ MAX_CORD_RELATIVE_DIFFERENCE = 0.5
 MAX_ANGLE_DIFFERENCE = 0.4
 GOOD_SEEN_WALL_LENGTH = 500
 
+RESET_TIME = 1
 MERGE_RADIUS = 300
 CONTACT_CENTER_TO_BACK = 100
 CONTACT_RADIUS = 80
@@ -92,7 +93,7 @@ def time_since_last_call(mul: int = 1000):
 
 
 def calc_weight(
-    cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
+        cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
 ) -> float:
     """
     Calculate the weight based on the given parameters.
@@ -162,9 +163,9 @@ def merge_item_prediction(dictionary) -> None:
 
 class Core:
 
-    def __init__(self, time: float, input_protocol: int):
-        self.start_time = time
-        self.last_update_time = time
+    def __init__(self, start_time: float, input_protocol: int):
+        self.start_time = start_time
+        self.last_update_time = start_time
         self.dt = 0
         self.protocol = input_protocol
 
@@ -384,15 +385,12 @@ class Core:
                 self.vision_message = "Going Home."
                 yield
 
-            while not -0.1 < angle_subtract(self.predicted_angle, HOME_ANGLE) < 0.1:
-                if angle_subtract(self.predicted_angle, HOME_ANGLE) > 0:
-                    self.motor = [-0.1, 0.1]
-                    self.vision_message = "At home rotating left."
-                    yield
-                else:
-                    self.motor = [0.1, -0.1]
-                    self.vision_message = "At home rotating right."
-                    yield
+            angle = angle_subtract(HOME_ANGLE, self.predicted_angle)
+            while not -0.05 < angle < 0.05:
+                self.set_motor_output(ANGLE_TYPICAL * angle, 0)
+                self.vision_message = "At home rotating."
+                yield
+                angle = angle_subtract(HOME_ANGLE, self.predicted_angle)
 
             t = 0
             while t < 2:
@@ -409,13 +407,13 @@ class Core:
                 self.vision_message = "At home opening door."
                 yield
 
-            t = 0
-            while t < 0.5:
-                t += self.dt
-                self.back_open = True
-                self.motor = [0.9, 0.9]
-                self.vision_message = "At home dumping."
-                yield
+            # t = 0
+            # while t < 0.5:
+            #     t += self.dt
+            #     self.back_open = True
+            #     self.motor = [0.9, 0.9]
+            #     self.vision_message = "At home dumping."
+            #     yield
 
             t = 0
             while t < 2.5:
@@ -481,7 +479,8 @@ class Core:
         angle = get_angle(cords)
         diff = ANGLE_TYPICAL * angle
         # print('diff:', diff)
-        summ = LENGTH_TYPICAL * length * np.exp(-((angle / ANGLE_STANDARD_DEVIATION) ** 2) / 2)
+        summ = LENGTH_TYPICAL * length \
+            * np.exp(-((angle / ANGLE_STANDARD_DEVIATION) ** 2) / 2)
         self.set_motor_output(diff, summ)
 
     def set_motor_output(self, diff: float, summ: float) -> None:
@@ -507,36 +506,34 @@ class Core:
 
         self.motor = [(summ + diff) / 2, (summ - diff) / 2]
 
-        # TODO: dependent on angle to walls
-
         # k = np.maximum(np.abs(np.max(self.motor)) / 0.9, 1)
         # self.motor[0] /= k
         # self.motor[1] /= k
         # print(self.motor)
 
     def update(
-        self,
-        time: float,
-        stm32_input: bytes,
-        unpacked_stm32_input: list[int],
-        imu_input: (
-            tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None
-        ),
-        camera_input: (
-            tuple[
-                float,
-                list[tuple[float, float]],
-                list[tuple[float, float]],
-                list[tuple[tuple[float, float], tuple[float, float]]],
-            ]
-            | None
-        ),
+            self,
+            current_time: float,
+            stm32_input: bytes,
+            unpacked_stm32_input: list[int],
+            imu_input: (
+                    tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None
+            ),
+            camera_input: (
+                    tuple[
+                        float,
+                        list[tuple[float, float]],
+                        list[tuple[float, float]],
+                        list[tuple[tuple[float, float], tuple[float, float]]],
+                    ]
+                    | None
+            ),
     ) -> None:
         """
         Get realtime data from other modules, thus updating the state of the algorithm.
 
         Args:
-            time (float): The current time.
+            current_time (float): The current time.
             stm32_input (bytes): The input from STM32.
             unpacked_stm32_input (list): The unpacked input from STM32.
             imu_input (tuple | None):
@@ -550,8 +547,8 @@ class Core:
         if CORE_TIME_DEBUG:
             next(self.time_tracker)
         # calculate the time interval between two updates
-        self.dt = time - self.last_update_time
-        self.last_update_time = time
+        self.dt = current_time - self.last_update_time
+        self.last_update_time = current_time
 
         # update all the input data
         if stm32_input is not None:
@@ -602,14 +599,14 @@ class Core:
                 )
 
         for i, camera_point in (
-            (0, (0, 0)),
-            (1, (0, vision.CAMERA_STATE.res_v)),
-            (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
-            (3, (vision.CAMERA_STATE.res_h, 0)),
-            (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
-            (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                (0, (0, 0)),
+                (1, (0, vision.CAMERA_STATE.res_v)),
+                (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
+                (3, (vision.CAMERA_STATE.res_h, 0)),
+                (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
         ):
             self.predicted_camera_vertices[i] = self.relative2absolute(
                 camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3]
@@ -633,8 +630,8 @@ class Core:
             for red in camera_reds:
                 cords = self.relative2absolute(red)  # position of red block
                 if (
-                    ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
-                    and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
+                        ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
+                        and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
                 ):
                     self.predicted_items[cords] = [
                         self.predicted_items.get(cords, (0, 0))[0] + 2,
@@ -645,8 +642,8 @@ class Core:
             for yellow in camera_yellows:
                 cords = self.relative2absolute(yellow)  # position of yellow block
                 if (
-                    ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
-                    and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
+                        ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
+                        and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
                 ):
                     self.predicted_items[cords] = [
                         self.predicted_items.get(cords, (0, 1))[0] + 3,
@@ -663,8 +660,8 @@ class Core:
                     vision.CAMERA_STATE, relative_cords[0], relative_cords[1], -12.5 if v[1] == RED else -15
                 )
                 if (
-                    0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H
-                    and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V
+                        0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H
+                        and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V
                 ):
                     v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
 
@@ -677,8 +674,8 @@ class Core:
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
             if (
-                get_distance(item, self.contact_center) < CONTACT_RADIUS
-                or self.predicted_items[item][0] < DELETE_VALUE
+                    get_distance(item, self.contact_center) < CONTACT_RADIUS
+                    or self.predicted_items[item][0] < DELETE_VALUE
             ):
                 items_to_delete.append(item)
         for item in items_to_delete:
@@ -700,10 +697,10 @@ class Core:
 
             self.target_toward_cords(item)
             self.vision_message = (
-                "Targeting towards "
-                + ("red" if self.predicted_items[item][1] == 0 else "yellow")
-                + " at "
-                + get_str(item)
+                    "Targeting towards "
+                    + ("red" if self.predicted_items[item][1] == 0 else "yellow")
+                    + " at "
+                    + get_str(item)
             )
 
         if CORE_TIME_DEBUG:
@@ -718,7 +715,7 @@ class Core:
 
         self.brush = True
 
-        if time - self.start_time < 3:
+        if current_time - self.start_time < RESET_TIME:
             self.status_code = 1
 
     def get_output(self) -> bytes:
@@ -729,18 +726,18 @@ class Core:
             output (bytes): The output as a bytes object.
         """
         output = (
-            [
-                128,
-                self.status_code,
-                int(self.motor[1] * PWM_PERIOD),
-                int(self.motor[0] * PWM_PERIOD),
-                int(self.brush),
-                int(self.back_open),
-                0,
-                0,
-            ]
-            + self.motor_PID[1]
-            + self.motor_PID[0]
+                [
+                    128,
+                    self.status_code,
+                    int(self.motor[1] * PWM_PERIOD),
+                    int(self.motor[0] * PWM_PERIOD),
+                    int(self.brush),
+                    int(self.back_open),
+                    0,
+                    0,
+                ]
+                + self.motor_PID[1]
+                + self.motor_PID[0]
         )
 
         for i in range(len(output)):
