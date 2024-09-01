@@ -23,7 +23,7 @@ void motor_init() {
 	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
 }
 
-void set_motor_speed(int num, int pulse) {
+void set_motor_speed(uint8_t num, int pulse) {
 	if (num == 1) {
 		if (pulse > 0) {
 			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_12, GPIO_PIN_SET); // IN1
@@ -97,25 +97,37 @@ uint16_t get_encoder_CNT(int num, uint32_t *out_real_tick_elapsed) {
 }
 
 /* @brief Get the direction of the encoder
- * @param num: 1, 2, 3 (notion of motor)
- * @retval direction_flag (int): 1 (down), 0 (up)
+ * @param num: 1, 2, 3 (number of motor)
+ * @retval direction_flag (uint8_t): 1 (down), 0 (up)
  * @note This function is never used (?)
  * */
-uint8_t get_encoder_direction(int num) {
+uint8_t get_encoder_direction(uint8_t num) {
 	uint8_t direction_flag = 0;
 	if (num == 1) {
-		iTimEncoder = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim5) ? 1 : 0;
+		direction_flag = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim5) ? 1 : 0;
 	} else if (num == 2) {
-		iTimEncoder = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3) ? 1 : 0;
+		direction_flag = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3) ? 1 : 0;
 	} else if (num == 3) {
-		iTimEncoder = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim4) ? 1 : 0;
+		direction_flag = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim4) ? 1 : 0;
 	} else {
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET); // Show errors
 	}
 	return direction_flag;
 }
 
-// Period = 2000, 20ms, pulse width = 0.5 ~ 2.5 ms
-void set_servo_angle(int pulse) {
-	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, pulse);
+/* @brief Set the angle of the servo motor
+ * @param pulse: 50 ~ 250 (250 -> door open | 150 -> door close)
+ * @retval None
+ * @note The rotation action is set to complete in 100ms in order to be smoother
+ * */
+void set_servo_angle(uint16_t pulse) {
+	uint16_t current_pulse = __HAL_TIM_GET_COMPARE(&htim8, TIM_CHANNEL_1);
+	uint8_t step_num = 10;
+	uint8_t step = (pulse - current_pulse) / step_num;
+	for (uint8_t i = 0; i < step_num; i++) {
+		current_pulse += step;
+		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, current_pulse);
+		HAL_Delay(10);
+	}
+//	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, pulse);
 }
