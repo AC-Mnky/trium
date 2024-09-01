@@ -116,13 +116,13 @@ def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step):
             s1, i1, j1 = camera_convert.space2img(CAMERA_STATE, x, y)
             s2, i2, j2 = camera_convert.space2img(CAMERA_STATE, x, y + y_step)
             if s1 or s2:
-                cv2.line(overlay, (i1, j1), (i2, j2), color, 1)
+                cv2.line(overlay, (i1, j1), (i2, j2), color if x != 0 else (0, 0, 255), 1)
     for y in range(y_start, y_stop + y_step, y_step):
         for x in range(x_start, x_stop, x_step):
             s1, i1, j1 = camera_convert.space2img(CAMERA_STATE, x, y)
             s2, i2, j2 = camera_convert.space2img(CAMERA_STATE, x + x_step, y)
             if s1 or s2:
-                cv2.line(overlay, (i1, j1), (i2, j2), color, 1)
+                cv2.line(overlay, (i1, j1), (i2, j2), color if y != 0 else (0, 0, 255), 1)
 
     overlay = np.minimum(
         overlay,
