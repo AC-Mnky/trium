@@ -64,7 +64,7 @@ ANGLE_TYPICAL = 0.2
 ANGLE_STANDARD_DEVIATION = 0.05
 LENGTH_TYPICAL = 0.002
 WALL_SLOW_MARGIN = 1000
-MAX_SPEED = 914.8
+MAX_SPEED = 915
 BASIC_WEIGHT = 0.5
 X_CLIP_MARGIN = 100
 Y_CLIP_MARGIN = 100
@@ -393,7 +393,7 @@ class Core:
                     yield
 
                 t = 0
-                while t < 5:
+                while t < 2.5:
                     t += self.dt
                     self.motor = [0.3, -0.3]
                     self.vision_message = "Rotating right for time " + str(t)
@@ -401,7 +401,7 @@ class Core:
                     yield
 
                 t = 0
-                while t < 15:
+                while t < 7.5:
                     t += self.dt
                     self.motor = [-0.1, 0.1]
                     self.vision_message = "Rotating left for time " + str(t)
