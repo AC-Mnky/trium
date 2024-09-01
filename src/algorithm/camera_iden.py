@@ -14,7 +14,10 @@ IDEN_TIMES = 65
 DATA_NUM = 8
 MINIMUM_ERROR = 100
 
-MAX_CHANGE = 3
+MAX_CHANGE = 1
+CHANGING_RANGE = [5,100,100, 20, 0, 0, 10, 10]
+ORIGIN_VALUE = [85, 18, -442, 55.9, 0.9, 0, 51.45, 51.09]
+
 ENABLE_SMOOTH_FACTOR = True
 OVERLAY_DISTANCE = 40  # The distance criterion of endpoints, deciding whether to merge two walls
 LAMBDA = 0
@@ -191,8 +194,8 @@ if __name__ == "__main__":
         except FileNotFoundError:
             print("cannot open", pic_path)
 
-    camera_xyz_0 = np.array([282, 14, -440])
-    camera_rotation_0 = np.array([56.1, 1.2, 0.1])
+    camera_xyz_0 = np.array([143, -38, -215])
+    camera_rotation_0 = np.array([56.5, 0.8, -0.5])
     fov_0 = np.array([51.45, 51.09])
     resolution = (320, 240)
     E_test = np.array(
@@ -247,6 +250,10 @@ if __name__ == "__main__":
         p = np.reshape(p, (1, 8))
         p += d_p
         p = np.reshape(p, (8,))
+
+        # restrict the range of paras
+        # for j in range(len(p)):
+        #     p[j] = CHANGING_RANGE[j] * math.atan(p[j] - ORIGIN_VALUE[j]) / (math.pi/2)  + ORIGIN_VALUE[j]
 
         print(f"p = {p}")
         print(f"d_p = {d_p}")
