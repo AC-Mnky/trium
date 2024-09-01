@@ -36,9 +36,9 @@ RIGHT_WHEEL = (WHEEL_X_OFFSET, DISTANCE_BETWEEN_WHEELS / 2)
 ROOM_X = 3000
 ROOM_Y = 2000
 
-INITIAL_CORD_X = 100
-INITIAL_CORD_Y = 150
-INITIAL_ANGLE = 0
+INITIAL_CORD_X = 200
+INITIAL_CORD_Y = 200
+INITIAL_ANGLE = np.pi / 2
 
 HOME = (400, ROOM_Y - 200)
 HOME_ANGLE = 0
@@ -49,7 +49,7 @@ MAX_ANGLE_DIFFERENCE = 0.4
 GOOD_SEEN_WALL_LENGTH = 500
 
 RESET_TIME = 1
-MERGE_RADIUS = 300
+MERGE_RADIUS = 50  # 300
 CONTACT_CENTER_TO_BACK = 100
 CONTACT_RADIUS = 80
 SEEN_ITEMS_DECAY_EXPONENTIAL = 0.5
@@ -61,10 +61,13 @@ AIM_ANGLE = 0.4
 NO_AIM_ANGLE = 0.2
 ROOM_MARGIN = -1000000
 ANGLE_TYPICAL = 0.2
-ANGLE_STANDARD_DEVIATION = 0.1
+ANGLE_STANDARD_DEVIATION = 0.05
 LENGTH_TYPICAL = 0.002
 WALL_SLOW_MARGIN = 1000
 MAX_SPEED = 914.8
+BASIC_WEIGHT = 0.5
+X_CLIP_MARGIN = 100
+Y_CLIP_MARGIN = 100
 
 MOTOR_SPEED = 0.5
 
@@ -107,7 +110,7 @@ def calc_weight(
     Returns:
         weight (float): The calculated weight.
     """
-    weight = 0.1
+    weight = BASIC_WEIGHT
     if np.abs(cord_difference) > MAX_CORD_DIFFERENCE:
         return 0
     if np.abs(cord_difference / distance_to_wall) > MAX_CORD_RELATIVE_DIFFERENCE:
@@ -407,20 +410,20 @@ class Core:
                 self.vision_message = "At home opening door."
                 yield
 
-            # t = 0
-            # while t < 0.5:
-            #     t += self.dt
-            #     self.back_open = True
-            #     self.motor = [0.9, 0.9]
-            #     self.vision_message = "At home dumping."
-            #     yield
-
             t = 0
             while t < 2.5:
                 t += self.dt
                 self.back_open = True
                 self.motor = [0.0, 0.0]
                 self.vision_message = "At home waiting for items to drop."
+                yield
+                
+            t = 0
+            while t < 0.5:
+                t += self.dt
+                self.back_open = True
+                self.motor = [0.9, 0.9]
+                self.vision_message = "At home leaving."
                 yield
 
             t = 0
@@ -479,7 +482,27 @@ class Core:
         angle = get_angle(cords)
         diff = ANGLE_TYPICAL * angle
         # print('diff:', diff)
-        summ = LENGTH_TYPICAL * length \
+        summ = np.clip(LENGTH_TYPICAL * length, 0.2, 0.9) \
+            * np.exp(-((angle / ANGLE_STANDARD_DEVIATION) ** 2) / 2)
+        self.set_motor_output(diff, summ)
+        
+    def target_toward_cords_backwards(self, cords: tuple[float, float]) -> None:
+        """
+        Set the target coordinates for the vision system and calculates the motor output, but backwards.
+
+        Args:
+            cords (tuple[float, float]): The target coordinates in absolute units.
+
+        Returns:
+            None
+        """
+        self.vision_target_cords = cords
+        cords = self.absolute2relative(cords)
+        length = get_length(cords)
+        angle = get_angle(vec_sub((0, 0), cords))
+        diff = ANGLE_TYPICAL * angle
+        # print('diff:', diff)
+        summ = - np.clip(LENGTH_TYPICAL * length, 0.2, 0.9) \
             * np.exp(-((angle / ANGLE_STANDARD_DEVIATION) ** 2) / 2)
         self.set_motor_output(diff, summ)
 
@@ -587,6 +610,8 @@ class Core:
         #     print([np.radians(x) for x in self.imu_angle_deg], "yee")
         inferred_velocity = rotated(inferred_relative_velocity, self.predicted_angle)
         self.predicted_cords = vec_add(vec_mul(inferred_velocity, self.dt), self.predicted_cords)
+        self.predicted_cords = (np.clip(self.predicted_cords[0], X_CLIP_MARGIN, ROOM_X - X_CLIP_MARGIN), 
+                                np.clip(self.predicted_cords[1], Y_CLIP_MARGIN, ROOM_Y - Y_CLIP_MARGIN))
 
         if CORE_TIME_DEBUG:
             print("Core: Velocity and cords predicted, used time:", next(self.time_tracker))
