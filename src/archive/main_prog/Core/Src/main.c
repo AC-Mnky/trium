@@ -363,6 +363,35 @@ int main(void) {
 		} else {
 			set_motor_speed(3, 0);
 		}
+
+		/* Test codes for servo motor. Used to replace changes in set_servo_angle() function.
+		 if (receive_buffer[5]) {
+
+		 if ( __HAL_TIM_GET_COMPARE(&htim8, TIM_CHANNEL_1) > 240
+		 && __HAL_TIM_GET_COMPARE(&htim8, TIM_CHANNEL_1) < 260) {
+		 set_servo_angle(250);
+		 } else {
+		 for (uint8_t i = 0; i < 10; ++i) {
+		 set_servo_angle(160 + i * 10);
+		 HAL_Delay(10);
+		 }
+		 }
+
+		 } else {
+
+		 if ( __HAL_TIM_GET_COMPARE(&htim8, TIM_CHANNEL_1) > 140
+		 && __HAL_TIM_GET_COMPARE(&htim8, TIM_CHANNEL_1) < 160) {
+		 set_servo_angle(150);
+		 } else {
+		 for (uint8_t i = 0; i < 10; ++i) {
+		 set_servo_angle(240 - i * 10);
+		 HAL_Delay(10);
+		 }
+		 }
+
+		 }
+		 */
+
 		/* 250 -> door open | 150 -> door close */
 		if (receive_buffer[5]) {
 			set_servo_angle(250);
@@ -387,7 +416,7 @@ int main(void) {
 		}
 
 		/* @brief control the time of one loop
-		 * @note set  the time of one loop to 200 ticks of timer 6 (0.1ms per tick)
+		 * @note set the time of one loop to 200 ticks of timer 6 (0.1ms per tick)
 		 * */
 		while (__HAL_TIM_GET_COUNTER(&htim6) < 200) {
 		}
@@ -398,7 +427,7 @@ int main(void) {
 		}
 
 		/* @brief use blink to test whether the loop is conducted properly
-		 * HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+		 * @code HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
 		 * */
 	}
 	/* USER CODE END 3 */
