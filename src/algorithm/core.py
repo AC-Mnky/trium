@@ -557,6 +557,7 @@ class Core:
         elif tag == 5:
             self.act_when_there_is_no_item()
 
+
     def distance_to_wall(self) -> float:
         """
         Calculate the minimum distance from the current position to the nearest wall in the area.
