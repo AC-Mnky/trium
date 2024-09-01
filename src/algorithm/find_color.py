@@ -68,7 +68,7 @@ def get_color_mask(
 
 def find_color(
     image: np.ndarray, color_range_list: list[np.ndarray], show: bool = False, color_name: str = "color"
-) -> list[(int, int)]:
+) -> tuple[np.ndarray, list[tuple[float, float]]]:
     """
     Find the coordinates of colored objects in an image.
 
@@ -92,10 +92,10 @@ def find_color(
             cy = int(m["m01"] / m["m00"])
             points.append((cx, cy))
 
-    return points
+    return output, points
 
 
-def find_red(image: np.ndarray, show: bool = False) -> list[(int, int)]:
+def find_red(image: np.ndarray, show: bool = False) -> tuple[np.ndarray, list[tuple[float, float]]]:
     """
     Find the coordinates of red pixels in the given image.
 
@@ -109,7 +109,7 @@ def find_red(image: np.ndarray, show: bool = False) -> list[(int, int)]:
     return find_color(image, [RED1, RED2], show, "red")
 
 
-def find_yellow(image: np.ndarray, show: bool = False) -> list[(int, int)]:
+def find_yellow(image: np.ndarray, show: bool = False) -> tuple[np.ndarray, list[tuple[float, float]]]:
     """
     Find the coordinates of yellow pixels in the given image.
 
@@ -149,7 +149,7 @@ def show_white(image: np.ndarray) -> None:
     get_color_mask(image, [WHITE], True, "white")
 
 
-def find_wall_bottom(image: np.ndarray, show: bool = False):
+def find_wall_bottom(image: np.ndarray, show: bool = False) -> tuple[np.ndarray, np.ndarray, list]:
     """
     Find the bottom of the given walls in an image, cv2.HoughLines() version.
 
@@ -158,6 +158,8 @@ def find_wall_bottom(image: np.ndarray, show: bool = False):
         show (bool, optional): Whether to display intermediate images. Defaults to False.
 
     Returns:
+        blue: Mask of blue.
+        white: Mask of white.
         lines: The detected lines using Hough transform.
     """
     blue = get_color_mask(image, [BLUE])
@@ -178,6 +180,9 @@ def find_wall_bottom(image: np.ndarray, show: bool = False):
 
     lines = cv2.HoughLines(x, 1, np.pi / 180, HOUGH_THRESHOLD)
 
+    if lines is None:
+        lines = []
+
     # print(lines)
     if SHOW_LINE and lines is not None:
         for line in lines:
@@ -195,10 +200,10 @@ def find_wall_bottom(image: np.ndarray, show: bool = False):
     if show:
         cv2.imshow("wall bottom", draw)
 
-    return lines
+    return blue, white, lines
 
 
-def find_wall_bottom_p(image: np.ndarray, show: bool = False):
+def find_wall_bottom_p(image: np.ndarray, show: bool = False) -> tuple[np.ndarray, np.ndarray, list]:
     """
     Find the bottom of wall lines in an image, cv2.HoughLinesP() version.
 
@@ -207,6 +212,8 @@ def find_wall_bottom_p(image: np.ndarray, show: bool = False):
         show (bool, optional): Whether to display intermediate images. Defaults to False.
 
     Returns:
+        blue: Mask of blue.
+        white: Mask of white.
         lines: A list of line coordinates (x1, y1, x2, y2) if lines are found, None otherwise.
     """
     blue = get_color_mask(image, [BLUE])
@@ -232,6 +239,10 @@ def find_wall_bottom_p(image: np.ndarray, show: bool = False):
     lines = cv2.HoughLinesP(
         x, 1, np.pi / 180, HOUGH_P_THRESHOLD, minLineLength=HOUGH_P_MIN_LENGTH, maxLineGap=HOUGH_P_MAX_GAP
     )
+
+    if lines is None:
+        lines = []
+
     # print(lines)
     if SHOW_LINE and lines is not None:
         for line in lines:
@@ -241,4 +252,4 @@ def find_wall_bottom_p(image: np.ndarray, show: bool = False):
     if show:
         cv2.imshow("wall bottom", draw)
 
-    return lines
+    return blue, white, lines

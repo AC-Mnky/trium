@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 try:
     import camera_convert
@@ -44,7 +45,7 @@ CAMERA_STATE = camera_convert.CameraState(
 
 
 def process(
-        time: float, image: cv2.UMat | None
+        time: float, image: cv2.UMat | np.ndarray | None
 ) -> (
         tuple[
             float,
@@ -72,9 +73,9 @@ def process(
     if image is None:
         return None
 
-    reds_in_image = find_color.find_red(image)
-    yellows_in_image = find_color.find_yellow(image)
-    walls_in_image = find_color.find_wall_bottom_p(image)
+    mask_red, reds_in_image = find_color.find_red(image)
+    mask_yellow, yellows_in_image = find_color.find_yellow(image)
+    mask_blue, mask_white, walls_in_image = find_color.find_wall_bottom_p(image)
 
     reds = []
     yellows = []
