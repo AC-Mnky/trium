@@ -86,6 +86,7 @@ def process(img, show: bool = False, img_=None):
 
     if show and DRAW_GRID:
         draw_grid(to_draw, (255, 255, 255, 255), 300, 2000, 50, -500, 500, 50, y_shift)
+        draw_grid(to_draw, (255, 255, 255, 255), 2000, 102000, 100000, -500, 500, 50, y_shift)
 
     if walls is not None:
         for w in walls:
@@ -119,14 +120,14 @@ def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step,  y_s
         for y in range(y_start, y_stop, y_step):
             s1, i1, j1 = camera_convert.space2img(CAMERA_STATE, x, y)
             s2, i2, j2 = camera_convert.space2img(CAMERA_STATE, x, y + y_step)
-            if s1 or s2:
-                cv2.line(overlay, (i1, j1 + y_shift), (i2, j2 + y_shift), color if x != 0 else (0, 0, 255), 1)
+            # if s1 or s2:
+            cv2.line(overlay, (i1, j1 + y_shift), (i2, j2 + y_shift), color if x != 0 else (0, 0, 255), 1)
     for y in range(y_start, y_stop + y_step, y_step):
         for x in range(x_start, x_stop, x_step):
             s1, i1, j1 = camera_convert.space2img(CAMERA_STATE, x, y)
             s2, i2, j2 = camera_convert.space2img(CAMERA_STATE, x + x_step, y)
-            if s1 or s2:
-                cv2.line(overlay, (i1, j1 + y_shift), (i2, j2 + y_shift), color if y != 0 else (0, 0, 255), 1)
+            # if s1 or s2:
+            cv2.line(overlay, (i1, j1 + y_shift), (i2, j2 + y_shift), color if y != 0 else (0, 0, 255), 1)
 
     overlay = np.minimum(
         overlay,
@@ -168,11 +169,13 @@ if __name__ == "__main__":
         if not os.path.isfile(filename):
             print("cannot open " + filename)
             exit(0)
+        else:
+            image = cv2.imread(filename)
         if not os.path.isfile(filename_):
             print("cannot open " + filename_)
-            exit(0)
-        image = cv2.imread(filename)
-        image_ = cv2.imread(filename_)
+            image_ = None
+        else:
+            image_ = cv2.imread(filename_)
         while True:
             img_temp = image.copy()
             img__temp = image_.copy()
