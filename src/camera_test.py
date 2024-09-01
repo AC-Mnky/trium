@@ -61,7 +61,8 @@ def process(img, show: bool = False, img_=None):
     print()
 
     to_draw = img if img_ is None else img_
-    y_shift = 0 if img_ is None else img_[1] - img[1]
+    y_shift = 0 if img_ is None else img_.shape[0] - img.shape[0]
+    print(y_shift)
 
     for p in points_red:
         s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -12.5)
