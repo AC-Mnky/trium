@@ -363,6 +363,7 @@ int main(void) {
 		} else {
 			set_motor_speed(3, 0);
 		}
+		/* 250 -> door open | 150 -> door close */
 		if (receive_buffer[5]) {
 			set_servo_angle(250);
 		} else {
