@@ -22,12 +22,12 @@ else:
 """
 MODE = "camera", "file", "adjust"
 """
-MODE = "adjust"
+MODE = "file"
 
 FORCE_OVERWRITE = True
 GLOBAL_SHOW = True
 MASK_SHOW = True
-READ_DIR = "color_dot_far"
+READ_DIR = "test5 "
 # naming rule: forward dist first, right dist second
 WRITE_DIR = "NANA"
 
@@ -49,13 +49,14 @@ USE_HOUGH_P = True
 
 
 def process(img, show: bool = False, img_=None):
-    points_red = find_color.find_red(img, show and MASK_SHOW)
-    points_yellow = find_color.find_yellow(img, show and MASK_SHOW)
-    walls = (
+    mask_red, points_red = find_color.find_red(img, show and MASK_SHOW)
+    mask_yellow, points_yellow = find_color.find_yellow(img, show and MASK_SHOW)
+    mask_blue, mask_white, walls = (
         find_color.find_wall_bottom_p(img, show and MASK_SHOW)
         if USE_HOUGH_P
         else find_color.find_wall_bottom(img, show and MASK_SHOW)
     )
+    mask_else = 255 - np.max(np.stack((mask_red, mask_yellow, mask_blue, mask_white), axis=0), axis=0)
 
     # switch to a new line
     print()
@@ -109,6 +110,10 @@ def process(img, show: bool = False, img_=None):
             print(((x1, y1), (x2, y2)), "wall")
 
     if show:
+        overlay = np.repeat(mask_else[:, :, np.newaxis], 3, axis=2)
+
+        cv2.add(overlay, img, img)
+
         cv2.imshow("image", to_draw)
         print("no shit")
 
@@ -178,7 +183,7 @@ if __name__ == "__main__":
             image_ = cv2.imread(filename_)
         while True:
             img_temp = image.copy()
-            img__temp = image_.copy()
+            img__temp = image_.copy() if image_ is not None else None
             process(img_temp, True, img__temp)
             key = cv2.waitKey()
             print(key)
