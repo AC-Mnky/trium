@@ -59,7 +59,7 @@ INTEREST_ADDITION = 5
 INTEREST_MAXIMUM = 30
 AIM_ANGLE = 0.4
 NO_AIM_ANGLE = 0.2
-ROOM_MARGIN = -1000000
+ROOM_MARGIN = 10
 ANGLE_TYPICAL = 0.2
 ANGLE_STANDARD_DEVIATION = 0.05
 LENGTH_TYPICAL = 0.002
@@ -96,7 +96,7 @@ def time_since_last_call(mul: int = 1000):
 
 
 def calc_weight(
-    cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
+        cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
 ) -> float:
     """
     Calculate the weight based on the given parameters.
@@ -123,12 +123,14 @@ def calc_weight(
 
 
 # k = key, v = value
-def merge_item_prediction(dictionary) -> None:
+def merge_item_prediction(dictionary: dict[tuple[float, float], list[float, int, float]],
+                          to_merge: list[tuple[float, float]]) -> None:
     """
     Merge items in the given dictionary based on certain conditions.
 
     Args:
         dictionary (dict): The dictionary containing items to be merged.
+        to_merge: Items to merge.
 
     Returns:
         None
@@ -137,7 +139,10 @@ def merge_item_prediction(dictionary) -> None:
     while True:
         substitution = None
 
-        for k1, v1 in dictionary.items():
+        for k1 in to_merge:
+            if k1 not in dictionary.keys():
+                continue
+            v1 = dictionary[k1]
 
             neighbour_of_k1 = {}
             for k2, v2 in dictionary.items():
@@ -162,6 +167,24 @@ def merge_item_prediction(dictionary) -> None:
         for k in substitution[0]:
             dictionary.pop(k)
         dictionary[substitution[1]] = list(substitution[2:])
+
+
+def reachable(cords: tuple[float, float]) -> bool:
+    if not ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN:
+        return False
+    if 0 <= cords[0] <= 250 and ROOM_Y - 350 <= cords[1] <= ROOM_Y:  # my home
+        return False
+    if ROOM_X - 250 <= cords[0] <= ROOM_X and 0 <= cords[1] <= 350:  # opponent home
+        return False
+    if 0 <= cords[0] <= 50 and 0 <= cords[1] <= 200:  # room corner
+        return False
+    if 0 <= cords[0] <= 200 and 0 <= cords[1] <= 50:  # room corner
+        return False
+    if ROOM_X - 50 <= cords[0] <= ROOM_X and ROOM_Y - 200 <= cords[1] <= ROOM_Y:  # room corner
+        return False
+    if ROOM_X - 200 <= cords[0] <= ROOM_X and ROOM_Y - 50 <= cords[1] <= ROOM_Y:  # room corner
+        return False
+    return True
 
 
 class Core:
@@ -227,6 +250,8 @@ class Core:
         closest = None
         closest_distance = np.inf
         for x, v in self.predicted_items.items():
+            if not reachable(x):
+                continue
             x_distance = get_distance(x, self.predicted_cords) - v[2]
             if x_distance < closest_distance:
                 closest = x
@@ -537,22 +562,22 @@ class Core:
         # print(self.motor)
 
     def update(
-        self,
-        current_time: float,
-        stm32_input: bytes,
-        unpacked_stm32_input: list[int],
-        imu_input: (
-            tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None
-        ),
-        camera_input: (
-            tuple[
-                float,
-                list[tuple[float, float]],
-                list[tuple[float, float]],
-                list[tuple[tuple[float, float], tuple[float, float]]],
-            ]
-            | None
-        ),
+            self,
+            current_time: float,
+            stm32_input: bytes,
+            unpacked_stm32_input: list[int],
+            imu_input: (
+                    tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None
+            ),
+            camera_input: (
+                    tuple[
+                        float,
+                        list[tuple[float, float]],
+                        list[tuple[float, float]],
+                        list[tuple[tuple[float, float], tuple[float, float]]],
+                    ]
+                    | None
+            ),
     ) -> None:
         """
         Get realtime data from other modules, thus updating the state of the algorithm.
@@ -628,14 +653,14 @@ class Core:
                 )
 
         for i, camera_point in (
-            (0, (0, 0)),
-            (1, (0, vision.CAMERA_STATE.res_v)),
-            (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
-            (3, (vision.CAMERA_STATE.res_h, 0)),
-            (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
-            (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
-            (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                (0, (0, 0)),
+                (1, (0, vision.CAMERA_STATE.res_v)),
+                (2, (vision.CAMERA_STATE.res_h, vision.CAMERA_STATE.res_v)),
+                (3, (vision.CAMERA_STATE.res_h, 0)),
+                (4, (CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
+                (5, (CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                (6, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V)),
+                (7, (vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H, CAMERA_MARGIN_V)),
         ):
             self.predicted_camera_vertices[i] = self.relative2absolute(
                 camera_convert.img2space(vision.CAMERA_STATE, camera_point[0], camera_point[1])[1:3]
@@ -656,12 +681,11 @@ class Core:
             if ENABLE_INFER_POSITION_FROM_WALLS:
                 self.infer_position_from_walls()
 
-            for red in camera_reds:
+            new_items = []
+            for red in camera_reds:  # TODO
                 cords = self.relative2absolute(red)  # position of red block
-                if (
-                    ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
-                    and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
-                ):
+                if 0 < cords[0] < ROOM_X and 0 < cords[1] < ROOM_Y:
+                    new_items.append(cords)
                     self.predicted_items[cords] = [
                         self.predicted_items.get(cords, (0, 0))[0] + 2,
                         RED,
@@ -670,17 +694,15 @@ class Core:
 
             for yellow in camera_yellows:
                 cords = self.relative2absolute(yellow)  # position of yellow block
-                if (
-                    ROOM_MARGIN < cords[0] < ROOM_X - ROOM_MARGIN
-                    and ROOM_MARGIN < cords[1] < ROOM_Y - ROOM_MARGIN
-                ):
+                if 0 < cords[0] < ROOM_X and 0 < cords[1] < ROOM_Y:
+                    new_items.append(cords)
                     self.predicted_items[cords] = [
                         self.predicted_items.get(cords, (0, 1))[0] + 3,
                         YELLOW,
                         0,
                     ]  # let the first element of the value add 3, and let the second element be 1
 
-            merge_item_prediction(self.predicted_items)
+            merge_item_prediction(self.predicted_items, new_items)
 
             # decay seen items
             for item, v in self.predicted_items.items():
@@ -689,8 +711,8 @@ class Core:
                     vision.CAMERA_STATE, relative_cords[0], relative_cords[1], -12.5 if v[1] == RED else -15
                 )
                 if (
-                    0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H
-                    and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V
+                        0 + CAMERA_MARGIN_H < i < vision.CAMERA_STATE.res_h - CAMERA_MARGIN_H
+                        and 0 + CAMERA_MARGIN_V < j < vision.CAMERA_STATE.res_v - CAMERA_MARGIN_V
                 ):
                     v[0] *= SEEN_ITEMS_DECAY_EXPONENTIAL
 
@@ -703,8 +725,8 @@ class Core:
         for item in self.predicted_items:
             self.predicted_items[item][0] *= ALL_ITEMS_DECAY_EXPONENTIAL
             if (
-                get_distance(item, self.contact_center) < CONTACT_RADIUS
-                or self.predicted_items[item][0] < DELETE_VALUE
+                    get_distance(item, self.contact_center) < CONTACT_RADIUS
+                    or self.predicted_items[item][0] < DELETE_VALUE
             ):
                 items_to_delete.append(item)
         for item in items_to_delete:
@@ -726,10 +748,10 @@ class Core:
 
             self.target_toward_cords(item)
             self.vision_message = (
-                "Targeting towards "
-                + ("red" if self.predicted_items[item][1] == 0 else "yellow")
-                + " at "
-                + get_str(item)
+                    "Targeting towards "
+                    + ("red" if self.predicted_items[item][1] == 0 else "yellow")
+                    + " at "
+                    + get_str(item)
             )
 
         if CORE_TIME_DEBUG:
@@ -755,18 +777,18 @@ class Core:
             output (bytes): The output as a bytes object.
         """
         output = (
-            [
-                128,
-                self.status_code,
-                int(self.motor[1] * PWM_PERIOD),
-                int(self.motor[0] * PWM_PERIOD),
-                int(self.brush),
-                int(self.back_open),
-                0,
-                0,
-            ]
-            + self.motor_PID[1]
-            + self.motor_PID[0]
+                [
+                    128,
+                    self.status_code,
+                    int(self.motor[1] * PWM_PERIOD),
+                    int(self.motor[0] * PWM_PERIOD),
+                    int(self.brush),
+                    int(self.back_open),
+                    0,
+                    0,
+                ]
+                + self.motor_PID[1]
+                + self.motor_PID[0]
         )
 
         for i in range(len(output)):
