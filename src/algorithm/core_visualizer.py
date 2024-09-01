@@ -32,6 +32,12 @@ CAMERA_SHOT = (255, 255, 255, 128)
 
 SPEED_CONTROL = 0.5
 
+class VisualizerInterrupt(Exception):
+    def __init__(self):
+        super(VisualizerInterrupt, self).__init__('interrupted')
+
+    def __str__(self):
+        return 'interrupted'
 
 class Visualizer:
     def __init__(self, _core: core.Core, control: bool = False):
@@ -71,7 +77,7 @@ class Visualizer:
                 or event.type == pygame.KEYDOWN
                 and (event.key in [pygame.K_ESCAPE, pygame.K_q])
             ):
-                exit()
+                raise VisualizerInterrupt()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 cords = window2real(self.mouse_pos)
                 if event.button == 1:  # left-click

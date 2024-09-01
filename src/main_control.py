@@ -188,9 +188,9 @@ if __name__ == "__main__":
             if DEBUG_INFO:
                 print("Slept:", next(cycle_time))
             next(module_time)
-    except KeyboardInterrupt:
+    finally:
         if stm is not None:
             for i in range(64):
                 stm.send_message(FORCE_STOP_MESSAGE, MAX_MESSAGE_LENGTH)
             print('\n\nFORCE STOPPED')
-        
+            
