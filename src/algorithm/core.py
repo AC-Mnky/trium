@@ -728,7 +728,7 @@ class Core:
                 The input from the camera, containing time, red blocks, yellow blocks, and wall coordinates.
 
         Returns:
-            None
+            None: The state of the algorithm is updated directly.
         """
         if CORE_TIME_DEBUG:
             next(self.time_tracker)
