@@ -1,8 +1,8 @@
+import numpy as np
 import torch
 import torch.nn as nn
 from torch import tensor
-import numpy as np
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 INITIAL_XYZ, INITIAL_ROTATION, INITIAL_FOV, RESOLUTION = (
     # (140.0, -40.0, -220.0), (56.0, 0.0, 0.0), (52, 50), (320, 240)
