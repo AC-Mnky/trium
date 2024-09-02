@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 else:
     ...
 
-ENABLE_WEIRD_COLOR_DETECTING = False
+ENABLE_WEIRD_COLOR_DETECTING = True
 
 CAMERA_STATE = camera_convert.CameraState(
     # (309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480)
@@ -77,10 +77,12 @@ def process(
     mask_yellow, yellows_in_image = find_color.find_yellow(image)
     mask_blue, mask_white, walls_in_image = find_color.find_wall_bottom_p(image)
 
+    rects = []
     if ENABLE_WEIRD_COLOR_DETECTING:
         mask_else = 255 - np.max(np.stack((mask_red, mask_yellow, mask_blue, mask_white), axis=0), axis=0)
         small_mask_else = block_or(mask_else, 10)
-        ...  # TODO
+        small_rects = find_color.find_bounding_rect_in_mask(small_mask_else)
+        rects = [(x * 10, y * 10, w * 10, h * 10) for x, y, w, h in small_rects]
 
     reds = []
     yellows = []
@@ -88,13 +90,35 @@ def process(
 
     for red in reds_in_image:
         s, x, y = camera_convert.img2space(CAMERA_STATE, red[0], red[1], -12.5)
-        if s:
-            reds.append((x, y))
+        if not s:
+            continue
+
+        if ENABLE_WEIRD_COLOR_DETECTING:
+            flag = False
+            for r in rects:
+                if rect_contain_point(r, (x, y)):
+                    flag = True
+                    break
+            if flag:
+                continue
+
+        reds.append((x, y))
 
     for yellow in yellows_in_image:
         s, x, y = camera_convert.img2space(CAMERA_STATE, yellow[0], yellow[1], -15)
-        if s:
-            yellows.append((x, y))
+        if not s:
+            continue
+
+        if ENABLE_WEIRD_COLOR_DETECTING:
+            flag = False
+            for r in rects:
+                if rect_contain_point(r, (x, y)):
+                    flag = True
+                    break
+            if flag:
+                continue
+
+        yellows.append((x, y))
 
     if walls_in_image is not None:
         walls = [
@@ -126,18 +150,6 @@ def block_or(image: cv2.UMat | np.ndarray, block_size: int) -> np.ndarray:
 
     return new_image
 
-    # size = image.shape[0] // 5, image.shape[1] // 5
-    # output = np.full(size, 0, dtype=np.uint8)
-    # for x in range(size[0]):
-    #     for y in range(size[1]):
-    #         flag = False
-    #         for i in range(5):
-    #             for j in range(5):
-    #                 if image[5 * x + i, 5 * y + j] > 0:
-    #                     flag = True
-    #                     break
-    #             if flag:
-    #                 break
-    #         if flag:
-    #             output[x, y] = 255
-    # return output
+
+def rect_contain_point(rect: tuple[int, int, int, int], point: tuple[float, float]) -> bool:
+    return 0 <= point[0] - rect[0] <= rect[2] and 0 <= point[1] - rect[1] <= rect[3]

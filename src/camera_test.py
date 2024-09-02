@@ -22,14 +22,14 @@ else:
 """
 MODE = "camera", "file", "adjust"
 """
-MODE = "camera"
+MODE = "file"
 
 FORCE_OVERWRITE = False
 GLOBAL_SHOW = True
 MASK_SHOW = True
-READ_DIR = "test5"
+READ_DIR = "cars1"
 # naming rule: forward dist first, right dist second
-WRITE_DIR = "cars2"
+WRITE_DIR = "cars3"
 
 # CAMERA_STATE = camera_convert.CameraState((269, 1, -178), (90 - 29.8, 2.0, 0.2), (62.2, 48.8), (640, 480))
 # CAMERA_STATE = camera_convert.CameraState((286, 2, -197), (90 - 33.3, 2.0, 0.0), (62.2, 55), (640, 480))
@@ -62,7 +62,8 @@ def process(img, show: bool = False, img_=None):
     small_mask_else = vision.block_or(mask_else, 10)
     if show:
         cv2.imshow('else', small_mask_else)
-    ...  # TODO
+    small_rects = find_color.find_bounding_rect_in_mask(small_mask_else, show)
+    rects = [(x*10, y*10, w*10, h*10) for x, y, w, h in small_rects]
 
     # switch to a new line
     print()
@@ -72,6 +73,15 @@ def process(img, show: bool = False, img_=None):
     print(y_shift)
 
     for p in points_red:
+
+        flag = False
+        for r in rects:
+            if vision.rect_contain_point(r, p):
+                flag = True
+                break
+        if flag:
+            continue
+
         s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -12.5)
         if s:
             if show and SHOW_RED:
@@ -82,6 +92,15 @@ def process(img, show: bool = False, img_=None):
                 cv2.rectangle(to_draw, (p[0] - 10, p[1] + y_shift - 10, 20, 20), (128, 128, 128, 255), 1)
 
     for p in points_yellow:
+
+        flag = False
+        for r in rects:
+            if vision.rect_contain_point(r, p):
+                flag = True
+                break
+        if flag:
+            continue
+
         s, x, y = camera_convert.img2space(CAMERA_STATE, p[0], p[1], -15)
         if s:
             if show and SHOW_YELLOW:
@@ -119,7 +138,8 @@ def process(img, show: bool = False, img_=None):
         # overlay = np.repeat(mask_else[:, :, np.newaxis], 3, axis=2)
         #
         # cv2.add(overlay, img, img)
-
+        for r in rects:
+            cv2.rectangle(to_draw, r, (255, 255, 255), 2)
         cv2.imshow("image", to_draw)
         print("no shit")
 
