@@ -87,11 +87,13 @@ class Visualizer:
                         self.core.predicted_items.get(cords, (0, 0))[0] + 2,
                         core.RED,
                         0,
+                        0,
                     ]
                 elif event.button == 3:  # right-click
                     self.core.predicted_items[cords] = [
                         self.core.predicted_items.get(cords, (0, 0))[0] + 3,
                         core.YELLOW,
+                        0,
                         0,
                     ]
             elif event.type == pygame.KEYDOWN:
@@ -172,15 +174,24 @@ class Visualizer:
         )
 
         for item, v in self.core.predicted_items.items():
+            if v[3] == 5:
+                color = (0, 0, 255)
+            elif 1 <= v[3] <= 4:
+                color = (0, 255, 0)
+            else:
+                if v[1] == core.YELLOW:
+                    color = (255, 255, 0)
+                else:
+                    color = (255, 0, 0)
             draw_alpha.circle(
                 self.screen,
-                (255, 255 if v[1] == core.YELLOW else 0, 0, min(v[0] * 32, 255)),
+                color + (min(v[0] * 32, 255),),
                 real2window(item),
                 core.MERGE_RADIUS / UNIT / 2,
             )
             if v[2] > 0:
                 draw_alpha.circle(
-                    self.screen, (255, 255, 255, 128), real2window(item), core.MERGE_RADIUS / UNIT / 2
+                    self.screen, (255, 255, 255, 128), real2window(item), 10
                 )
 
         if self.core.camera_input is not None:
