@@ -16,6 +16,8 @@ except ModuleNotFoundError:
 else:
     ...
 
+ENABLE_WEIRD_COLOR_DETECTING = False
+
 CAMERA_STATE = camera_convert.CameraState(
     # (309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480)
     # (295, 12, -221), (57.7, 1.1, 0.3), (51.45, 51.09), (640, 480)
@@ -43,15 +45,15 @@ CAMERA_STATE = camera_convert.CameraState(
 
 
 def process(
-    time: float, image: cv2.UMat | np.ndarray | None
+        time: float, image: cv2.UMat | np.ndarray | None
 ) -> (
-    tuple[
-        float,
-        list[tuple[float, float]],
-        list[tuple[float, float]],
-        list[tuple[tuple[float, float], tuple[float, float]]],
-    ]
-    | None
+        tuple[
+            float,
+            list[tuple[float, float]],
+            list[tuple[float, float]],
+            list[tuple[tuple[float, float], tuple[float, float]]],
+        ]
+        | None
 ):
     """
     Process the given image to extract relevant information.
@@ -74,6 +76,11 @@ def process(
     mask_red, reds_in_image = find_color.find_red(image)
     mask_yellow, yellows_in_image = find_color.find_yellow(image)
     mask_blue, mask_white, walls_in_image = find_color.find_wall_bottom_p(image)
+
+    if ENABLE_WEIRD_COLOR_DETECTING:
+        mask_else = 255 - np.max(np.stack((mask_red, mask_yellow, mask_blue, mask_white), axis=0), axis=0)
+        small_mask_else = block_or(mask_else, 10)
+        ...  # TODO
 
     reds = []
     yellows = []
@@ -99,3 +106,38 @@ def process(
         ]
 
     return time, reds, yellows, walls
+
+
+def block_or(image: cv2.UMat | np.ndarray, block_size: int) -> np.ndarray:
+    # 获取原始图像的尺寸
+    h, w = image.shape
+    # 新图像的尺寸
+    new_h, new_w = h // block_size, w // block_size
+    # 创建一个新图像
+    new_image = np.zeros((new_h, new_w), dtype=np.uint8)
+
+    # 对于每个块进行处理
+    for i in range(new_h):
+        for j in range(new_w):
+            # 提取原图中的一个块
+            block = image[i * block_size:(i + 1) * block_size, j * block_size:(j + 1) * block_size]
+            # 计算块中所有像素的“或”值
+            new_image[i, j] = np.bitwise_or.reduce(block, axis=(0, 1))
+
+    return new_image
+
+    # size = image.shape[0] // 5, image.shape[1] // 5
+    # output = np.full(size, 0, dtype=np.uint8)
+    # for x in range(size[0]):
+    #     for y in range(size[1]):
+    #         flag = False
+    #         for i in range(5):
+    #             for j in range(5):
+    #                 if image[5 * x + i, 5 * y + j] > 0:
+    #                     flag = True
+    #                     break
+    #             if flag:
+    #                 break
+    #         if flag:
+    #             output[x, y] = 255
+    # return output

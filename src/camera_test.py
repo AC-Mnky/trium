@@ -24,10 +24,10 @@ MODE = "camera", "file", "adjust"
 """
 MODE = "file"
 
-FORCE_OVERWRITE = True
+FORCE_OVERWRITE = False
 GLOBAL_SHOW = True
 MASK_SHOW = True
-READ_DIR = "test5 "
+READ_DIR = "test5"
 # naming rule: forward dist first, right dist second
 WRITE_DIR = "NANA"
 
@@ -56,7 +56,13 @@ def process(img, show: bool = False, img_=None):
         if USE_HOUGH_P
         else find_color.find_wall_bottom(img, show and MASK_SHOW)
     )
+    # mask_else = 255 - np.max(np.stack((mask_red, mask_yellow, mask_blue, mask_white), axis=0), axis=0)
+
     mask_else = 255 - np.max(np.stack((mask_red, mask_yellow, mask_blue, mask_white), axis=0), axis=0)
+    small_mask_else = vision.block_or(mask_else, 10)
+    if show:
+        cv2.imshow('else', small_mask_else)
+    ...  # TODO
 
     # switch to a new line
     print()
@@ -110,9 +116,9 @@ def process(img, show: bool = False, img_=None):
             print(((x1, y1), (x2, y2)), "wall")
 
     if show:
-        overlay = np.repeat(mask_else[:, :, np.newaxis], 3, axis=2)
-
-        cv2.add(overlay, img, img)
+        # overlay = np.repeat(mask_else[:, :, np.newaxis], 3, axis=2)
+        #
+        # cv2.add(overlay, img, img)
 
         cv2.imshow("image", to_draw)
         print("no shit")

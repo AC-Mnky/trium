@@ -253,3 +253,16 @@ def find_wall_bottom_p(image: np.ndarray, show: bool = False) -> tuple[np.ndarra
         cv2.imshow("wall bottom", draw)
 
     return blue, white, lines
+
+
+def find_bounding_rect_in_mask(mask: np.ndarray, show: bool = False) -> list[tuple[int, int, int, int]]:
+    contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
+    rects = []
+    for c in contours:
+        x, y, w, h = cv2.boundingRect(c)
+
+        m = cv2.moments(c)
+        if m["m00"] > 25:  # 100:
+            cx = int(m["m10"] / m["m00"])
+            cy = int(m["m01"] / m["m00"])
+            points.append((cx, cy))
