@@ -1,5 +1,5 @@
-import time
 import argparse
+import time
 
 parser = argparse.ArgumentParser(description="No description")
 parser.add_argument("-d", dest="disable", action="store_true", help="Disable core visualization")
