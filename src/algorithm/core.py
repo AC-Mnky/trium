@@ -516,7 +516,7 @@ class Core:
                     + " at "
                     + get_str(item)
             )
-        elif tag == 1:
+        elif tag < 5:
             if cords[0] < PUSH_WALL_MAX_LENGTH \
                     and -HALF_PUSH_WALL_WIDTH < item[1] - cords[1] < HALF_PUSH_WALL_WIDTH:
                 if -PUSH_WALL_MAX_ANGLE < angle_subtract(np.pi, angle) < PUSH_WALL_MAX_ANGLE:
@@ -560,12 +560,12 @@ class Core:
                         + " at "
                         + get_str((PUSH_WALL_LENGTH, item[1]))
                 )
-        elif tag == 2:
-            ...
-        elif tag == 3:
-            ...
-        elif tag == 4:
-            ...
+        # elif tag == 2:
+        #     ...
+        # elif tag == 3:
+        #     ...
+        # elif tag == 4:
+        #     ...
         elif tag == 5:
             self.act_when_there_is_no_item()
 
