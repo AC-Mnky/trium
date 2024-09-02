@@ -15,9 +15,12 @@ except ModuleNotFoundError:
     import camera_convert
     import vision
 
-INITIAL_CORD_X = 200
-INITIAL_CORD_Y = 200
-INITIAL_ANGLE = np.pi / 2
+INITIAL_CORD_X = 100
+INITIAL_CORD_Y = 1000
+INITIAL_ANGLE = 0
+
+DDL = 600
+DISABLE_GO_HOME_EARLY = False
 
 ENABLE_INFER_POSITION_FROM_WALLS = True  # True
 CORE_TIME_DEBUG = False
@@ -60,18 +63,18 @@ INTEREST_MAXIMUM = 30
 AIM_ANGLE = 0.4
 NO_AIM_ANGLE = 0.2
 ROOM_MARGIN = 100
-ANGLE_TYPICAL = 0.5
+ANGLE_TYPICAL = 0.6
 ANGLE_STANDARD_DEVIATION = 0.15
-LENGTH_TYPICAL = 0.003
+LENGTH_TYPICAL = 0.004
 WALL_SLOW_MARGIN = 1000
 MAX_SPEED = 915
 BASIC_WEIGHT = 0.5
 X_CLIP_MARGIN = 100
 Y_CLIP_MARGIN = 100
-PUSH_WALL_TIME = 5
+PUSH_WALL_TIME = 4
 HALF_PUSH_WALL_WIDTH = 80
-PUSH_WALL_LENGTH = 200
-PUSH_WALL_MAX_LENGTH = 250
+PUSH_WALL_LENGTH = 500
+PUSH_WALL_MAX_LENGTH = 600
 PUSH_WALL_MAX_ANGLE = 0.05
 
 
@@ -167,7 +170,7 @@ def merge_item_prediction(
                     pos_sum = vec_add(pos_sum, vec_mul(k2, v2[0]))
                     value_sum += v2[0]
                     interest_max = max(interest_max, v2[2])
-                    tag_max = max(tag_max, v2[2])
+                    tag_max = max(tag_max, v2[3])
                 pos_avg = (pos_sum[0] / value_sum, pos_sum[1] / value_sum)
                 substitution = (neighbour_of_k1, pos_avg, value_sum, v1[1], interest_max, tag_max)
                 break
@@ -184,6 +187,7 @@ class Core:
 
     def __init__(self, start_time: float, input_protocol: int):
         self.start_time = start_time
+        self.real_time = start_time
         self.last_update_time = start_time
         self.dt = 0
         self.protocol = input_protocol
@@ -229,11 +233,15 @@ class Core:
 
         self.action_no_item = None
         self.action_push_left = None
+        self.action_push_right = None
+        self.action_push_top = None
+        self.action_push_bottom = None
         self.time_tracker = time_since_last_call()
         next(self.time_tracker)
         self.vision_message = "Initiating."
         self.vision_target_cords = None
         self.time_already_pushed_wall = 0
+        self.target_item = None
 
         # !There is no reset function. When you want to reset the _core, just create a new object.
 
@@ -413,13 +421,15 @@ class Core:
         Yields:
             None: This method is a generator and yields None at each step.
         """
-        current_cords = self.predicted_cords
+        current_cords = np.clip(self.predicted_cords[0], 300, ROOM_X - 300), np.clip(self.predicted_cords[1], 300, ROOM_Y - 300) 
 
         while True:
 
             for rotation_spot in (current_cords, (1000, 1000), (2000, 1000)):
 
                 while get_length(vec_sub(self.predicted_cords, rotation_spot)) > 50:
+                    if self.real_time > DDL - 30:
+                        break
                     self.target_toward_cords(rotation_spot)
                     self.vision_message = "Going to rotate at " + get_str(rotation_spot)
                     # print("Core: Targeting toward", rotation_spot)
@@ -427,6 +437,8 @@ class Core:
 
                 t = 0
                 while t < 2.5:
+                    if self.real_time > DDL - 30:
+                        break
                     t += self.dt
                     self.motor = [0.3, -0.3]
                     self.vision_message = "Rotating right for time " + str(t)
@@ -435,12 +447,18 @@ class Core:
 
                 t = 0
                 while t < 7.5:
+                    if self.real_time > DDL - 30:
+                        break
                     t += self.dt
                     self.motor = [-0.1, 0.1]
                     self.vision_message = "Rotating left for time " + str(t)
                     # print('Core: Rotating left for', t)
                     yield
-
+            
+            if DISABLE_GO_HOME_EARLY and not self.real_time > DDL - 30:
+                current_cords = (1500, 1000)
+                continue
+                
             while get_length(vec_sub(self.predicted_cords, HOME)) > 30:
                 self.target_toward_cords(HOME)
                 self.vision_message = "Going Home."
@@ -507,52 +525,30 @@ class Core:
 
             current_cords = (1500, 1000)
 
-    def act_push_left_wall(self, item: tuple[float, float]):
-        target = (PUSH_WALL_LENGTH, item[1])
-        while get_distance(self.predicted_cords, target) > 30:
+    def act_push_wall(self, target: tuple[float, float]):
+        while get_distance(self.predicted_cords, target) > 20:
             self.target_toward_cords(target)
             self.vision_message = "Going to push at " + get_str(target)
             yield
-
-        angle = angle_subtract(np.pi, self.predicted_angle)
-        while not -PUSH_WALL_MAX_ANGLE < angle < PUSH_WALL_MAX_ANGLE:
-            diff = ANGLE_TYPICAL * angle
-            if diff > 0:
-                diff = np.clip(diff, 0.1, 0.5)
-            else:
-                diff = np.clip(diff, -0.5, -0.1)
-            self.set_motor_output(float(diff), 0)
-            self.vision_message = (
-                    "Rotating at push point for "
-                    + ("red" if self.predicted_items[item][1] == 0 else "yellow")
-            )
-            yield
-            angle = angle_subtract(np.pi, self.predicted_angle)
-
+        
         t = 0
-        while t < 3:
+        while t < 5:
             t += self.dt
-            angle = angle_subtract(np.pi, self.predicted_angle)
-            diff = ANGLE_TYPICAL * angle
-            if diff > 0:
-                diff = np.clip(diff, 0.1, 0.5)
-            else:
-                diff = np.clip(diff, -0.5, -0.1)
-            self.set_motor_output(float(diff), 0.2)
-            self.vision_message = "Pushing."
+            self.target_toward_cords(self.target_item)
+            self.vision_message = "Pushing for time " + str(t)
             yield
 
         t = 0
-        while t < 0.5:
+        while t < 1:
             t += self.dt
             self.set_motor_output(0, -0.2)
             self.vision_message = "Reverse pushing."
             yield
 
-        while True:
-            self.predicted_items.pop(item)
-            self.vision_message = "Deleting item."
-            yield
+
+        if self.target_item in self.predicted_items.keys():
+            self.predicted_items.pop(self.target_item)
+        self.vision_message = "Deleting item."
 
     def act_pursue_item(self, item: tuple[float, float]) -> None:
         """
@@ -591,61 +587,44 @@ class Core:
             )
         if tag == 1:
             if self.action_push_left is None:
-                self.action_push_left = self.act_push_left_wall(item)
-            next(self.action_push_left)
-            # if cords[0] < PUSH_WALL_MAX_LENGTH \
-            #         and -HALF_PUSH_WALL_WIDTH < item[1] - cords[1] < HALF_PUSH_WALL_WIDTH:
-            #     if -PUSH_WALL_MAX_ANGLE < angle_subtract(np.pi, angle) < PUSH_WALL_MAX_ANGLE:
-            #         self.time_already_pushed_wall += self.dt
-            #         if self.time_already_pushed_wall < 5:
-            #             self.motor = [0.2, 0.2]
-            #             self.vision_message = (
-            #                     "Pushing wall for "
-            #                     + ("red" if self.predicted_items[item][1] == 0 else "yellow")
-            #                     + ' for time '
-            #                     + str(self.time_already_pushed_wall)
-            #             )
-            #         elif self.time_already_pushed_wall < 8:
-            #             self.motor = [-0.2, -0.2]
-            #             self.vision_message = (
-            #                     "Leaving wall for "
-            #                     + ("red" if self.predicted_items[item][1] == 0 else "yellow")
-            #                     + ' for time '
-            #                     + str(self.time_already_pushed_wall)
-            #             )
-            #         else:
-            #             self.time_already_pushed_wall = 0
-            #             self.predicted_items.pop(item)
-            #             self.act_when_there_is_no_item()
-            #     else:
-            #         diff = ANGLE_TYPICAL * angle_subtract(np.pi, angle)
-            #         if diff > 0:
-            #             diff = np.clip(diff, 0.1, 0.5)
-            #         else:
-            #             diff = np.clip(diff, -0.5, -0.1)
-            #         self.set_motor_output(float(diff), 0)
-            #         self.vision_message = (
-            #             "Rotating at push point for "
-            #             + ("red" if self.predicted_items[item][1] == 0 else "yellow")
-            #         )
-            # else:
-            #     self.target_toward_cords((PUSH_WALL_LENGTH, item[1]))
-            #     self.vision_message = (
-            #             "Targeting push point for "
-            #             + ("red" if self.predicted_items[item][1] == 0 else "yellow")
-            #             + " at "
-            #             + get_str((PUSH_WALL_LENGTH, item[1]))
-            #     )
+                self.action_push_left = self.act_push_wall((PUSH_WALL_LENGTH, item[1]))
+            self.target_item = item
+            try:
+                next(self.action_push_left)
+            except StopIteration:
+                self.action_push_left = None
         else:
             self.action_push_left = None
         if tag == 2:
-            ...
+            if self.action_push_right is None:
+                self.action_push_right = self.act_push_wall((ROOM_X - PUSH_WALL_LENGTH, item[1]))
+            self.target_item = item
+            try:
+                next(self.action_push_right)
+            except StopIteration:
+                self.action_push_right = None
+        else:
+            self.action_push_right = None
         if tag == 3:
-            ...
+            if self.action_push_top is None:
+                self.action_push_top = self.act_push_wall((item[0], PUSH_WALL_LENGTH))
+            self.target_item = item
+            try:
+                next(self.action_push_top)
+            except StopIteration:
+                self.action_push_top = None
+        else:
+            self.action_push_top = None
         if tag == 4:
-            ...
-        if tag == 5:
-            self.act_when_there_is_no_item()
+            if self.action_push_bottom is None:
+                self.action_push_bottom = self.act_push_wall((item[0], ROOM_Y - PUSH_WALL_LENGTH))
+            self.target_item = item
+            try:
+                next(self.action_push_bottom)
+            except StopIteration:
+                self.action_push_bottom = None
+        else:
+            self.action_push_bottom = None
 
     def distance_to_wall(self) -> float:
         """
@@ -782,6 +761,8 @@ class Core:
         Returns:
             None: The state of the algorithm is updated directly.
         """
+        self.real_time = current_time
+        
         if CORE_TIME_DEBUG:
             next(self.time_tracker)
         # calculate the time interval between two updates
@@ -927,7 +908,12 @@ class Core:
 
         # go towards the closest item
         item = self.get_closest_item()
-        if item is None:
+        if item is None or self.real_time > DDL - 30:
+            self.action_push_left = None
+            self.action_push_right = None
+            self.action_push_top = None
+            self.action_push_bottom = None
+            
             if self.action_no_item is None:
                 self.action_no_item = self.act_when_there_is_no_item()
             next(self.action_no_item)
