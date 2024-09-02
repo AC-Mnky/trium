@@ -1,13 +1,4 @@
 #!/bin/zsh
-echo "Strat running main program..."
-
-for i in {1..5}; do
-    run
-done
-
-echo "End running main program..."
-read input
-
 function run(){
     echo "Please choose your mode: [A] visualization mode  [B] cmd mode"
     read mode
@@ -23,3 +14,12 @@ function run(){
         read mode
     fi
 }
+
+echo "Strat running main program..."
+
+for i in {1..5}; do
+    run
+done
+
+echo "End running main program..."
+read input
