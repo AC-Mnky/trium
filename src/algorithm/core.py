@@ -108,7 +108,7 @@ def calc_weight(
     cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
 ) -> float:
     """
-    Calculate the weight based on the given parameters.
+    Calculate the weight of target object at given coordinates.
 
     Args:
         cord_difference (float): The difference in coordinates.
@@ -141,7 +141,7 @@ def merge_item_prediction(
     Merge items in the given dictionary based on certain conditions.
 
     Args:
-        dictionary (dict): The dictionary containing items to be merged.
+        dictionary (dict): The dictionary containing all items recognized.
         to_merge: Items to merge.
 
     Returns:
