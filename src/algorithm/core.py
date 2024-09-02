@@ -19,6 +19,9 @@ INITIAL_CORD_X = 100
 INITIAL_CORD_Y = 1000
 INITIAL_ANGLE = 0
 
+DDL = 600
+DISABLE_GO_HOME_EARLY = False
+
 ENABLE_INFER_POSITION_FROM_WALLS = True  # True
 CORE_TIME_DEBUG = False
 
@@ -184,6 +187,7 @@ class Core:
 
     def __init__(self, start_time: float, input_protocol: int):
         self.start_time = start_time
+        self.real_time = start_time
         self.last_update_time = start_time
         self.dt = 0
         self.protocol = input_protocol
@@ -424,6 +428,8 @@ class Core:
             for rotation_spot in (current_cords, (1000, 1000), (2000, 1000)):
 
                 while get_length(vec_sub(self.predicted_cords, rotation_spot)) > 50:
+                    if self.real_time > DDL - 30:
+                        break
                     self.target_toward_cords(rotation_spot)
                     self.vision_message = "Going to rotate at " + get_str(rotation_spot)
                     # print("Core: Targeting toward", rotation_spot)
@@ -431,6 +437,8 @@ class Core:
 
                 t = 0
                 while t < 2.5:
+                    if self.real_time > DDL - 30:
+                        break
                     t += self.dt
                     self.motor = [0.3, -0.3]
                     self.vision_message = "Rotating right for time " + str(t)
@@ -439,12 +447,18 @@ class Core:
 
                 t = 0
                 while t < 7.5:
+                    if self.real_time > DDL - 30:
+                        break
                     t += self.dt
                     self.motor = [-0.1, 0.1]
                     self.vision_message = "Rotating left for time " + str(t)
                     # print('Core: Rotating left for', t)
                     yield
-
+            
+            if DISABLE_GO_HOME_EARLY and not self.real_time > DDL - 30:
+                current_cords = (1500, 1000)
+                continue
+                
             while get_length(vec_sub(self.predicted_cords, HOME)) > 30:
                 self.target_toward_cords(HOME)
                 self.vision_message = "Going Home."
@@ -747,6 +761,8 @@ class Core:
         Returns:
             None: The state of the algorithm is updated directly.
         """
+        self.real_time = current_time
+        
         if CORE_TIME_DEBUG:
             next(self.time_tracker)
         # calculate the time interval between two updates
@@ -892,7 +908,7 @@ class Core:
 
         # go towards the closest item
         item = self.get_closest_item()
-        if item is None:
+        if item is None or self.real_time > DDL - 30:
             self.action_push_left = None
             self.action_push_right = None
             self.action_push_top = None
