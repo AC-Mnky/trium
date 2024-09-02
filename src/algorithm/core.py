@@ -60,9 +60,9 @@ INTEREST_MAXIMUM = 30
 AIM_ANGLE = 0.4
 NO_AIM_ANGLE = 0.2
 ROOM_MARGIN = 100
-ANGLE_TYPICAL = 0.5
+ANGLE_TYPICAL = 0.6
 ANGLE_STANDARD_DEVIATION = 0.15
-LENGTH_TYPICAL = 0.003
+LENGTH_TYPICAL = 0.004
 WALL_SLOW_MARGIN = 1000
 MAX_SPEED = 915
 BASIC_WEIGHT = 0.5
@@ -532,7 +532,7 @@ class Core:
             yield
 
 
-        if self.targeted_item in self.predicted_items.keys():
+        if self.target_item in self.predicted_items.keys():
             self.predicted_items.pop(self.target_item)
         self.vision_message = "Deleting item."
 
