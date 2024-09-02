@@ -613,10 +613,10 @@ class Core:
 
     def distance_before_crashing_into_wall(self) -> float:
         """
-        Calculate the distance before the car crashes into a wall.
+        Calculate the minimal distance that the car may crash into a wall.
 
         Returns:
-            distance (float): The minimum distance before crashing into a wall.
+            distance (float): That minimum distance.
         """
         cos = np.cos(self.predicted_angle)
         sin = np.sin(self.predicted_angle)
@@ -629,13 +629,13 @@ class Core:
 
     def target_toward_cords(self, cords: tuple[float, float]) -> None:
         """
-        Set the target coordinates for the vision system and calculates the motor output.
+        Set the target coordinates for the vision system and calculate the motor output.
 
         Args:
             cords (tuple[float, float]): The target coordinates in absolute units.
 
         Returns:
-            None
+            None: This method sets the motor output directly.
         """
         self.vision_target_cords = cords
         cords = self.absolute2relative(cords)
@@ -656,7 +656,7 @@ class Core:
             cords (tuple[float, float]): The target coordinates in absolute units.
 
         Returns:
-            None
+            None: This method sets the motor output directly.
         """
         self.vision_target_cords = cords
         cords = self.absolute2relative(cords)
@@ -678,7 +678,7 @@ class Core:
             summ (float): The sum input.
 
         Returns:
-            None
+            None: Motor output is set directly.
         """
         diff = np.clip(diff, -0.9, 0.9)
         summ = np.clip(summ, -0.9 - diff, 0.9 - diff)
@@ -728,7 +728,7 @@ class Core:
                 The input from the camera, containing time, red blocks, yellow blocks, and wall coordinates.
 
         Returns:
-            None
+            None: The state of the algorithm is updated directly.
         """
         if CORE_TIME_DEBUG:
             next(self.time_tracker)
