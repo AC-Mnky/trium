@@ -220,7 +220,7 @@ class Core:
             - Second is the tag to identify red/yellow blocks.
             - Third is the interest of an item.
             - Fourth is the tag to mark the item's position range.
-              0 is default, 1 is left, 2 is right, 3 is top, 4 is bottom, 5 is corner or base.
+                - 0 is default, 1 is left, 2 is right, 3 is top, 4 is bottom, 5 is corner or base.
         """
         self.predicted_items: dict[tuple[float, float], list] = {}
 
@@ -237,6 +237,15 @@ class Core:
         # !There is no reset function. When you want to reset the _core, just create a new object.
 
     def reachable(self, cords: tuple[float, float]) -> bool:
+        """
+        Determine if the given coordinates are reachable within the room.
+
+        Args:
+            cords (tuple[float, float]): The coordinates to check.
+
+        Returns:
+            bool: True if the coordinates are reachable, False otherwise.
+        """
         is_item = False
         if cords in self.predicted_items.keys():
             is_item = True
@@ -269,7 +278,8 @@ class Core:
         Find the closest item to the predicted coordinates.
 
         Returns:
-            closet (tuple[float, float] | None): The coordinates of the closest item, or None if no items are found.
+            closet (tuple[float, float] | None):
+                The coordinates of the closest item, or None if no items are found.
         """
         closest = None
         closest_distance = np.inf
@@ -292,7 +302,6 @@ class Core:
         - paras have to be modified: WHEEL_X_OFFSET
         - angular_speed can use data from imu directly
         """
-
         if self.unpacked_stm_input is not None:
             encoder = self.unpacked_stm_input[2:4]
             tick = self.unpacked_stm_input[0:2]
@@ -403,7 +412,6 @@ class Core:
         Yields:
             None: This method is a generator and yields None at each step.
         """
-
         current_cords = self.predicted_cords
 
         while True:
@@ -499,6 +507,15 @@ class Core:
             current_cords = (1500, 1000)
 
     def act_pursue_item(self, item: tuple[float, float]) -> None:
+        """
+        Updates the state of the agent when pursuing an item.
+
+        Args:
+            item (tuple[float, float]): The coordinates of the item.
+
+        Returns:
+            None
+        """
         self.predicted_items[item][2] = min(
             self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
         )
