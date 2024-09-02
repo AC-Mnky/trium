@@ -108,7 +108,7 @@ def calc_weight(
     cord_difference: float, angle_difference: float, distance_to_wall: float, seen_wall_length: float
 ) -> float:
     """
-    Calculate the weight based on the given parameters.
+    Calculate the weight of target object at given coordinates.
 
     Args:
         cord_difference (float): The difference in coordinates.
@@ -141,7 +141,7 @@ def merge_item_prediction(
     Merge items in the given dictionary based on certain conditions.
 
     Args:
-        dictionary (dict): The dictionary containing items to be merged.
+        dictionary (dict): The dictionary containing all items recognized.
         to_merge: Items to merge.
 
     Returns:
@@ -421,7 +421,9 @@ class Core:
         Yields:
             None: This method is a generator and yields None at each step.
         """
-        current_cords = np.clip(self.predicted_cords[0], 300, ROOM_X - 300), np.clip(self.predicted_cords[1], 300, ROOM_Y - 300) 
+        current_cords = np.clip(self.predicted_cords[0], 300, ROOM_X - 300), np.clip(
+            self.predicted_cords[1], 300, ROOM_Y - 300
+        )
 
         while True:
 
@@ -454,11 +456,11 @@ class Core:
                     self.vision_message = "Rotating left for time " + str(t)
                     # print('Core: Rotating left for', t)
                     yield
-            
+
             if DISABLE_GO_HOME_EARLY and not self.real_time > DDL - 30:
                 current_cords = (1500, 1000)
                 continue
-                
+
             while get_length(vec_sub(self.predicted_cords, HOME)) > 30:
                 self.target_toward_cords(HOME)
                 self.vision_message = "Going Home."
@@ -530,7 +532,7 @@ class Core:
             self.target_toward_cords(target)
             self.vision_message = "Going to push at " + get_str(target)
             yield
-        
+
         t = 0
         while t < 5:
             t += self.dt
@@ -544,7 +546,6 @@ class Core:
             self.set_motor_output(0, -0.2)
             self.vision_message = "Reverse pushing."
             yield
-
 
         if self.target_item in self.predicted_items.keys():
             self.predicted_items.pop(self.target_item)
@@ -762,7 +763,7 @@ class Core:
             None: The state of the algorithm is updated directly.
         """
         self.real_time = current_time
-        
+
         if CORE_TIME_DEBUG:
             next(self.time_tracker)
         # calculate the time interval between two updates
@@ -913,7 +914,7 @@ class Core:
             self.action_push_right = None
             self.action_push_top = None
             self.action_push_bottom = None
-            
+
             if self.action_no_item is None:
                 self.action_no_item = self.act_when_there_is_no_item()
             next(self.action_no_item)

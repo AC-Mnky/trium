@@ -61,9 +61,9 @@ def process(img, show: bool = False, img_=None):
     mask_else = 255 - np.max(np.stack((mask_red, mask_yellow, mask_blue, mask_white), axis=0), axis=0)
     small_mask_else = vision.block_or(mask_else, 10)
     if show:
-        cv2.imshow('else', small_mask_else)
+        cv2.imshow("else", small_mask_else)
     small_rects = find_color.find_bounding_rect_in_mask(small_mask_else, show)
-    rects = [(x*10, y*10, w*10, h*10) for x, y, w, h in small_rects]
+    rects = [(x * 10, y * 10, w * 10, h * 10) for x, y, w, h in small_rects]
 
     # switch to a new line
     print()

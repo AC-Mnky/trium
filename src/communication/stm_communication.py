@@ -32,7 +32,7 @@ class STM:
         Synchronization by reset time.
 
         Returns:
-            None
+            None: the stm_start_time is reset to the current time.
         """
         self.stm_start_time = time.time()
 
@@ -41,8 +41,8 @@ class STM:
         Retrieve a message from STM32.
 
         Returns:
-            tuple (tuple[bytes, list[int]]): A tuple containing the message as bytes and the unpacked message
-            as a list of integers.
+            tuple (tuple[bytes, list[int]]):
+                A tuple containing the message as bytes and the unpacked message as a list of integers.
         """
 
         if not self.ser.is_open:
@@ -126,7 +126,7 @@ class STM:
             max_length (int): The maximum length of the message.
 
         Returns:
-            None
+            None: The message is sent to STM32 through serial communicaiton.
         """
 
         message = message[:max_length]
