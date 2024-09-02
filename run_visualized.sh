@@ -1,1 +1,0 @@
-python3 src/main_control.py
