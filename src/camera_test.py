@@ -27,7 +27,7 @@ MODE = "file"
 FORCE_OVERWRITE = False
 GLOBAL_SHOW = True
 MASK_SHOW = True
-READ_DIR = "cars1"
+READ_DIR = "test6"
 # naming rule: forward dist first, right dist second
 WRITE_DIR = "cars3"
 
