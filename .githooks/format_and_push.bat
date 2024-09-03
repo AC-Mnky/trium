@@ -6,6 +6,7 @@ REM Set git user name and email
 
 REM 运行 black 和 isort
 cd ..
+cd ..
 echo Running Black for code formatting...
 echo Current formatting settings: [max-line-length=110][skip magic trailing comma]
 black . --line-length=110 --skip-magic-trailing-comma
