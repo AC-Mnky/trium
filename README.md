@@ -60,6 +60,26 @@ def func(arg1: int, arg2: str) -> bool:
 
 This documentation style guide is based on [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html). It is a simplified version, besides the `example` part is omitted since we are not writing a complicated project.
 
+### Git Norm
+
+#### Commit Message
+
+A commit message should be clear and concise. It should be in the following format:
+
+```git
+<type>(<scoop>): <subject>
+// <BLANK LINE>
+<body>
+// <BLANK LINE>
+<footer>
+```
+
+- `<type>`: The type of the commit, such as `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, etc.
+- `<scoop>` (optional): The scope of the commit, such as `algorithm`, `communication`, `archive`, etc.
+- `<subject>`: A brief summary of the commit. It should be in the imperative mood without `dot (.)` at the end.
+- `<body>` (optional): A detailed description of the commit.
+- `<footer>` (optional): A footer for the commit, such as `BREAKING CHANGE`, `ISSUES CLOSED`, etc.
+
 ## Mnky
 
 > [!WARNING]
