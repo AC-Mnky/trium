@@ -289,7 +289,7 @@ if __name__ == "__main__":
         else:
             os.mkdir(target_dir)
         c = Camera()
-        time_last_capture = time.time() + 1.5
+        time_last_capture=time.time() + 1.5
         for image_index in range(100):
             print(int((time.time() - time_last_capture) * 1000))
             time.sleep(max(time_last_capture + 0.5 - time.time(), 0))
@@ -301,6 +301,6 @@ if __name__ == "__main__":
                 cv2.imwrite(filename, image)
                 process(image, GLOBAL_SHOW)
 
-            else:
+            else:                 
                 print("shit")
             cv2.waitKey(200)
