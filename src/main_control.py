@@ -37,14 +37,14 @@ if ENABLE_CORE:
     from algorithm import core
 if ENABLE_DUMMY:
     if ENABLE_CORE_VISUALIZER:
-        ENABLE_CORE_VISUALIZER =   False
+        ENABLE_CORE_VISUALIZER = False
         print("Visualizer disabled by dummy.")
     import dummy
 if ENABLE_CORE_VISUALIZER:
     from algorithm import core_visualizer
 
 DEBUG_INFO = True
-CAMERA_DEBUG_INFO =    True
+CAMERA_DEBUG_INFO = True
 DEBUG_RESET = False
 core.CORE_TIME_DEBUG = True  # False
 
