@@ -44,7 +44,7 @@ if ENABLE_CORE_VISUALIZER:
     from algorithm import core_visualizer
 
 DEBUG_INFO = True
-CAMERA_DEBUG_INFO = True
+CAMERA_DEBUG_INFO =   True
 DEBUG_RESET = False
 core.CORE_TIME_DEBUG = True  # False
 
