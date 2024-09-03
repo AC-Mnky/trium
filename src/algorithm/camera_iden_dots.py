@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from camera_convert import CameraState
 
-DIFF_LEN = 10
-IDEN_TIMES = 10
+DIFF_LEN = 0.1
+IDEN_TIMES = 1000
 DATA_NUM = 7
-MINIMUM_ERROR = 100
+MINIMUM_ERROR = 35
 
 MAX_CHANGE = 1
-CHANGING_RANGE = [5, 100, 100, 20, 0, 0, 10, 10]
+CHANGING_RANGE = [5, 100, 100, 20, 1, 1, 10, 10]
 ORIGIN_VALUE = [90, 18, -442, 55.9, 0.9, 0, 51.45, 51.09]
 
 ENABLE_SMOOTH_FACTOR = False
@@ -75,7 +75,7 @@ def partial_dirivative(
         v1 = (x1, y1)
         v2 = (x2, y2)
 
-        d_cords = np.concatenate((d_cords, np.array(core.vec_sub(v1, v2))))
+        d_cords = np.concatenate((d_cords, np.array(core.vec_sub(v2, v1))))
 
     return d_cords / DIFF_LEN
 
@@ -116,8 +116,8 @@ def Jacobian(
 
 if __name__ == "__main__":
 
-    camera_xyz_0 = np.array([142, -38, -219])
-    camera_rotation_0 = np.array([56.3, 0.9, -0.5])
+    camera_xyz_0 = np.array([90, 18, -442])
+    camera_rotation_0 = np.array([55.9, 0.9, 0])
     fov_0 = np.array([51.45, 51.09])
     resolution = (320, 240)
 
@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
         # compensate the paras
         p = np.reshape(p, (1, 8))
-        p += d_p
+        p += d_p_r
         p = np.reshape(p, (8,))
 
         # restrict the range of paras
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         #     p[j] = CHANGING_RANGE[j] * math.atan(p[j] - ORIGIN_VALUE[j]) / (math.pi/2)  + ORIGIN_VALUE[j]
 
         print(f"p = {p}")
-        print(f"d_p = {d_p}")
+        print(f"d_p = {d_p_r}")
         print(f"loop {i} finished\n")
 
     fig1 = plt.figure()
