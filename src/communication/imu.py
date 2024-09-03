@@ -47,7 +47,7 @@ class IMU:
             datahex (bytes): The input data in hexadecimal format.
 
         Returns:
-            acc (list): A list containing the acceleration values [acc_x, acc_y, acc_z].
+            acc (tuple): A tuple containing the acceleration values [acc_x, acc_y, acc_z].
         """
         axl = datahex[0]
         axh = datahex[1]
@@ -79,7 +79,7 @@ class IMU:
             datahex (bytes): The input data in hexadecimal format.
 
         Returns:
-            gyro (list): A list containing the angular velocity values [gyro_x, gyro_y, gyro_z].
+            gyro (tuple): A tuple containing the angular velocity values [gyro_x, gyro_y, gyro_z].
         """
         wxl = datahex[0]
         wxh = datahex[1]
@@ -111,7 +111,7 @@ class IMU:
             datahex (bytes): The input data in hexadecimal format.
 
         Returns:
-            angle (list): A list containing the calculated angles [angle_x, angle_y, angle_z].
+            angle (tuple): A tuple containing the calculated angles [angle_x, angle_y, angle_z].
         """
         rxl = datahex[0]
         rxh = datahex[1]
@@ -145,7 +145,7 @@ class IMU:
             inputdata (bytes): The input data to be processed.
 
         Returns:
-            None
+            data (tuple | None): A tuple containing the extracted data or None if error.
 
         Prints:
             acceleration (g): The acceleration values in g-force.
@@ -155,24 +155,26 @@ class IMU:
         add_data = [0.0] * 8
         gyro_data = [0.0] * 8
         angle_data = [0.0] * 8
-        frame_state = 0  # 通过0x后面的值判断属于哪一种情况
-        byte_num = 0  # 读取到这一段的第几位
-        check_sum = 0  # 求和校验位
+        frame_state = 0  # decide the case by the value after 0x
+        byte_num = 0  # the number of byte that has been read
+        check_sum = 0  # sum check bit
         acceleration = (0.0,) * 3
         angular_velocity = (0.0,) * 3
         angle = (0.0,) * 3
 
-        for data in inputdata:  # 在输入的数据进行遍历
-            if frame_state == 0:  # 当未确定状态的时候，进入以下判断
-                if data == 0x55 and byte_num == 0:  # 0x55位于第一位时候，开始读取数据，增大bytenum
+        for data in inputdata:  # ergodic the input data
+            if frame_state == 0:  # when the state is not determined, enter the following judgment
+                if (
+                    data == 0x55 and byte_num == 0
+                ):  # if 0x55 is the start bit, start reading data and increase byte_num
                     check_sum = data
                     byte_num = 1
                     continue
-                elif data == 0x51 and byte_num == 1:  # 在byte不为0 且 识别到 0x51 的时候，改变frame
+                elif data == 0x51 and byte_num == 1:  # if byte is not 0 and recognized 0x51, change the frame
                     check_sum += data
                     frame_state = 1
                     byte_num = 2
-                elif data == 0x52 and byte_num == 1:  # 同理
+                elif data == 0x52 and byte_num == 1:  # the same as above
                     check_sum += data
                     frame_state = 2
                     byte_num = 2
@@ -180,19 +182,19 @@ class IMU:
                     check_sum += data
                     frame_state = 3
                     byte_num = 2
-            elif frame_state == 1:  # acc    # 已确定数据代表加速度
+            elif frame_state == 1:  # acceleration
 
-                if byte_num < 10:  # 读取8个数据
-                    add_data[byte_num - 2] = data  # 从0开始
+                if byte_num < 10:  # read 8 bytes of data
+                    add_data[byte_num - 2] = data  # start from byte_num = 2
                     check_sum += data
                     byte_num += 1
                 else:
-                    if data == (check_sum & 0xFF):  # 假如校验位正确
+                    if data == (check_sum & 0xFF):  # if the check bit is correct, extract the data
                         acceleration = self._extract_acceleration(add_data)
-                    check_sum = 0  # 各数据归零，进行新的循环判断
+                    check_sum = 0  # reset the flags and enter the next loop
                     byte_num = 0
                     frame_state = 0
-            elif frame_state == 2:  # gyro
+            elif frame_state == 2:  # gyroscope
 
                 if byte_num < 10:
                     gyro_data[byte_num - 2] = data
@@ -221,6 +223,7 @@ class IMU:
                         print("Angular_Velocity(deg/s):", angular_velocity)
                         print("Angle(deg):", angle)
                         print("\n")
+            
                     """
                     check_sum = 0
                     byte_num = 0

@@ -9,7 +9,7 @@ def output_to_message(output) -> bytes:
         output (list): The output to be converted.
 
     Returns:
-        bytes: The converted message in bytes format.
+        message (bytes): The converted message in bytes format.
     """
     message = (
         [0x80, int(output[0][1] * PWM_PERIOD), int(output[0][0] * PWM_PERIOD), int(output[1]), int(output[2])]

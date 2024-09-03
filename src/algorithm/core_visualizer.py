@@ -184,15 +184,10 @@ class Visualizer:
                 else:
                     color = (255, 0, 0)
             draw_alpha.circle(
-                self.screen,
-                color + (min(v[0] * 32, 255),),
-                real2window(item),
-                core.MERGE_RADIUS / UNIT / 2,
+                self.screen, color + (min(v[0] * 32, 255),), real2window(item), core.MERGE_RADIUS / UNIT / 2
             )
             if v[2] > 0:
-                draw_alpha.circle(
-                    self.screen, (255, 255, 255, 128), real2window(item), 10
-                )
+                draw_alpha.circle(self.screen, (255, 255, 255, 128), real2window(item), 10)
 
         if self.core.camera_input is not None:
             self.walls = self.core.camera_input[3]

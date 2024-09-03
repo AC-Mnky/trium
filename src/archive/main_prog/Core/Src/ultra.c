@@ -5,6 +5,11 @@
 
 const uint8_t ultra_debug_print = 1;
 
+/**
+ * @brief  Delay certain time (in us) counted by TIM7.
+ * @param  n_us: time to delay (in us)
+ * @retval None
+ */
 void TIM7_Delay_us(uint16_t n_us) {
 	__HAL_TIM_SetCounter(&htim7, 0);
 	__HAL_TIM_ENABLE(&htim7);
@@ -14,6 +19,11 @@ void TIM7_Delay_us(uint16_t n_us) {
 	__HAL_TIM_DISABLE(&htim7);
 }
 
+/**
+ * @brief  Get the distance detected by certain ultrasonic sensor.
+ * @param  num: 1 -> left sensor | 2 -> right sensor
+ * @retval distance (in cm)
+ */
 uint8_t get_distance_single(int num) {
 	int CSB_value = 0;
 	GPIO_TypeDef *trig_port = GPIOD;
@@ -33,7 +43,7 @@ uint8_t get_distance_single(int num) {
 
 	__HAL_TIM_ENABLE(&htim7);
 
-	//等待接收引脚变成高电平
+	// wait for the echo pin to be high
 	__HAL_TIM_SetCounter(&htim7, 0);
 	while (HAL_GPIO_ReadPin(echo_port, echo_pin) == 0) {
 		if ( __HAL_TIM_GetCounter(&htim7) > 5000) {
@@ -47,7 +57,7 @@ uint8_t get_distance_single(int num) {
 	if (ultra_debug_print)
 		HAL_UART_Transmit(&huart1, (uint8_t*) "between", 7, 100);
 
-	//接收完全后不再为高电平，即当接收引脚变成低电平后，停止计时，获取计数时间
+	// wait for the echo pin to be low, which means the end of the signal
 	__HAL_TIM_SetCounter(&htim7, 0);
 	while (HAL_GPIO_ReadPin(echo_port, echo_pin) == 1) {
 		if (__HAL_TIM_GetCounter(&htim7) > 5000) {
@@ -64,6 +74,11 @@ uint8_t get_distance_single(int num) {
 	return (uint8_t) (CSB_value * 346 / 20000);  // cm
 }
 
+/**
+ * @brief  Get the distance detected by both ultrasonic sensor.
+ * @param  distance: array to store the distance detected by left and right sensor
+ * @retval distance array (in cm)
+ */
 void get_distance(uint8_t *distance) {
 	int CSB_value_L = 0;
 	int CSB_value_R = 0;
@@ -90,7 +105,7 @@ void get_distance(uint8_t *distance) {
 	int Past_turn_L = 0;
 	int Past_turn_R = 0;
 
-	//等待两侧接收引脚变成高电平，某边变高就开始记时
+	// wait for the echo pin to be high, start counting when either side is high
 	while (check_1 == 0 || check_2 == 0) {
 
 		if (HAL_GPIO_ReadPin(Echo_L_GPIO_Port, Echo_L_Pin) == 1 && Past_turn_L == 0) {
@@ -121,7 +136,7 @@ void get_distance(uint8_t *distance) {
 	int Past_turn_L_2 = 0;
 	int Past_turn_R_2 = 0;
 
-	//接收完全后不再为高电平，即当接收引脚变成低电平后，停止计时，获取计数时间
+	// wait for the echo pin to be low, which means the end of the signal
 	while (check_3 == 0 && check_4 == 0) {
 
 		if (HAL_GPIO_ReadPin(Echo_L_GPIO_Port, Echo_L_Pin) == 0 && Past_turn_L_2 == 1) {

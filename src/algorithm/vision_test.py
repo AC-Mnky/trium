@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 else:
     ...
 
-ENABLE_WEIRD_COLOR_DETECTING = True
+ENABLE_WEIRD_COLOR_DETECTING = False
 
 CAMERA_STATE = camera_convert.CameraState(
     # (309, 0, -218), (52.8, 2.1, 0.4), (62.2, 62), (640, 480)
@@ -37,23 +37,24 @@ CAMERA_STATE = camera_convert.CameraState(
     # (142.76063537597656, -37.38973617553711, -222.53807067871094), (58.60441589355469, 2.5239651203155518, -1.2797986268997192), (54.54129409790039, 51.247108459472656), (320, 240)
     # (143.325439453125, -37.89916229248047, -217.80101013183594), (30.0211238861084, -26.496797561645508, 50.47840118408203), (55.39643478393555, -0.6100906729698181), (320, 240)
     # that is a lot of real shit up there!
-    (142, 17, -241),
-    (56.1, 1.6, -0.5),
-    (51.45, 51.09),
+    (161.36, -6, -235.4),
+    (56.1, 1.0, -0.35),
+    (51.17, 51.04),
     (320, 240),
+    #(90, 18, -442), (55.9, 0.9, 0), (51.45, 51.09), (320, 240)
 )
 
 
 def process(
-    time: float, image: cv2.UMat | np.ndarray | None
+        time: float, image: cv2.UMat | np.ndarray | None
 ) -> (
-    tuple[
-        float,
-        list[tuple[float, float]],
-        list[tuple[float, float]],
-        list[tuple[tuple[float, float], tuple[float, float]]],
-    ]
-    | None
+        tuple[
+            float,
+            list[tuple[float, float]],
+            list[tuple[float, float]],
+            list[tuple[tuple[float, float], tuple[float, float]]],
+        ]
+        | None
 ):
     """
     Process the given image to extract relevant information.
@@ -77,12 +78,10 @@ def process(
     mask_yellow, yellows_in_image = find_color.find_yellow(image)
     mask_blue, mask_white, walls_in_image = find_color.find_wall_bottom_p(image)
 
-    rects = []
     if ENABLE_WEIRD_COLOR_DETECTING:
         mask_else = 255 - np.max(np.stack((mask_red, mask_yellow, mask_blue, mask_white), axis=0), axis=0)
         small_mask_else = block_or(mask_else, 10)
-        small_rects = find_color.find_bounding_rect_in_mask(small_mask_else)
-        rects = [(x * 10, y * 10, w * 10, h * 10) for x, y, w, h in small_rects]
+        ...  # TODO
 
     reds = []
     yellows = []
@@ -90,35 +89,13 @@ def process(
 
     for red in reds_in_image:
         s, x, y = camera_convert.img2space(CAMERA_STATE, red[0], red[1], -12.5)
-        if not s:
-            continue
-
-        if ENABLE_WEIRD_COLOR_DETECTING:
-            flag = False
-            for r in rects:
-                if rect_contain_point(r, (x, y)):
-                    flag = True
-                    break
-            if flag:
-                continue
-
-        reds.append((x, y))
+        if s:
+            reds.append((x, y))
 
     for yellow in yellows_in_image:
         s, x, y = camera_convert.img2space(CAMERA_STATE, yellow[0], yellow[1], -15)
-        if not s:
-            continue
-
-        if ENABLE_WEIRD_COLOR_DETECTING:
-            flag = False
-            for r in rects:
-                if rect_contain_point(r, (x, y)):
-                    flag = True
-                    break
-            if flag:
-                continue
-
-        yellows.append((x, y))
+        if s:
+            yellows.append((x, y))
 
     if walls_in_image is not None:
         walls = [
@@ -144,12 +121,24 @@ def block_or(image: cv2.UMat | np.ndarray, block_size: int) -> np.ndarray:
     for i in range(new_h):
         for j in range(new_w):
             # 提取原图中的一个块
-            block = image[i * block_size : (i + 1) * block_size, j * block_size : (j + 1) * block_size]
+            block = image[i * block_size:(i + 1) * block_size, j * block_size:(j + 1) * block_size]
             # 计算块中所有像素的“或”值
             new_image[i, j] = np.bitwise_or.reduce(block, axis=(0, 1))
 
     return new_image
 
-
-def rect_contain_point(rect: tuple[int, int, int, int], point: tuple[float, float]) -> bool:
-    return 0 <= point[0] - rect[0] <= rect[2] and 0 <= point[1] - rect[1] <= rect[3]
+    # size = image.shape[0] // 5, image.shape[1] // 5
+    # output = np.full(size, 0, dtype=np.uint8)
+    # for x in range(size[0]):
+    #     for y in range(size[1]):
+    #         flag = False
+    #         for i in range(5):
+    #             for j in range(5):
+    #                 if image[5 * x + i, 5 * y + j] > 0:
+    #                     flag = True
+    #                     break
+    #             if flag:
+    #                 break
+    #         if flag:
+    #             output[x, y] = 255
+    # return output
