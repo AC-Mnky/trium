@@ -19,7 +19,7 @@ DUMMY_CONTROL = True  # Whatever
 ENABLE_CORE_VISUALIZER = True  # False
 if args.disable:
     ENABLE_CORE_VISUALIZER = False
-VISUALIZER_CONTROL = True  # False
+VISUALIZER_CONTROL =        True  # False
 MAX_MESSAGE_LENGTH = 6  # 6
 
 CAMERA_COOLDOWN = 0.0
