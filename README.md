@@ -5,7 +5,7 @@
 > [!NOTE]
 > 本仓库主要存储算法代码，同时也存储一部分其他材料。
 
-## Getting started
+## Getting Started
 
 - 新的代码请在[`src`](src/)创建新文件夹并放入。
 - 代码要用到的数据请在[`assets`](assets/)创建新文件夹并放入，零碎的数据可放入[`assets/miscellaneous`](assets/miscellaneous/)。（**加工数据时，请不要删除旧的数据，而是创建一个新文件夹并将加工后的数据放入**）
@@ -14,7 +14,9 @@
 > [!TIP]
 > 若是深陷迷茫，不妨运行[`Trium_Intro`](Trium_Intro.bat)。
 
-## About this directory
+## About This Repository
+
+### File Structure
 
 - [`assets`](assets/) -- 一些图片，以及会在算法中用到的非代码数据。
 - [`doc`](doc/) -- 一些其他材料，如设计方案等。
@@ -28,6 +30,56 @@
   - [`algorithm`](src/algorithm/) -- 一些算法，部署于树莓派4B。
   - [`communication`](src/communication/) -- 通信相关的代码，如串口、摄像头等。
   - [`archive`](src/archive/) -- 代码存档，包括有趣的尝试和备份代码。关于STM32部分的代码请参考[`README.md`](src/archive/main_prog/README.md)。
+
+### Documentation Norm
+
+A typical pythonic documentation should behave like this:
+
+```python
+def func(arg1: int, arg2: str) -> bool:
+    """
+    Here is the function's brief summary.
+
+    - You may add some detailed description here.
+    ...
+
+    Args:
+        arg1 (int): Description of the first argument.
+        arg2 (str): Description of the second argument.
+        ...
+
+    Returns:
+        value (bool): Always True.
+
+    Note:
+        Some additional notes may be placed here.
+    """
+    value = True
+    return value
+```
+
+This documentation style guide is based on [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html). It is a simplified version, besides the `example` part is omitted since we are not writing a complicated project.
+
+### Git Norm
+
+A commit message should be clear and concise. It should be in the following format:
+
+```git
+<type>(<scoop>): <subject>
+// <BLANK LINE>
+<body>
+// <BLANK LINE>
+<footer>
+```
+
+- `<type>`: The type of the commit, such as `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, etc.
+- `<scoop>` (optional): The scope of the commit, such as `algorithm`, `communication`, `archive`, etc.
+- `<subject>`: A brief summary of the commit. It should be in the imperative mood without `dot (.)` at the end.
+- `<body>` (optional): A detailed description of the commit.
+- `<footer>` (optional): A footer for the commit, such as `BREAKING CHANGE`, `ISSUES CLOSED`, etc.
+
+> [!NOTE]
+> Although pull requests are different from commits, you may follow the same format when writing a pull request.
 
 ## Mnky
 
