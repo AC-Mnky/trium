@@ -8,7 +8,7 @@ args = parser.parse_args()
 
 ENABLE_STM_INPUT = True  # True
 STM_INPUT_PROTOCOL = 127  # 127 | 128
-ENABLE_IMU = True  # True
+ENABLE_IMU =  True  # True
 ENABLE_CAMERA = True  # True
 ENABLE_VISION = True  # True
 ENABLE_CORE = True  # True
