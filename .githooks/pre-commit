@@ -1,3 +1,0 @@
-@echo off
-REM Auto run format and push batch
-call format_and_push.bat

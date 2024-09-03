@@ -1,0 +1,3 @@
+@echo off
+REM Auto run format and commit batch
+call format_and_commit.bat

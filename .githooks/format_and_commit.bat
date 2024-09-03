@@ -5,13 +5,9 @@ REM Set git user name and email
 @REM git config --global user.email "145042207+VeriTas-arch@users.noreply.github.com"
 
 REM 运行 black 和 isort
-cd ..
-cd ..
-cd ..
 echo Running Black for code formatting...
 echo Current formatting settings: [max-line-length=110][skip magic trailing comma]
 black . --line-length=110 --skip-magic-trailing-comma
-
 echo Running isort for import sorting...
 isort .
 
@@ -27,11 +23,10 @@ REM 添加所有更改
 git add .
 
 REM 提交更改
-git commit -m "chore: auto format code"
+git commit -m "chore: auto format code test"
 
 REM 推送更改到当前分支
-git push
-echo Code formatted and pushed successfully!
+echo Code formatted successfully!
 EXIT /B 0
 
 :NO_CHANGES
