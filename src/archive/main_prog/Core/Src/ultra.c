@@ -5,10 +5,11 @@
 
 const uint8_t ultra_debug_print = 1;
 
-/* @brief Delay certain time (in us) counted by TIM7
+/**
+ * @brief Delay certain time (in us) counted by TIM7
  * @param n_us: time to delay (in us)
  * @retval None
- * */
+ */
 void TIM7_Delay_us(uint16_t n_us) {
 	__HAL_TIM_SetCounter(&htim7, 0);
 	__HAL_TIM_ENABLE(&htim7);
@@ -18,10 +19,11 @@ void TIM7_Delay_us(uint16_t n_us) {
 	__HAL_TIM_DISABLE(&htim7);
 }
 
-/* @brief Get the distance detected by certain ultrasonic sensor
+/**
+ * @brief Get the distance detected by certain ultrasonic sensor
  * @param num: 1 -> left sensor | 2 -> right sensor
  * @retval distance (in cm)
- * */
+ */
 uint8_t get_distance_single(int num) {
 	int CSB_value = 0;
 	GPIO_TypeDef *trig_port = GPIOD;
@@ -72,10 +74,11 @@ uint8_t get_distance_single(int num) {
 	return (uint8_t) (CSB_value * 346 / 20000);  // cm
 }
 
-/* @brief Get the distance detected by both ultrasonic sensor
+/**
+ * @brief Get the distance detected by both ultrasonic sensor
  * @param distance: array to store the distance detected by left and right sensor
  * @retval distance array (in cm)
- * */
+ */
 void get_distance(uint8_t *distance) {
 	int CSB_value_L = 0;
 	int CSB_value_R = 0;

@@ -52,20 +52,23 @@
 
 /* USER CODE BEGIN PV */
 
-/* @brief choose whether to enable debug message prints.
+/**
+ * @brief choose whether to enable debug message prints.
  * @description debug prints -> program variables | reflect -> retransmit messages to PC
  * @type unit8_t
  * @value 0: disable | 1: enable
  * @note  uart1 -> PC |  uart3 -> pi4B
- * */
+ */
 const uint8_t debug_print = 0;
 const uint8_t reflect = 1;
 
-/* @brief buffers used for message transmission
+/**
+ * @brief buffers used for message transmission
  * @description temp_buffer -> temporary buffer used to check messages
  * @description receive_buffer -> buffer used to receive messages
  * @note 127-protocol: 6 bytes | 128-protocol: 24 bytes
- * */
+ */
+
 // 127-protocol
 uint8_t temp_buffer[6] = { 0 };
 uint8_t receive_buffer[6] = { 0 };
@@ -86,22 +89,22 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-/* @brief call urgency by analyzing the speed and distance
+/**
+ * @brief call urgency by analyzing the speed and distance
  * @param distance: distance to the obstacle detected by the ultrasonic sensor
- * @param encoder_CNT1->encoder count of motor 1 | encoder_CNT2->encoder count of motor 2
- * @retval call_flag: 1 (urgency) | 0 (no urgency)
+ * @param encoder_CNTx -> encoder count of motor x
+ * @retval call_flag: 1 (two wheels in the same direction) | 0 (otherwise)
  * @note ratio = max(v1 / distance, v2 / distance)
- * @note call_flag = 1 if ratio > 1 | call_flag = 0 otherwise
- * */
+ * @note urgent_flag = 1 if ratio > 1 | urgent_flag = 0 otherwise
+ */
 uint8_t urgency_call(uint8_t distance, uint16_t encoder_CNT1, uint16_t encoder_CNT2) {
 	uint8_t call_flag = (get_encoder_direction(1) == get_encoder_direction(2)) ? 1 : 0;
 	if (call_flag) {
 		uint8_t v1 = (uint8_t) 3 * M_PI * encoder_CNT1 / 8; // cm/s
 		uint8_t v2 = (uint8_t) 3 * M_PI * encoder_CNT2 / 8; //
 		uint8_t ratio = (uint8_t) (v1 > v2) ? (v1 / distance) : (v2 / distance);
-		if (ratio > 1) {
-			return 1;
-		}
+
+		return (ratio > 1) ? 1 : 0;
 	}
 	return 0;
 }
@@ -188,12 +191,12 @@ int main(void) {
 	HAL_TIM_Base_Start(&htim6);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, SET);
 
-	/* @brief ultra sonic sensor order init
+	/**
+	 * @brief ultra sonic sensor order init
 	 * @note 0 -> left | 1 -> right
-	 * */
+	 */
 //	uint8_t ultra_order = 0;
 //	uint8_t distance = 0;
-
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -203,10 +206,11 @@ int main(void) {
 
 		/* USER CODE BEGIN 3 */
 
-		/* @brief receive controlling message under 128-protocol
+		/**
+		 * @brief receive controlling message under 128-protocol
 		 * @note 0x80 -> head of the message
 		 * @note inquiry mode
-		 * */
+		 */
 		if (transmit_protocol == 128) {
 
 			for (uint8_t j = 0; j < max_attempt; ++j) {
@@ -244,7 +248,8 @@ int main(void) {
 			speed_1 = receive_buffer[2], speed_2 = receive_buffer[3];
 		}
 
-		/* @brief Urgent case dealing
+		/**
+		 * @brief Urgent case dealing
 		 * @note Aborted at this edition
 
 		 if (urgent_count > 0) {
@@ -293,8 +298,9 @@ int main(void) {
 			HAL_UART_Transmit(&huart1, (uint8_t*) "head transmitted\n", 17, 400);
 		}
 
-		/* @brief velocity control under 128-protocol.
-		 * */
+		/**
+		 * @brief velocity control under 128-protocol.
+		 */
 		if (transmit_protocol == 128) {
 			uint32_t real_tick_2;
 			uint16_t encoder_CNT_2 = get_encoder_CNT(2, &real_tick_2);
@@ -325,8 +331,9 @@ int main(void) {
 			HAL_UART_Transmit(&huart3, empty, 8, 20);
 
 		}
-		/* @brief velocity control under 127-protocol.
-		 * */
+		/**
+		 * @brief velocity control under 127-protocol.
+		 */
 		else if (transmit_protocol == 127) {
 			*motor2count = get_encoder_CNT(2, motor2time);
 			*motor1count = get_encoder_CNT(1, motor1time);
@@ -347,8 +354,9 @@ int main(void) {
 			}
 		}
 
-		/* @brief clear integral when velocity is set to zero.
-		 * */
+		/**
+		 * @brief clear integral when velocity is set to zero.
+		 */
 		if (PID_obj_1.target_val == 0) {
 			PID_obj_1.integral = 0;
 		}
@@ -361,10 +369,11 @@ int main(void) {
 			HAL_UART_Transmit(&huart1, (uint8_t*) "pid integral set\n", 17, 400);
 		}
 
-		/* @brief control the brush and servo motor
+		/**
+		 * @brief control the brush and servo motor
 		 * @note brush -> motor 3 | servo -> motor 4
 		 * @note receive_buffer[4] -> brush | reveive_buffer[5] -> servo
-		 * */
+		 */
 		if (receive_buffer[4]) {
 			set_motor_speed(3, 60);
 		} else {
@@ -383,7 +392,8 @@ int main(void) {
 			HAL_UART_Transmit(&huart1, (uint8_t*) "brush and servo set\n", 20, 400);
 		}
 
-		/* @brief Change the urgency case handling by analyzing the ultrasonic sensor data
+		/**
+		 * @brief Change the urgency case handling by analyzing the ultrasonic sensor data
 		 * @note Aborted at this edition
 
 		 distance = get_distance_single(ultra_order);
@@ -397,11 +407,12 @@ int main(void) {
 		 urgent_count = 0;
 		 }
 
-		 * */
+		 */
 
-		/* @brief control the time of one loop
+		/**
+		 * @brief control the time of one loop
 		 * @note set the time of one loop to 200 ticks of timer 6 (0.1ms per tick)
-		 * */
+		 */
 		while (__HAL_TIM_GET_COUNTER(&htim6) < 200) {
 		}
 		__HAL_TIM_SET_COUNTER(&htim6, 0);
@@ -410,11 +421,10 @@ int main(void) {
 			HAL_UART_Transmit(&huart1, (uint8_t*) "timer ended\n", 12, 400);
 		}
 
-		/* @brief use blink to test whether the loop is conducted properly
-
+		/**
+		 * @brief use blink to test whether the loop is conducted properly
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
-
-		 * */
+		 */
 	}
 	/* USER CODE END 3 */
 }
