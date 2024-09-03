@@ -559,7 +559,7 @@ class Core:
             item (tuple[float, float]): The coordinates of the item.
 
         Returns:
-            None
+            None: The state of the agent is updated directly.
         """
         self.predicted_items[item][2] = min(
             self.predicted_items[item][2] + INTEREST_ADDITION, INTEREST_MAXIMUM
@@ -995,7 +995,7 @@ class Core:
 
 def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> float:
     """
-    Calculate the distance between two points in a 2D-space.
+    Calculate the distance between two points in a 2D space.
 
     Args:
         point1 (tuple[float, float]): The coordinates of the first point.
@@ -1009,10 +1009,10 @@ def get_distance(point1: tuple[float, float], point2: tuple[float, float]) -> fl
 
 def get_length(vec: tuple[float, float]) -> float:
     """
-    Calculate the length of a 2D-vector.
+    Calculate the length of a 2D vector.
 
     Args:
-        vec (tuple[float, float]): The 2D-vector represented as a tuple of floats.
+        vec (tuple[float, float]): The 2D vector represented as a tuple of floats.
 
     Returns:
         length (float): The length of the vector.
