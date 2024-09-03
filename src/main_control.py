@@ -37,7 +37,7 @@ if ENABLE_CORE:
     from algorithm import core
 if ENABLE_DUMMY:
     if ENABLE_CORE_VISUALIZER:
-        ENABLE_CORE_VISUALIZER =   False
+        ENABLE_CORE_VISUALIZER  =   False
         print("Visualizer disabled by dummy.")
     import dummy
 if ENABLE_CORE_VISUALIZER:
