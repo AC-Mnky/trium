@@ -5,9 +5,10 @@ REM Set git user name and email
 @REM git config --global user.email "145042207+VeriTas-arch@users.noreply.github.com"
 
 REM 运行 black 和 isort
-set PATH=%cd%
+cd ..
 echo Running Black for code formatting...
-black .
+echo Current formatting settings: [max-line-length=110][skip magic trailing comma]
+black . --line-length=110 --skip-magic-trailing-comma
 
 echo Running isort for import sorting...
 isort .
