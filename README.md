@@ -38,9 +38,9 @@ A typical pythonic documentation should behave like this:
 ```python
 def func(arg1: int, arg2: str) -> bool:
     """
-    Here is the function's brief introduction.
+    Here is the function's brief introduction. The imperative mood instead of the declarative mood is recommended.
 
-    - You may add some detailed description here.
+    - You may add some detailed description here. It is optional, and can have a flexible format.
 
     Args:
         arg1 (int): Description of the first argument.
