@@ -49,6 +49,17 @@ USE_HOUGH_P = True
 
 
 def process(img, show: bool = False, img_=None):
+    """
+    Process the given image by performing color detection and object recognition.
+
+    Args:
+        img (numpy.ndarray): The input image.
+        show (bool, optional): Flag to indicate whether to display intermediate results. Defaults to False.
+        img_ (numpy.ndarray, optional): An alternate image to draw on. Defaults to None.
+
+    Returns:
+        None
+    """
     mask_red, points_red = find_color.find_red(img, show and MASK_SHOW)
     mask_yellow, points_yellow = find_color.find_yellow(img, show and MASK_SHOW)
     mask_blue, mask_white, walls = (
@@ -144,7 +155,24 @@ def process(img, show: bool = False, img_=None):
         print("no shit")
 
 
-def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step, y_shift: int = 0):
+def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step, y_shift: int = 0) -> None:
+    """
+    Draws a grid on the given image.
+
+    Args:
+        img (numpy.ndarray): The image on which the grid will be drawn.
+        color (tuple): The color of the grid lines in BGR format.
+        x_start (int): The starting x-coordinate of the grid.
+        x_stop (int): The ending x-coordinate of the grid.
+        x_step (int): The step size for the x-coordinate.
+        y_start (int): The starting y-coordinate of the grid.
+        y_stop (int): The ending y-coordinate of the grid.
+        y_step (int): The step size for the y-coordinate.
+        y_shift (int, optional): The vertical shift of the grid lines. Defaults to 0.
+
+    Returns:
+        None
+    """
     overlay = np.zeros(img.shape, np.uint8)
 
     for x in range(x_start, x_stop + x_step, x_step):

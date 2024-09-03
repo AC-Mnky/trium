@@ -110,6 +110,19 @@ def process(
 
 
 def block_or(image: cv2.UMat | np.ndarray, block_size: int) -> np.ndarray:
+    """
+    Applies a bitwise OR operation on each block of pixels in the input image.
+
+    Args:
+        image (cv2.UMat | np.ndarray): The input image.
+        block_size (int): The size of each block.
+
+    Returns:
+        new_image (np.ndarray): The resulting image after applying the bitwise OR operation on each block.
+
+    Raises:
+        None
+    """
     # 获取原始图像的尺寸
     h, w = image.shape
     # 新图像的尺寸

@@ -25,6 +25,20 @@ class Model(nn.Module):
         self.build()
 
     def build(self):
+        """
+        Builds the camera transformation matrix.
+
+        This method calculates the camera transformation matrix based on the given rotation, field of view (fov),
+        and resolution. The resulting matrix is stored in the `matrix` attribute of the camera object.
+
+        Args:
+            rotation (numpy.ndarray): The rotation angles in degrees, represented as a 3-element array.
+            fov (numpy.ndarray): The field of view angles in degrees, represented as a 2-element array.
+            resolution (tuple): The resolution of the camera image, represented as a tuple of width and height.
+
+        Returns:
+            None
+        """
         tpo = self.rotation / 180 * np.pi
         theta, phi, omega = tpo[0], tpo[1], tpo[2]
         half_fov = self.fov / 180 * np.pi / 2
@@ -92,6 +106,17 @@ class Model(nn.Module):
         self.matrix = torch.matmul(trans, img_to_relative_cords_mapping)
 
     def forward(self, x: tensor):
+        """
+        Applies camera transformation to the input tensor.
+
+        Args:
+            x (tensor): Input tensor of shape (N, C).
+
+        Returns:
+            tensor: Transformed tensor of shape (N, 2).
+        """
+        # Implementation code here
+        ...
         # self.build()
         x = torch.concat((torch.ones(x.shape[0], 1), x), dim=1)
         x = torch.tensordot(x, self.matrix, dims=([1], [1]))
@@ -101,6 +126,16 @@ class Model(nn.Module):
 
 
 def criterion(output: tensor, label: tensor):
+    """
+    Calculate the criterion for the given output and label tensors.
+
+    Args:
+        output (tensor): The output tensor.
+        label (tensor): The label tensor.
+
+    Returns:
+        tensor: The criterion tensor.
+    """
     return torch.sum(torch.square(output / label - 1), dim=1)
 
 
@@ -122,6 +157,16 @@ class NewDataset(Dataset):
 
 
 def train(model, dataloader):
+    """
+    Trains the model using the given dataloader.
+
+    Args:
+        model (torch.nn.Module): The model to be trained.
+        dataloader (torch.utils.data.DataLoader): The dataloader containing the training data.
+
+    Returns:
+        None
+    """
     model.train()
     for x, target_y in train_dataloader:
         optimizer.zero_grad()
@@ -133,6 +178,16 @@ def train(model, dataloader):
 
 
 def evaluate(model, dataloader):
+    """
+    Evaluate the model on the given dataloader.
+
+    Args:
+        model: The model to be evaluated.
+        dataloader: The dataloader containing the data for evaluation.
+
+    Returns:
+        None
+    """
     model.eval()
     loss_sum = 0
     num = 0

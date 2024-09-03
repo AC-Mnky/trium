@@ -62,6 +62,17 @@ class Dummy:
         self.output = bytes((0,) * 16)
 
     def get_output(self, stm_input: bytes, unpacked_stm_input) -> bytes:
+        """
+        Process the input and generate the output.
+
+        Args:
+            stm_input (bytes): The input data.
+            unpacked_stm_input: The unpacked input data.
+
+        Returns:
+            bytes: The generated output.
+        """
+        # Rest of the code...
         if stm_input is not None:
             self.stm_input = stm_input
         if unpacked_stm_input is not None:
@@ -186,16 +197,58 @@ class Dummy:
         return self.output
 
     def drawn_rect(self, x, y_normalized, color, width=0) -> pygame.Rect:
+        """
+        Draw a rectangle on the screen.
+
+        Args:
+            self (object): The object instance.
+            x (int): The x-coordinate of the top-left corner of the rectangle.
+            y_normalized (float): The normalized y-coordinate of the top-left corner of the rectangle.
+            color (tuple): The color of the rectangle in RGB format.
+            width (int, optional): The width of the rectangle's outline. Defaults to 0.
+
+        Returns:
+            rect (pygame.Rect): The rectangle object that was drawn.
+        """
         rect = pygame.Rect(x - HALF_A, 1.5 * UNIT - y_normalized * 0.5 * UNIT - HALF_A, A, A)
         pygame.draw.rect(self.screen, color, rect, width)
         return rect
 
     def draw_text(self) -> None:
+        """
+        Renders and displays text on the screen.
+
+        - This method is responsible for rendering and displaying various text elements on the screen.
+        - It iterates over the motor_PID list and renders the values at specific positions using the font provided.
+        - The rendered text is then blitted onto the screen at the calculated offset positions.
+        - The method also renders and displays the output and stm_input values at specific positions on the screen.
+
+        Returns:
+            None
+        """
 
         def j_offset(_j):
+            """
+            Calculate the offset value based on the input parameter _j.
+
+            Args:
+                _j (int): The input parameter representing the value of _j.
+
+            Returns:
+                float: The calculated offset value.
+            """
             return 1.7 * UNIT if _j == 3 else UNIT + 0.5 * UNIT * j
 
         def j_text(_j):
+            """
+            Returns "<<" if _j is equal to 3, otherwise returns "/"
+
+            Args:
+                _j (int): The value to be checked
+
+            Returns:
+                str: The resulting string
+            """
             return "<<" if _j == 3 else "/"
 
         if self.input_protocol == 128:
@@ -239,6 +292,21 @@ class Dummy:
         self.screen.blit(text, (0.2 * UNIT, 0.3 * UNIT))
 
     def draw(self) -> None:
+        """
+        Draws the screen based on the input protocol and other parameters.
+
+        - If the input protocol is 128, it draws rectangles based on specific values from the `stm_input` array.
+        - If the input protocol is 127, it draws rectangles based on either the `unpacked_stm_input` array or
+        specific values from the `stm_input` array.
+        - If `enabled` is True, it draws rectangles based on the `motor` and `left_lock`/`right_lock` values.
+        - If `enabled` is False and the input protocol is 128, it draws rectangles based on specific values from
+        the `stm_input` array.
+        - It also draws rectangles based on the `brush` and `back_open` values.
+        - Finally, it displays the text and updates the display.
+
+        Returns:
+            None
+        """
         self.screen.fill(BACK)
 
         if self.input_protocol == 128:
