@@ -133,6 +133,16 @@ def process(
 
 
 def block_or(image: cv2.UMat | np.ndarray, block_size: int) -> np.ndarray:
+    """
+    Applies a block-wise OR operation on the input image.
+
+    Args:
+        image (cv2.UMat | np.ndarray): The input image.
+        block_size (int): The size of each block.
+
+    Returns:
+        np.ndarray: The resulting image after applying the block-wise OR operation.
+    """
     # 获取原始图像的尺寸
     h, w = image.shape
     # 新图像的尺寸
@@ -152,4 +162,14 @@ def block_or(image: cv2.UMat | np.ndarray, block_size: int) -> np.ndarray:
 
 
 def rect_contain_point(rect: tuple[int, int, int, int], point: tuple[float, float]) -> bool:
+    """
+    Check if a point is contained within a rectangle.
+
+    Args:
+        rect (tuple[int, int, int, int]): The rectangle coordinates (x, y, width, height).
+        point (tuple[float, float]): The point coordinates (x, y).
+
+    Returns:
+        containable (bool): True if the point is inside the rectangle, False otherwise.
+    """
     return 0 <= point[0] - rect[0] <= rect[2] and 0 <= point[1] - rect[1] <= rect[3]
