@@ -6,7 +6,7 @@ parser.add_argument("-d", dest="disable", action="store_true", help="Disable cor
 parser.set_defaults(disable=False)
 args = parser.parse_args()
 
-ENABLE_STM_INPUT =  True  # True
+ENABLE_STM_INPUT = True  # True
 STM_INPUT_PROTOCOL = 127  # 127 | 128
 ENABLE_IMU = True  # True
 ENABLE_CAMERA = True  # True
