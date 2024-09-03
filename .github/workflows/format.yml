@@ -1,0 +1,75 @@
+# Format Python code using Black and isort, and create a pull request with the changes.
+# name: Format Python Code
+# on: push
+# jobs:
+#   python-code-format:
+#     runs-on: ubuntu-20.04
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.12"
+#           architecture: "x64"
+#       - name: Display Python version
+#         run: python --version
+#       - name: Install packages
+#         run: pip install black isort
+#       - name: Formatter
+#         run: |
+#           black . --line-length=110 --skip-magic-trailing-comma
+#           isort .
+#       - name: Create Pull Request
+#         uses: peter-evans/create-pull-request@v3
+#         with:
+#           commit-message: "fix: Auto code format with black and isort"
+#           title: Fixes by format action
+#           body: This is an auto-generated PR with fixes.
+#           labels: automated pr
+#           branch: python-code-format-patches
+
+# Format Python code without creating a pull request.
+name: Python Code Formatter
+
+on: 
+  push:
+    branches: 
+      - main
+  pull_request:
+    branches: 
+      - main
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+        architecture: "x64"
+
+    - name: Install dependencies
+      run: |
+        pip install black isort
+
+    - name: Run Black and fix formatting
+      run: black . --line-length=110 --skip-magic-trailing-comma
+
+    - name: Run isort and fix imports
+      run: isort .
+
+    - name: Check for changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        if [ -n "$(git status --porcelain)" ]; then
+          git add .
+          git commit -m "chore: auto format code"
+          git push
+        else
+          echo "No formatting changes required"
+        fi
