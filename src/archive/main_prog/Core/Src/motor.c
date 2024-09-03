@@ -29,9 +29,9 @@ void motor_init() {
 }
 
 /**
- * @brief Set the speed of a DC motor
- * @param num: 1, 2, 3 (number of motor, 1 -> right, 2 -> left, 3 -> brush)
- * @param pulse: -100 ~ 100 (minus value means reverse rotation)
+ * @brief  Set the speed of a DC motor.
+ * @param  num: 1, 2, 3 (number of motor, 1 -> right, 2 -> left, 3 -> brush)
+ * @param  pulse: -100 ~ 100 (minus value means reverse rotation)
  * @retval None
  */
 void set_motor_speed(uint8_t num, int8_t pulse) {
@@ -83,9 +83,9 @@ void set_motor_speed(uint8_t num, int8_t pulse) {
 }
 
 /**
- * @brief Get the encoder count
- * @param num: 1, 2, 3 (number of motor, 1 -> right, 2 -> left, 3 -> brush)
- * @param out_real_tick_elapsed: pointer to the real tick elapsed
+ * @brief  Get the encoder count.
+ * @param  num: 1, 2, 3 (number of motor, 1 -> right, 2 -> left, 3 -> brush)
+ * @param  out_real_tick_elapsed: pointer to the real tick elapsed
  * @retval iTimEncoder (uint16_t): encoder count
  */
 uint16_t get_encoder_CNT(int num, uint32_t *out_real_tick_elapsed) {
@@ -114,10 +114,10 @@ uint16_t get_encoder_CNT(int num, uint32_t *out_real_tick_elapsed) {
 }
 
 /**
- * @brief Get the direction of the encoder
- * @param num: 1, 2, 3 (number of motor, 1 -> right, 2 -> left, 3 -> brush)
+ * @brief  Get the direction of the encoder.
+ * @param  num: 1, 2, 3 (number of motor, 1 -> right, 2 -> left, 3 -> brush)
  * @retval direction_flag (uint8_t): 1 (down), 0 (up)
- * @note This function is never used (?)
+ * @note   This function is never used. (?)
  */
 uint8_t get_encoder_direction(uint8_t num) {
 	uint8_t direction_flag = 0;
@@ -134,21 +134,21 @@ uint8_t get_encoder_direction(uint8_t num) {
 }
 
 /**
- * @brief Set the angle of the servo motor
- * @param pulse: 50 ~ 250 (200 -> door open | 50 -> door close)
+ * @brief  Set the angle of the servo motor.
+ * @param  pulse: 50 ~ 250 (200 -> door open | 50 -> door close)
  * @retval None
- * @note Period = 2000, 20ms, pulse width = 0.5 ~ 2.5 ms
+ * @note   Period = 2000, 20ms, pulse width = 0.5 ~ 2.5 ms
  */
 void set_servo_angle(uint16_t pulse) {
 	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, pulse);
 }
 
 /**
- * @brief Set the angle of the servo motor in delay mode
- * @param pulse: 50 ~ 250 (200 -> door open | 50 -> door close)
+ * @brief  Set the angle of the servo motor in delay mode.
+ * @param  pulse: 50 ~ 250 (200 -> door open | 50 -> door close)
  * @retval None
- * @note Period = 2000, 20ms, pulse width = 0.5 ~ 2.5 ms
- * @note The rotation action is set to complete in 50 steps with a 10ms delay per step.
+ * @note   Period = 2000, 20ms, pulse width = 0.5 ~ 2.5 ms
+ * @note   The rotation action is set to complete in 50 steps with a 10ms delay per step.
  */
 void set_servo_angle_delay(uint16_t pulse) {
 	uint16_t current_pulse = __HAL_TIM_GET_COMPARE(&htim8, TIM_CHANNEL_1);

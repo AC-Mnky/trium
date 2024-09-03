@@ -6,8 +6,8 @@
 const uint8_t ultra_debug_print = 1;
 
 /**
- * @brief Delay certain time (in us) counted by TIM7
- * @param n_us: time to delay (in us)
+ * @brief  Delay certain time (in us) counted by TIM7.
+ * @param  n_us: time to delay (in us)
  * @retval None
  */
 void TIM7_Delay_us(uint16_t n_us) {
@@ -20,8 +20,8 @@ void TIM7_Delay_us(uint16_t n_us) {
 }
 
 /**
- * @brief Get the distance detected by certain ultrasonic sensor
- * @param num: 1 -> left sensor | 2 -> right sensor
+ * @brief  Get the distance detected by certain ultrasonic sensor.
+ * @param  num: 1 -> left sensor | 2 -> right sensor
  * @retval distance (in cm)
  */
 uint8_t get_distance_single(int num) {
@@ -75,8 +75,8 @@ uint8_t get_distance_single(int num) {
 }
 
 /**
- * @brief Get the distance detected by both ultrasonic sensor
- * @param distance: array to store the distance detected by left and right sensor
+ * @brief  Get the distance detected by both ultrasonic sensor.
+ * @param  distance: array to store the distance detected by left and right sensor
  * @retval distance array (in cm)
  */
 void get_distance(uint8_t *distance) {

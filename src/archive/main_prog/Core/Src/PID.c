@@ -12,7 +12,7 @@ const int32_t real_tick_freq = 72000000;
 const int32_t real_tick_freq_div256 = real_tick_freq >> 8;
 
 /**
- * @brief Initialize PID struct
+ * @brief Initialize PID struct.
  * @param pid: pointer to PID struct
  * @param Kx_mul_n: numerator of Kx (x=p, i, d)
  * @param Kx_frac_n: denominator of Kx (x=p, i, d)
@@ -39,7 +39,7 @@ void PID_init(struct PID_struct *pid, uint8_t Kp_mul_n, uint8_t Kp_frac_n, uint8
 }
 
 /**
- * @brief Change the parameters of given PID struct
+ * @brief Change the parameters of given PID struct.
  * @param pid: pointer to PID struct
  * @param Kx_mul_n: numerator of Kx (x=p, i, d)
  * @param Kx_frac_n: denominator of Kx (x=p, i, d)
@@ -60,11 +60,11 @@ void PID_change_para(struct PID_struct *pid, uint8_t Kp_mul_n, uint8_t Kp_frac_n
 }
 
 /**
- * @brief Calculation of velocity-based PID process
- * @param pid: pointer to PID struct
- * @param PWM_Pulse: ideal PWM pulse (set by program)
- * @param Encoder_pulse: read encoder readings
- * @param real_tick_elapsed: real tick elapsed since last calculation
+ * @brief  Calculation of velocity-based PID process.
+ * @param  pid: pointer to PID struct
+ * @param  PWM_Pulse: ideal PWM pulse (set by program)
+ * @param  Encoder_pulse: read encoder readings
+ * @param  real_tick_elapsed: real tick elapsed since last calculation
  * @retval output_val: modified PWM pulse to be set in the next loop
  */
 int32_t PID_vel(struct PID_struct *pid, uint8_t PWM_Pulse, uint16_t Encoder_pulse,
