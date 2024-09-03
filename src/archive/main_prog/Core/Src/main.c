@@ -53,9 +53,9 @@
 /* USER CODE BEGIN PV */
 
 /**
- * @brief choose whether to enable debug message prints.
- * @description debug prints -> program variables | reflect -> retransmit messages to PC
- * @type unit8_t
+ * @brief Choose whether to enable debug message prints.
+ * @param debug prints -> program variables | reflect -> retransmit messages to PC
+ * @type  unit8_t
  * @value 0: disable | 1: enable
  * @note  uart1 -> PC |  uart3 -> pi4B
  */
@@ -63,10 +63,10 @@ const uint8_t debug_print = 0;
 const uint8_t reflect = 1;
 
 /**
- * @brief buffers used for message transmission
- * @description temp_buffer -> temporary buffer used to check messages
- * @description receive_buffer -> buffer used to receive messages
- * @note 127-protocol: 6 bytes | 128-protocol: 24 bytes
+ * @brief Buffers used for message transmission.
+ * @param temp_buffer -> temporary buffer used to check messages
+ * @param receive_buffer -> buffer used to receive messages
+ * @note  127-protocol: 6 bytes | 128-protocol: 24 bytes
  */
 
 // 127-protocol
@@ -90,12 +90,12 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 /**
- * @brief call urgency by analyzing the speed and distance
- * @param distance: distance to the obstacle detected by the ultrasonic sensor
- * @param encoder_CNTx -> encoder count of motor x
+ * @brief  Call urgency by analyzing the speed and distance.
+ * @param  distance: distance to the obstacle detected by the ultrasonic sensor
+ * @param  encoder_CNTx -> encoder count of motor x
  * @retval call_flag: 1 (two wheels in the same direction) | 0 (otherwise)
- * @note ratio = max(v1 / distance, v2 / distance)
- * @note urgent_flag = 1 if ratio > 1 | urgent_flag = 0 otherwise
+ * @note   ratio = max(v1 / distance, v2 / distance)
+ * @note   urgent_flag = 1 if ratio > 1 | urgent_flag = 0 otherwise
  */
 uint8_t urgency_call(uint8_t distance, uint16_t encoder_CNT1, uint16_t encoder_CNT2) {
 	uint8_t call_flag = (get_encoder_direction(1) == get_encoder_direction(2)) ? 1 : 0;
@@ -192,8 +192,8 @@ int main(void) {
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, SET);
 
 	/**
-	 * @brief ultra sonic sensor order init
-	 * @note 0 -> left | 1 -> right
+	 * @brief Ultrasonic sensor order init
+	 * @note  0 -> left | 1 -> right
 	 */
 //	uint8_t ultra_order = 0;
 //	uint8_t distance = 0;
@@ -207,9 +207,9 @@ int main(void) {
 		/* USER CODE BEGIN 3 */
 
 		/**
-		 * @brief receive controlling message under 128-protocol
-		 * @note 0x80 -> head of the message
-		 * @note inquiry mode
+		 * @brief Receive controlling message under 128-protocol.
+		 * @note  0x80 -> head of the message
+		 * @note  Inquiry mode
 		 */
 		if (transmit_protocol == 128) {
 
@@ -249,8 +249,8 @@ int main(void) {
 		}
 
 		/**
-		 * @brief Urgent case dealing
-		 * @note Aborted at this edition
+		 * @brief Urgent case dealing.
+		 * @note  Aborted at this edition.
 
 		 if (urgent_count > 0) {
 		 --urgent_count;
@@ -290,7 +290,6 @@ int main(void) {
 			memset(head, 128, head_length);
 			HAL_UART_Transmit(&huart3, head, head_length, 20);
 			HAL_UART_Transmit(&huart3, temp_buffer_128, 32 - head_length, 50);
-		} else {
 		}
 
 		// debug message of head transmission
@@ -299,7 +298,7 @@ int main(void) {
 		}
 
 		/**
-		 * @brief velocity control under 128-protocol.
+		 * @brief Velocity control under 128-protocol.
 		 */
 		if (transmit_protocol == 128) {
 			uint32_t real_tick_2;
@@ -332,7 +331,7 @@ int main(void) {
 
 		}
 		/**
-		 * @brief velocity control under 127-protocol.
+		 * @brief Velocity control under 127-protocol.
 		 */
 		else if (transmit_protocol == 127) {
 			*motor2count = get_encoder_CNT(2, motor2time);
@@ -355,7 +354,7 @@ int main(void) {
 		}
 
 		/**
-		 * @brief clear integral when velocity is set to zero.
+		 * @brief Clear integral when velocity is set to zero.
 		 */
 		if (PID_obj_1.target_val == 0) {
 			PID_obj_1.integral = 0;
@@ -370,9 +369,9 @@ int main(void) {
 		}
 
 		/**
-		 * @brief control the brush and servo motor
-		 * @note brush -> motor 3 | servo -> motor 4
-		 * @note receive_buffer[4] -> brush | reveive_buffer[5] -> servo
+		 * @brief Control the brush and servo motor.
+		 * @note  brush -> motor 3 | servo -> motor 4
+		 * @note  receive_buffer[4] -> brush | reveive_buffer[5] -> servo
 		 */
 		if (receive_buffer[4]) {
 			set_motor_speed(3, 60);
@@ -394,7 +393,7 @@ int main(void) {
 
 		/**
 		 * @brief Change the urgency case handling by analyzing the ultrasonic sensor data
-		 * @note Aborted at this edition
+		 * @note  Aborted at this edition
 
 		 distance = get_distance_single(ultra_order);
 		 ultra_order = ultra_order ? 0 : 1;
@@ -410,8 +409,8 @@ int main(void) {
 		 */
 
 		/**
-		 * @brief control the time of one loop
-		 * @note set the time of one loop to 200 ticks of timer 6 (0.1ms per tick)
+		 * @brief Control the time of one loop.
+		 * @note  Set the time of one loop to 200 ticks of timer 6 (0.1ms per tick).
 		 */
 		while (__HAL_TIM_GET_COUNTER(&htim6) < 200) {
 		}
@@ -422,7 +421,7 @@ int main(void) {
 		}
 
 		/**
-		 * @brief use blink to test whether the loop is conducted properly
+		 * @brief Use blink to test whether the loop is conducted properly.
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
 		 */
 	}
@@ -430,14 +429,15 @@ int main(void) {
 }
 
 /**
- * @brief System Clock Configuration
+ * @brief  System Clock Configuration
  * @retval None
  */
 void SystemClock_Config(void) {
 	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
 	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
-	/** Initializes the RCC Oscillators according to the specified parameters
+	/**
+	 * Initializes the RCC Oscillators according to the specified parameters
 	 * in the RCC_OscInitTypeDef structure.
 	 */
 	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
@@ -451,7 +451,8 @@ void SystemClock_Config(void) {
 		Error_Handler();
 	}
 
-	/** Initializes the CPU, AHB and APB buses clocks
+	/**
+	 * Initializes the CPU, AHB and APB buses clocks
 	 */
 	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1
 			| RCC_CLOCKTYPE_PCLK2;
@@ -513,7 +514,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+     ex:  printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
