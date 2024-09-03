@@ -38,7 +38,7 @@ A typical pythonic documentation should behave like this:
 ```python
 def func(arg1: int, arg2: str) -> bool:
     """
-    Here is the function's brief summary.
+    Here is the function's brief introduction.
 
     - You may add some detailed description here.
     ...
@@ -52,7 +52,7 @@ def func(arg1: int, arg2: str) -> bool:
         value (bool): Always True.
 
     Note:
-        Some additional notes may be placed here.
+        Some additional notes may be placed here, such as problems to be solved, etc.
     """
     value = True
     return value
@@ -74,7 +74,7 @@ A commit message should be clear and concise. It should be in the following form
 
 - `<type>`: The type of the commit, such as `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, etc.
 - `<scoop>` (optional): The scope of the commit, such as `algorithm`, `communication`, `archive`, etc.
-- `<subject>`: A brief summary of the commit. It should be in the imperative mood without `dot (.)` at the end.
+- `<subject>`: A brief summary of the commit. It should be in the imperative mood without `dot (.)` at the end of a line.
 - `<body>` (optional): A detailed description of the commit.
 - `<footer>` (optional): A footer for the commit, such as `BREAKING CHANGE`, `ISSUES CLOSED`, etc.
 
