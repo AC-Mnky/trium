@@ -41,20 +41,20 @@ CAMERA_STATE = camera_convert.CameraState(
     (56.1, 1.0, -0.35),
     (51.17, 51.04),
     (320, 240),
-    #(90, 18, -442), (55.9, 0.9, 0), (51.45, 51.09), (320, 240)
+    # (90, 18, -442), (55.9, 0.9, 0), (51.45, 51.09), (320, 240)
 )
 
 
 def process(
-        time: float, image: cv2.UMat | np.ndarray | None
+    time: float, image: cv2.UMat | np.ndarray | None
 ) -> (
-        tuple[
-            float,
-            list[tuple[float, float]],
-            list[tuple[float, float]],
-            list[tuple[tuple[float, float], tuple[float, float]]],
-        ]
-        | None
+    tuple[
+        float,
+        list[tuple[float, float]],
+        list[tuple[float, float]],
+        list[tuple[tuple[float, float], tuple[float, float]]],
+    ]
+    | None
 ):
     """
     Process the given image to extract relevant information.
@@ -121,7 +121,7 @@ def block_or(image: cv2.UMat | np.ndarray, block_size: int) -> np.ndarray:
     for i in range(new_h):
         for j in range(new_w):
             # 提取原图中的一个块
-            block = image[i * block_size:(i + 1) * block_size, j * block_size:(j + 1) * block_size]
+            block = image[i * block_size : (i + 1) * block_size, j * block_size : (j + 1) * block_size]
             # 计算块中所有像素的“或”值
             new_image[i, j] = np.bitwise_or.reduce(block, axis=(0, 1))
 

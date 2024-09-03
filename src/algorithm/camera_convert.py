@@ -25,7 +25,7 @@ class CameraState:
             resolution (tuple[int, int]): The resolution of the camera image.
 
         Returns:
-            None
+            None: Nothing is returned.
         """
         self.x, self.y, self.z = camera_xyz
         self.theta, self.phi, self.omega = np.radians(camera_rotation)
@@ -78,14 +78,11 @@ class CameraState:
         - img_to_relative_cords_mapping: Transformation matrix from image coordinates to relative coordinates.
         - relative_cords_to_img_mapping: Inverse of img_to_relative_cords_mapping.
 
+        Returns:
+            None: Camera related transform matrices are updated automatically.
+
         Note:
             The matrices and mappings are stored as attributes of the CameraConvert object.
-
-        Args:
-            None
-
-        Returns:
-            None
         """
         self.trans_phi = np.array(
             ((np.cos(self.phi), np.sin(self.phi), 0), (-np.sin(self.phi), np.cos(self.phi), 0), (0, 0, 1))
