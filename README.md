@@ -41,12 +41,10 @@ def func(arg1: int, arg2: str) -> bool:
     Here is the function's brief introduction.
 
     - You may add some detailed description here.
-    ...
 
     Args:
         arg1 (int): Description of the first argument.
         arg2 (str): Description of the second argument.
-        ...
 
     Returns:
         value (bool): Always True.
