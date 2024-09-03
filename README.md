@@ -58,11 +58,11 @@ def func(arg1: int, arg2: str) -> bool:
     return value
 ```
 
-This documentation style guide is based on [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html). It is a simplified version, besides the `example` part is omitted since we are not writing a complicated project.
+This documentation style guide is based on [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html). It is a simplified version, and thus the `example` part is omitted since we are not writing a complicated project.
 
 ### Git Norm
 
-A commit message should be clear and concise. It should be in the following format:
+A commit message should be clear and concise in order that problem dealing can be more efficient. It ought to be in the following format:
 
 ```git
 <type>(<scoop>): <subject>
@@ -73,10 +73,10 @@ A commit message should be clear and concise. It should be in the following form
 ```
 
 - `<type>`: The type of the commit, such as `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, etc.
-- `<scoop>` (optional): The scope of the commit, such as `algorithm`, `communication`, `archive`, etc.
+- `<scoop>` (optional) : The scope of the commit, such as `algorithm`, `communication`, `archive`, etc.
 - `<subject>`: A brief summary of the commit. It should be in the imperative mood without `dot (.)` at the end of a line.
-- `<body>` (optional): A detailed description of the commit.
-- `<footer>` (optional): A footer for the commit, such as `BREAKING CHANGE`, `ISSUES CLOSED`, etc.
+- `<body>` (optional) : A detailed description of the commit.
+- `<footer>` (optional) : A footer for the commit, such as `BREAKING CHANGE`, `ISSUES CLOSED`, etc.
 
 > [!NOTE]
 > Although pull requests are different from commits, you may follow the same format when writing a pull request.
