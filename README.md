@@ -62,8 +62,6 @@ This documentation style guide is based on [Google Python Style Guide](https://g
 
 ### Git Norm
 
-#### Commit Message
-
 A commit message should be clear and concise. It should be in the following format:
 
 ```git
@@ -79,6 +77,9 @@ A commit message should be clear and concise. It should be in the following form
 - `<subject>`: A brief summary of the commit. It should be in the imperative mood without `dot (.)` at the end.
 - `<body>` (optional): A detailed description of the commit.
 - `<footer>` (optional): A footer for the commit, such as `BREAKING CHANGE`, `ISSUES CLOSED`, etc.
+
+> [!NOTE]
+> Although pull requests are different from commits, you may follow the same format when writing a pull request.
 
 ## Mnky
 
