@@ -256,6 +256,16 @@ def find_wall_bottom_p(image: np.ndarray, show: bool = False) -> tuple[np.ndarra
 
 
 def find_bounding_rect_in_mask(mask: np.ndarray, show: bool = False) -> list[tuple[int, int, int, int]]:
+    """
+    Finds the bounding rectangles in a given mask.
+
+    Args:
+        mask (np.ndarray): The input mask image.
+        show (bool, optional): Whether to show the result. Defaults to False.
+
+    Returns:
+        rects (list[tuple[int, int, int, int]]): A list of tuples representing the bounding rectangles.
+    """
     contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
     rects = []
     for c in contours:
