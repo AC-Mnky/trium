@@ -4,8 +4,8 @@ import numpy as np
 class CameraState:
     """
     Ruleset:
-        - 座标架: 车向前为x, 车向右为y, 向下为z (地面对应z=0), 方向与z轴夹角为theta, 右手螺旋向下相对x轴旋转为phi,
-        绕入射光方向右手螺旋偏转为omega, 方向指摄像头中央对准的位置
+    - 座标架: 车向前为x, 车向右为y, 向下为z (地面对应z=0)
+    - 方向与z轴夹角为theta, 右手螺旋向下相对x轴旋转为phi, 绕入射光方向右手螺旋偏转为omega, 方向指摄像头中央对准的位置
     """
 
     def __init__(

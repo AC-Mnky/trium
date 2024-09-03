@@ -216,7 +216,7 @@ class Dummy:
 
     def draw_text(self) -> None:
         """
-        Renders and displays text on the screen.
+        Render and display text on the screen.
 
         - This method is responsible for rendering and displaying various text elements on the screen.
         - It iterates over the motor_PID list and renders the values at specific positions using the font provided.
@@ -293,7 +293,7 @@ class Dummy:
 
     def draw(self) -> None:
         """
-        Draws the screen based on the input protocol and other parameters.
+        Draw the screen based on the input protocol and other parameters.
 
         - If the input protocol is 128, it draws rectangles based on specific values from the `stm_input` array.
         - If the input protocol is 127, it draws rectangles based on either the `unpacked_stm_input` array or

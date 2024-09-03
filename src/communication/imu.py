@@ -156,13 +156,13 @@ class IMU:
         gyro_data = [0.0] * 8
         angle_data = [0.0] * 8
         frame_state = 0  # decide the case by the value after 0x
-        byte_num = 0  # the number of byte that has been read
-        check_sum = 0  # sum check bit
+        byte_num = 0     # the number of byte that has been read
+        check_sum = 0    # sum check bit
         acceleration = (0.0,) * 3
         angular_velocity = (0.0,) * 3
         angle = (0.0,) * 3
 
-        for data in inputdata:  # ergodic the input data
+        for data in inputdata:    # ergodic the input data
             if frame_state == 0:  # when the state is not determined, enter the following judgment
                 if (
                     data == 0x55 and byte_num == 0
@@ -184,14 +184,14 @@ class IMU:
                     byte_num = 2
             elif frame_state == 1:  # acceleration
 
-                if byte_num < 10:  # read 8 bytes of data
-                    add_data[byte_num - 2] = data  # start from byte_num = 2
+                if byte_num < 10:   # read 8 bytes of data
+                    add_data[byte_num - 2] = data   # start from byte_num = 2
                     check_sum += data
                     byte_num += 1
                 else:
                     if data == (check_sum & 0xFF):  # if the check bit is correct, extract the data
                         acceleration = self._extract_acceleration(add_data)
-                    check_sum = 0  # reset the flags and enter the next loop
+                    check_sum = 0   # reset the flags and enter the next loop
                     byte_num = 0
                     frame_state = 0
             elif frame_state == 2:  # gyroscope
@@ -217,7 +217,7 @@ class IMU:
                     if data == (check_sum & 0xFF):
                         angle = self._extract_angle(angle_data)
                         return acceleration, angular_velocity, angle
-                    """ Debug printing codes
+                    """Debug printing codes
 
                         print("Acceleration(g):", acceleration)
                         print("Angular_Velocity(deg/s):", angular_velocity)

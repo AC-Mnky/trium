@@ -134,7 +134,7 @@ def process(
 
 def block_or(image: cv2.UMat | np.ndarray, block_size: int) -> np.ndarray:
     """
-    Applies a block-wise OR operation on the input image.
+    Apply a block-wise OR operation on the input image.
 
     Args:
         image (cv2.UMat | np.ndarray): The input image.

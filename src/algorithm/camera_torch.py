@@ -26,7 +26,7 @@ class Model(nn.Module):
 
     def build(self):
         """
-        Builds the camera transformation matrix.
+        Build the camera transformation matrix.
 
         This method calculates the camera transformation matrix based on the given rotation, field of view (fov),
         and resolution. The resulting matrix is stored in the `matrix` attribute of the camera object.
@@ -107,7 +107,7 @@ class Model(nn.Module):
 
     def forward(self, x: tensor):
         """
-        Applies camera transformation to the input tensor.
+        Apply camera transformation to the input tensor.
 
         Args:
             x (tensor): Input tensor of shape (N, C).

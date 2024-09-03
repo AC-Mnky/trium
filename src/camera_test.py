@@ -157,7 +157,7 @@ def process(img, show: bool = False, img_=None):
 
 def draw_grid(img, color, x_start, x_stop, x_step, y_start, y_stop, y_step, y_shift: int = 0) -> None:
     """
-    Draws a grid on the given image.
+    Draw a grid on the given image.
 
     Args:
         img (numpy.ndarray): The image on which the grid will be drawn.
