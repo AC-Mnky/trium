@@ -15,12 +15,12 @@ except ModuleNotFoundError:
     import camera_convert
     import vision
 
-INITIAL_CORD_X = 100
+INITIAL_CORD_X = 200
 INITIAL_CORD_Y = 1000
 INITIAL_ANGLE = 0
 
-DDL = 600
-USE_DDL = False
+DDL = 600 - 0
+USE_DDL = True
 
 ENABLE_INFER_POSITION_FROM_WALLS = True  # True
 CORE_TIME_DEBUG = False
@@ -64,9 +64,9 @@ AIM_ANGLE = 0.4
 NO_AIM_ANGLE = 0.2
 ROOM_MARGIN = 100
 ANGLE_TYPICAL = 0.4
-ANGLE_STANDARD_DEVIATION = 0.15
+ANGLE_STANDARD_DEVIATION = 0.2
 LENGTH_TYPICAL = 0.004
-WALL_SLOW_MARGIN = 1000
+WALL_SLOW_MARGIN = 250
 MAX_SPEED = 915
 BASIC_WEIGHT = 0.5
 X_CLIP_MARGIN = 100
@@ -428,21 +428,22 @@ class Core:
 
         while True:
 
-            for rotation_spot in (current_cords, (1000, 1000), (2000, 1000)):
+            for rotation_spot in (current_cords, (500, 500), (2500, 500), (2500, 1500), (500, 1500)):
 
-                #!!! Changed by lcy, would be changed back soon
-                # while get_length(vec_sub(self.predicted_cords, rotation_spot)) > 50:
-                #     if self.real_time > DDL - 30:
-                #         break
-                #     self.target_toward_cords(rotation_spot)
-                #     self.vision_message = "Going to rotate at " + get_str(rotation_spot)
-                #     # print("Core: Targeting toward", rotation_spot)
-                #     yield
+                # !!! Changed by lcy, would be changed back soon
+                while get_length(vec_sub(self.predicted_cords, rotation_spot)) > 50:
+                    if self.real_time > DDL - 60:
+                        break
+                    self.target_toward_cords(rotation_spot)
+                    self.vision_message = "Going to " + get_str(rotation_spot)
+                    # self.vision_message = "Going to rotate at " + get_str(rotation_spot)
+                    # print("Core: Targeting toward", rotation_spot)
+                    yield
 
                 #!!! quick rotation was banned
                 # t = 0
                 # while t < 2.5:
-                #     if self.real_time > DDL - 30:
+                #     if self.real_time > DDL - 60:
                 #         break
                 #     t += self.dt
                 #     self.motor = [0.3, -0.3]
@@ -450,18 +451,18 @@ class Core:
                 #     # print("Core: Rotating right for", t)
                 #     yield
 
-                t = 0
-                #!!! it used to be 7.5, lcy changed it to 3
-                while t < 3:
-                    if self.real_time > DDL - 30:
-                        break
-                    t += self.dt
-                    self.motor = [-0.1, 0.1]
-                    self.vision_message = "Rotating left for time " + str(t)
-                    # print('Core: Rotating left for', t)
-                    yield
+                # t = 0
+                # #!!! it used to be 7.5, lcy changed it to 3
+                # while t < 3:
+                #     if self.real_time > DDL - 60:
+                #         break
+                #     t += self.dt
+                #     self.motor = [-0.1, 0.1]
+                #     self.vision_message = "Rotating left for time " + str(t)
+                #     # print('Core: Rotating left for', t)
+                #     yield
             
-            if USE_DDL and not self.real_time > DDL - 30:
+            if USE_DDL and not self.real_time > DDL - 60:
                 current_cords = (1500, 1000)
                 continue
                 
@@ -483,11 +484,15 @@ class Core:
                 angle = angle_subtract(HOME_ANGLE, self.predicted_angle)
 
             t = 0
-            while t < 2:
+            angle = angle_subtract(HOME_ANGLE, self.predicted_angle)
+            while t < 3:
                 t += self.dt
-                self.motor = [-0.2, -0.2]
+                diff = ANGLE_TYPICAL * angle
+                diff = np.clip(diff, -0.5, 0.5)
+                self.set_motor_output(float(diff), -0.4)
                 self.vision_message = "At home backing up."
                 yield
+                angle = angle_subtract(HOME_ANGLE, self.predicted_angle)
 
             t = 0
             while t < 3:
@@ -862,7 +867,7 @@ class Core:
                 if 0 < cords[0] < ROOM_X and 0 < cords[1] < ROOM_Y:
                     new_items.append(cords)
                     self.predicted_items[cords] = [
-                        self.predicted_items.get(cords, (0, 0))[0] + 2,
+                        self.predicted_items.get(cords, (0, 0))[0] + 3,
                         RED,
                         0,
                         0,
@@ -873,7 +878,7 @@ class Core:
                 if 0 < cords[0] < ROOM_X and 0 < cords[1] < ROOM_Y:
                     new_items.append(cords)
                     self.predicted_items[cords] = [
-                        self.predicted_items.get(cords, (0, 1))[0] + 3,
+                        self.predicted_items.get(cords, (0, 1))[0] + 2,
                         YELLOW,
                         0,
                         0,
@@ -914,7 +919,7 @@ class Core:
 
         # go towards the closest item
         item = self.get_closest_item()
-        if item is None or self.real_time > DDL - 30:
+        if item is None or self.real_time > DDL - 60:
             self.action_push_left = None
             self.action_push_right = None
             self.action_push_top = None
