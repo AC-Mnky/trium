@@ -63,7 +63,7 @@ def real_time() -> float:
 
 def time_since_last_call(mul: int = 1000):
     """
-    Calculate the time elapsed since the last function call using a generator.
+    Calculate the time elapsed  since the last function call using a generator.
 
     Args:
         mul (int, optional): Multiplier for the elapsed time. Defaults to 1000.
