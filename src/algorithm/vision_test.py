@@ -80,7 +80,7 @@ def process(
 
     if ENABLE_WEIRD_COLOR_DETECTING:
         mask_else = 255 - np.max(np.stack((mask_red, mask_yellow, mask_blue, mask_white), axis=0), axis=0)
-        small_mask_else = block_or(mask_else, 10)
+        small_mask_else = block_or(mask_else, 10)  # noqa: F841
         ...  # TODO
 
     reds = []
