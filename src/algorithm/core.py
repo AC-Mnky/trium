@@ -451,8 +451,8 @@ class Core:
                 #     yield
 
                 t = 0
-                #!!! it used to be 7.5, lcy changed it to 5
-                while t < 5:
+                #!!! it used to be 7.5, lcy changed it to 3
+                while t < 3:
                     if self.real_time > DDL - 30:
                         break
                     t += self.dt
