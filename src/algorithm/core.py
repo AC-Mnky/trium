@@ -576,8 +576,8 @@ class Core:
             self.predicted_items[item][3] = max(4, tag)
 
         tag = self.predicted_items[item][3]
-        cords = self.predicted_cords
-        angle = self.predicted_angle
+        cords = self.predicted_cords  # noqa: F841
+        angle = self.predicted_angle  # noqa: F841
         if tag in (0, 2, 3, 4):
             self.target_toward_cords(item)
             self.vision_message = (
