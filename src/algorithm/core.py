@@ -20,7 +20,7 @@ INITIAL_CORD_Y = 1000
 INITIAL_ANGLE = 0
 
 DDL = 600
-DISABLE_GO_HOME_EARLY = False
+USE_DDL = False
 
 ENABLE_INFER_POSITION_FROM_WALLS = True  # True
 CORE_TIME_DEBUG = False
@@ -63,7 +63,7 @@ INTEREST_MAXIMUM = 30
 AIM_ANGLE = 0.4
 NO_AIM_ANGLE = 0.2
 ROOM_MARGIN = 100
-ANGLE_TYPICAL = 0.6
+ANGLE_TYPICAL = 0.4
 ANGLE_STANDARD_DEVIATION = 0.15
 LENGTH_TYPICAL = 0.004
 WALL_SLOW_MARGIN = 1000
@@ -266,8 +266,11 @@ class Core:
             and 0 < cords[1] < ROOM_Y
             or 0 <= cords[0] <= 300
             and ROOM_Y - 400 <= cords[1] <= ROOM_Y
+            
+            #!!! we shall reuse this function today, it could be banned soon
             or ROOM_X - 300 <= cords[0] <= ROOM_X
             and 0 <= cords[1] <= 400
+            
             or 0 <= cords[0] <= 50
             and 0 <= cords[1] <= 200
             or 0 <= cords[0] <= 200
@@ -427,26 +430,29 @@ class Core:
 
             for rotation_spot in (current_cords, (1000, 1000), (2000, 1000)):
 
-                while get_length(vec_sub(self.predicted_cords, rotation_spot)) > 50:
-                    if self.real_time > DDL - 30:
-                        break
-                    self.target_toward_cords(rotation_spot)
-                    self.vision_message = "Going to rotate at " + get_str(rotation_spot)
-                    # print("Core: Targeting toward", rotation_spot)
-                    yield
+                #!!! Changed by lcy, would be changed back soon
+                # while get_length(vec_sub(self.predicted_cords, rotation_spot)) > 50:
+                #     if self.real_time > DDL - 30:
+                #         break
+                #     self.target_toward_cords(rotation_spot)
+                #     self.vision_message = "Going to rotate at " + get_str(rotation_spot)
+                #     # print("Core: Targeting toward", rotation_spot)
+                #     yield
+
+                #!!! quick rotation was banned
+                # t = 0
+                # while t < 2.5:
+                #     if self.real_time > DDL - 30:
+                #         break
+                #     t += self.dt
+                #     self.motor = [0.3, -0.3]
+                #     self.vision_message = "Rotating right for time " + str(t)
+                #     # print("Core: Rotating right for", t)
+                #     yield
 
                 t = 0
-                while t < 2.5:
-                    if self.real_time > DDL - 30:
-                        break
-                    t += self.dt
-                    self.motor = [0.3, -0.3]
-                    self.vision_message = "Rotating right for time " + str(t)
-                    # print("Core: Rotating right for", t)
-                    yield
-
-                t = 0
-                while t < 7.5:
+                #!!! it used to be 7.5, lcy changed it to 5
+                while t < 5:
                     if self.real_time > DDL - 30:
                         break
                     t += self.dt
@@ -455,7 +461,7 @@ class Core:
                     # print('Core: Rotating left for', t)
                     yield
             
-            if DISABLE_GO_HOME_EARLY and not self.real_time > DDL - 30:
+            if USE_DDL and not self.real_time > DDL - 30:
                 current_cords = (1500, 1000)
                 continue
                 
