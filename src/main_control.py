@@ -52,10 +52,25 @@ FORCE_STOP_MESSAGE = bytes((128, 1, 0, 0, True, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0,
 
 
 def real_time() -> float:
+    """
+    Calculate the elapsed time since the start of the program.
+
+    Returns:
+        time (float): The elapsed time in seconds.
+    """
     return time.time() - start_time
 
 
 def time_since_last_call(mul: int = 1000):
+    """
+    Calculate the time elapsed since the last function call using a generator.
+
+    Args:
+        mul (int, optional): Multiplier for the elapsed time. Defaults to 1000.
+
+    Yields:
+        int: The elapsed time multiplied by the multiplier.
+    """
     last_call = start_time
     while True:
         temp = time.time() - last_call
@@ -65,7 +80,6 @@ def time_since_last_call(mul: int = 1000):
 
 if __name__ == "__main__":
     try:
-
         start_time = time.time()
 
         cycle_time = time_since_last_call()
