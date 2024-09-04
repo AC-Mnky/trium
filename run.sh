@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/sh
 function run(){
     echo "Please choose your mode: [A] visualization mode  [B] cmd mode"
     read mode
@@ -21,5 +21,5 @@ for i in {1..5}; do
     run
 done
 
-echo "End running main program..."
+echo "End running main program, press any key to continue..."
 read input
