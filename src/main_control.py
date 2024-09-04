@@ -73,7 +73,7 @@ def time_since_last_call(mul: int = 1000):
     """
     last_call = start_time
     while True:
-        temp = time.time() -    last_call
+        temp = time.time() - last_call
         last_call += temp
         yield int(mul * temp)
 
