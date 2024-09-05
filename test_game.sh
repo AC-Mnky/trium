@@ -9,6 +9,9 @@ SNAKE=("$SNAKE_X,$SNAKE_Y")
 DIRECTION="RIGHT"
 SCORE=0
 
+# 隐藏光标
+tput civis
+
 # 显示游戏画面
 draw_board() {
     clear
@@ -80,4 +83,5 @@ while true; do
     update_direction
     move_snake
     check_collision
+    sleep 0.05
 done
