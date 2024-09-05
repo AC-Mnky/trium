@@ -21,14 +21,15 @@ echo Here is a simple tutorial to help you quickly get started with this reposit
 echo.
 echo Please choose your operation (enter letter (case SENSITIVE) in square brackets):
 echo [A] Browse the global README.md  [B] Review SoftwareDesign.md  [C] Start Git Operations  [D] Format Codes
-echo [N] Exit  [T] Beta Test XD
+echo [N] Exit  [R] Alpha Test :)  [T] Beta Test XD
 set /p var=
 if %var%==A goto browse_readme
 if %var%==B goto software_design
 if %var%==C goto choose_git
 if %var%==D goto format_codes
 if %var%==N exit
-if %var%==T goto test
+if %var%==R goto alpha_test
+if %var%==T goto beta_test
 else echo Invalid input, please try again.
 goto choose_intro
 
@@ -186,8 +187,18 @@ pause
 goto choose_exit
 
 
-@REM Submenu 6 - test (beta)
-:test
+@REM Submenu 6 - test (alpha)
+:alpha_test
+echo.
+echo [Current Action] Relax yourself.
+echo.
+echo Run "./test_game.sh" in the git bash terminal to start the game.
+pause
+goto choose_intro
+
+
+@REM Submenu 7 - test (beta)
+:beta_test
 echo.
 echo [Current Action] Play Music!
 echo.
