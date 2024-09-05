@@ -52,8 +52,10 @@ move_snake() {
         FOOD_X=$((1+RANDOM % (WIDTH-2)))
         FOOD_Y=$((1+RANDOM % (HEIGHT-2)))
         ((SCORE++))
+        SNAKE+=("$SNAKE_X,$SNAKE_Y")  # 增加蛇的长度
     else
-        SNAKE=("${SNAKE[@]:1}" "$SNAKE_X,$SNAKE_Y")
+        SNAKE=("${SNAKE[@]}" "$SNAKE_X,$SNAKE_Y")
+        SNAKE=("${SNAKE[@]:1}")
     fi
 }
 
@@ -63,11 +65,13 @@ check_collision() {
         echo "Game Over! You hit the wall."
         exit 1
     fi
-    
-    if [[ " ${SNAKE[@]:1} " =~ " $SNAKE_X,$SNAKE_Y " ]]; then
-        echo "Game Over! You ran into yourself."
-        exit 1
-    fi
+
+    for ((i = 0; i < ${#SNAKE[@]}-1; i++)); do
+        if [[ "${SNAKE[i]}" == "$SNAKE_X,$SNAKE_Y" ]]; then
+            echo "Game Over! You ran into yourself."
+            exit 1
+        fi
+    done
 }
 
 # 主循环
