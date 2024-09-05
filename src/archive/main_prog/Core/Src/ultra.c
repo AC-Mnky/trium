@@ -169,7 +169,7 @@ void get_distance(uint8_t *distance) {
 
 	distance_L = (uint8_t) (CSB_value_L * 346 / 20000);  // cm
 	distance_R = (uint8_t) (CSB_value_R * 346 / 20000);  // cm
-// (uint8_t) (CSB_value * 346 / 2000);  // mm
+//    (uint8_t) (CSB_value * 346 / 2000);                // mm
 
 	distance[0] = distance_L;
 	distance[1] = distance_R;

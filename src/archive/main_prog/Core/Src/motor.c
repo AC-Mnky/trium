@@ -37,12 +37,12 @@ void motor_init() {
 void set_motor_speed(uint8_t num, int8_t pulse) {
 	if (num == 1) {
 		if (pulse > 0) {
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_12, GPIO_PIN_SET); // IN1
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_12, GPIO_PIN_SET);   // IN1
 			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_13, GPIO_PIN_RESET); // IN2
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pulse); // Set CCR, also called 'pulse'
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pulse);   // Set CCR, also called 'pulse'
 		} else if (pulse < 0) {
 			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_12, GPIO_PIN_RESET); // IN1
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_13, GPIO_PIN_SET); // IN2
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_13, GPIO_PIN_SET);   // IN2
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, -pulse);
 		} else {
 			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_12, GPIO_PIN_RESET); // IN1
@@ -52,10 +52,10 @@ void set_motor_speed(uint8_t num, int8_t pulse) {
 	} else if (num == 2) {
 		if (pulse > 0) {
 			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_14, GPIO_PIN_RESET); // IN1
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_15, GPIO_PIN_SET); // IN2
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pulse); // Set CCR, also called 'pulse'
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_15, GPIO_PIN_SET);   // IN2
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pulse);   // Set CCR, also called 'pulse'
 		} else if (pulse < 0) {
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_14, GPIO_PIN_SET); // IN1
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_14, GPIO_PIN_SET);   // IN1
 			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_15, GPIO_PIN_RESET); // IN2
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, -pulse);
 		} else {
@@ -65,20 +65,20 @@ void set_motor_speed(uint8_t num, int8_t pulse) {
 		}
 	} else if (num == 3) {
 		if (pulse > 0) {
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET); // IN1
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_RESET); // IN2
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pulse); // Set CCR, also called 'pulse'
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET);    // IN1
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_RESET);  // IN2
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pulse);   // Set CCR, also called 'pulse'
 		} else if (pulse < 0) {
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET); // IN1
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET); // IN2
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);  // IN1
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET);    // IN2
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, -pulse);
 		} else {
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET); // IN1
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_RESET); // IN2
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);  // IN1
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_RESET);  // IN2
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
 		}
 	} else {
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET); // Show errors
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);     // Show errors
 	}
 }
 
@@ -128,7 +128,7 @@ uint8_t get_encoder_direction(uint8_t num) {
 	} else if (num == 3) {
 		direction_flag = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim4) ? 1 : 0;
 	} else {
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET); // Show errors
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);  // Show errors
 	}
 	return direction_flag;
 }
