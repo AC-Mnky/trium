@@ -19,7 +19,7 @@
 ### File Structure
 
 - [`assets`](assets/) -- 一些图片，以及会在算法中用到的非代码数据。
-- [`doc`](doc/) -- 一些其他材料，如设计方案等。
+- [`doc`](doc/) -- 一些其他材料，如设计方案等。关于文档的更多信息请参考[`README.md`](doc/README.md)。
 - [`src`](src/) -- 源代码。
   <!-- - [`simulation`](src/simulation/) -- 基于pymunk的路径规划与避障算法。
   - [`simulation2`](src/simulation2/) -- 基于pymunk的路径规划与避障算法第二代。真实性++，收集效果--
