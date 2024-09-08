@@ -30,6 +30,7 @@
   - [`algorithm`](src/algorithm/) -- 一些算法，部署于树莓派4B。
   - [`communication`](src/communication/) -- 通信相关的代码，如串口、摄像头等。
   - [`archive`](src/archive/) -- 代码存档，包括有趣的尝试和备份代码。关于STM32部分的代码请参考[`README.md`](src/archive/main_prog/README.md)。
+- [`paper`](paper/) -- Git Submodule, 链接到论文的LaTex代码仓库。
 
 ### Documentation Norm
 
