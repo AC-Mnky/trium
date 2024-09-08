@@ -2,15 +2,15 @@
 
 ## User Manual
 
-### [SystemDesign](/doc/SystemDesign.pptx) (maintained by: veritas)
+### [System Design](/doc/SystemDesign.pptx) (maintained by: veritas)
 
 This powerpoint file provides most of the details of this system (except for the code).
 
-### [Notes_MCU](/doc/Notes_MCU.pptx) (maintained by: veritas)
+### [Notes of STM32](/doc/Notes_MCU.pptx) (maintained by: veritas)
 
 A simple note on STM32, maybe useful for beginners.
 
-### [SoftwareDesign](/doc/SoftwareDesign.md) (maintained by: Mnky, veritas & chaoyiL)
+### [Software Design](/doc/SoftwareDesign.md) (maintained by: Mnky, veritas & chaoyiL)
 
 This file provides the software design of this project.
 
